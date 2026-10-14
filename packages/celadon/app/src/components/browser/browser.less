@@ -272,14 +272,15 @@
 }
 
 /* 标签是一整块：图标 · 标题（省略号）· 关闭键都在同一块底里，块自己给悬停与当前态。
-   块内两颗按钮都用 plain（无边框、无自己的底），状态一律由块表达，读起来才是一个完整组件 */
+   块高取 24 档，与栏内上下内距 8 相加正好落在 40 的行高上，块的上留白因此与左留白等值；
+   最窄 48 就够，短标题不占一大片空底 */
 .browser__tab {
 	display: flex;
 	align-items: center;
 	gap: var(--spacing-4);
-	min-inline-size: 96px;
+	min-inline-size: var(--spacing-48);
 	max-inline-size: 200px;
-	block-size: var(--spacing-32);
+	block-size: var(--spacing-24);
 	padding-inline: var(--spacing-8) var(--spacing-4);
 	border-radius: var(--radius-small);
 	background: transparent;
@@ -301,17 +302,19 @@
 	background: var(--nav-select);
 }
 
-/* 块里的主体：图标与标题。它承担 tab 角色与点选，字号与导航列同类文字同档（body 14）；
+/* 块里的主体：图标与标题。它承担 tab 角色与点选，标题取 label 档（12），
+   图标取与文字相称的 14 档，两者之间留 8 的呼吸；
    宽度吃掉块内余量，右侧关闭键因此贴块右缘，余量留在标题与关闭键之间 */
 .browser__tab-main {
 	display: flex;
 	align-items: center;
-	gap: var(--spacing-4);
+	gap: var(--spacing-8);
 	flex: 1 1 auto;
 	min-inline-size: 0;
-	font-size: var(--font-size-body);
+	font-size: var(--font-size-label);
 	color: var(--text-primary);
-	cursor: default;
+	/* 整块可点，指针给手型 */
+	cursor: pointer;
 }
 
 .browser__tab-main:focus-visible {
@@ -321,7 +324,7 @@
 }
 
 /* 关闭键默认不画，指针进到这块或键盘已走到这块时出现：非当前标签不被一串叉号占满。
-   命中区仍按本包的键口径 24，图形取图标梯最小档 14，看着小、点得到 */
+   命中区仍按本包的键口径 24，图形取图标梯最小档 14，看着小、点得到；悬停给自己一档底 */
 .browser__tab-close {
 	flex: none;
 	display: flex;
@@ -329,8 +332,14 @@
 	justify-content: center;
 	inline-size: var(--spacing-24);
 	block-size: var(--spacing-24);
+	border-radius: var(--radius-small);
+	cursor: pointer;
 	opacity: 0;
 	transition: opacity var(--duration-fast) var(--easing-decelerate);
+}
+
+.browser__tab-close:hover {
+	background: var(--nav-select);
 }
 
 .browser__tab:hover .browser__tab-close,

@@ -3,7 +3,7 @@ import { Icon } from '@/components/base/icon'
 import { Tooltip } from '@/components/base/tooltip'
 import { useTranslation } from '@/platform/i18n'
 import type { BrowserTab } from '../../types'
-import { BrowserTabItem } from './tab'
+import { BrowserTabItem } from '../item'
 
 export type BrowserTabsProps = {
 	tabs: BrowserTab[]
@@ -13,7 +13,7 @@ export type BrowserTabsProps = {
 	onNew: () => void
 }
 
-/* 标签条：一行标签加末尾的新建键。新建键紧跟最后一个标签；
+/* 标签条：一行标签项加末尾的新建键。新建键紧跟最后一个标签；
    只有一个首页标签时不画新建键（不渲染，不是隐藏），只留条外的下拉键。 */
 export function BrowserTabs({ tabs, activeKey, onActivate, onClose, onNew }: BrowserTabsProps) {
 	const { t } = useTranslation()

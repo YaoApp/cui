@@ -13,7 +13,7 @@ export type BrowserTabItemProps = {
 }
 
 /* 一个标签项：整块是标签本体，悬停、当前、焦点、点选与中键都由它自己接；
-   块里只放图标与标题，关闭键是块内的兄弟控件，点它不激活标签。
+   块里放图标与标题，关闭键是块内的兄弟控件，点它只关闭、不激活。
    标签只做平移，新建与关闭时其余标签跟着挪，文字不参与尺寸投影。 */
 export function BrowserTabItem({ tab, active, onActivate, onClose }: BrowserTabItemProps) {
 	const { t } = useTranslation()
@@ -37,7 +37,7 @@ export function BrowserTabItem({ tab, active, onActivate, onClose }: BrowserTabI
 				aria-selected={active}
 				onClick={() => onActivate(tab.key)}
 			>
-				<Icon name={tab.closable ? 'i-globe' : 'i-home'} size={16} />
+				<Icon name={tab.closable ? 'i-globe' : 'i-home'} size={14} />
 				<span className="browser__tab-label" title={tab.label}>
 					{tab.label}
 				</span>

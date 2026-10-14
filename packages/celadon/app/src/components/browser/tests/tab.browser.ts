@@ -26,7 +26,14 @@ test('the tab label reads at the body size and the close key sits inside the blo
 
 	const tab = browser.getByRole('tab', { name: 'example.com' }).locator('..')
 	const label = tab.locator('.browser__tab-label')
-	await expect(label).toHaveCSS('font-size', '14px')
+	await expect(label).toHaveCSS('font-size', '12px')
+
+	/* 整块可点：指针是手型 */
+	await expect(tab.locator('.browser__tab-main')).toHaveCSS('cursor', 'pointer')
+
+	/* 最窄 48：短标题不占一大片空底 */
+	const minWidth = await tab.evaluate((el) => getComputedStyle(el).minInlineSize)
+	expect(minWidth).toBe('48px')
 
 	/* 关闭键在块内，贴块的右缘：它的右边缘与块的右边缘相差不超过块的内距 8 */
 	const block = (await tab.boundingBox())!
@@ -36,9 +43,17 @@ test('the tab label reads at the body size and the close key sits inside the blo
 	expect(close.y).toBeGreaterThanOrEqual(block.y)
 	expect(close.y + close.height).toBeLessThanOrEqual(block.y + block.height)
 
-	/* 关闭键图标是图标梯最小档 14 */
+	/* 关闭键图标是图标梯最小档 14，悬停时给自己一档底 */
 	const glyph = (await tab.locator('.browser__tab-close svg').boundingBox())!
 	expect(Math.round(glyph.width)).toBeLessThanOrEqual(14)
+	const closeBox = tab.locator('.browser__tab-close')
+	await closeBox.hover()
+	await expect(closeBox).toHaveCSS('background-color', 'rgb(232, 232, 235)')
+
+	/* 图标与文字之间留 8：图标的右缘到文字的起点不小于 8 */
+	const iconBox = (await tab.locator('.browser__tab-main svg').boundingBox())!
+	const labelBox = (await label.boundingBox())!
+	expect(labelBox.x - (iconBox.x + iconBox.width)).toBeGreaterThanOrEqual(8)
 })
 
 test('the close key only shows when the pointer or the keyboard is on the tab', async ({ page }) => {
