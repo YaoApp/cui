@@ -370,8 +370,12 @@
 /* 标题超出标签宽度时省略，完整标题由统一 Tooltip 给。
    这一段取 pointer-events: none：WebKit 会给「正在被省略号截断的元素」自己弹一个原生提示，
    它与 title 属性无关，空 title 也压不住；指针落不到它身上，原生提示就没有可瞄准的对象。
-   提示因此挂在覆盖整块主体的统一 Tooltip 上（见组件），截断信息只有一个来源 */
+   提示因此挂在覆盖整块主体的统一 Tooltip 上（见组件），截断信息只有一个来源。
+   不参与伸缩（flex: 0 0 auto）：标签行的可用宽度不够时，短标题不该被挤成省略号，
+   每个标签自己保住内容宽，超出的部分由标签行的溢出规则处理 */
 .browser__tab-label {
+	flex: 0 0 auto;
+	max-inline-size: 100%;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
