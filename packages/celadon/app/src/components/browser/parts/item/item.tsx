@@ -28,6 +28,8 @@ export function BrowserTabItem({ tab, active, onActivate, onClose }: BrowserTabI
 		<span
 			className="browser__tab-label"
 			ref={labelRef}
+			/* 显式给空 title：原生气泡一律不出现，提示只走下面的统一 Tooltip */
+			title=""
 			onPointerEnter={() => {
 				const node = labelRef.current
 				setTruncated(!!node && node.scrollWidth > node.clientWidth)
