@@ -2,7 +2,7 @@
 
 - 上层：[08-layout-index.md](08-layout-index.md)（三栏骨架 · 导航列 · 外壳 · 内容区与标签浏览器）
 - 依据：`design/main-shell.md` §四至§六 · `design/foundations.md` F6 · `design/layout.md`（列表项与键的口径）· `architecture/06-state.md` §2.3 · `architecture/12-motion.md`
-- 状态：进行中（2026-10-14），第 1、8 条已落地。设计稿在内部资料 `内部文档/requirements/主界面布局-场景/标签浏览器-标题栏与标签设计.md`（第三版，含八张参考图）；本册列 TODO 明细与验收口径。
+- 状态：进行中（2026-10-14），第 1、8 条已落地；第 2 至 5 条的顶栏结构改造与既有用例迁移放在一起做（把分屏两键从顶栏收进下拉菜单会改到既有浏览器用例的按键路径，共 15 条，必须同批迁移，已实现一版后回退，见 §6）。设计稿在内部资料 `内部文档/requirements/主界面布局-场景/标签浏览器-标题栏与标签设计.md`（第三版，含八张参考图）；本册列 TODO 明细与验收口径。
 - 上游：`内部文档/requirements/主界面布局-场景/标签浏览器-细节优化.md` 五条里的第一条（标题栏与标签的详细设计，含图标与背景分档）。
 
 本册管标签浏览器顶栏这一层：键与图标的口径、标题栏结构、标签样式、溢出、两处菜单、键盘、窄栏与镜像。标签内部的页面内容、地址栏与分屏内容不在本册。
@@ -72,8 +72,13 @@
 
 ## 5. 图标账
 
-- 已在：`i-plus` · `i-down`（`chevron-down`）· `i-split`（`columns-2`）· `i-rows`（`rows-2`）· `i-swap`（`arrow-left-right`）· `i-home`（`house`）· `i-globe`（`globe`）· `i-panel-left` / `i-panel-right`（`panel-left` / `panel-right`）· `i-act-close`（`x`，只用于标签右键菜单里的「关闭标签」）。
-- 各处的图形：导航列收起键 `i-panel-left`、上区折起键 `i-dock` / `i-undock`（**本轮未动**）；内容列头 `i-panel-left`（导航）与 `i-panel-right`（本栏）；标签栏新建 `i-plus`、左右分栏 `i-split`、上下分栏 `i-rows`、更多 `i-dots`；第 6 条的顶栏关闭键取 `i-panel-right` / `i-panel-left`（与内容列头同一颗）。
-- 待补：`i-maximize`（`maximize`）· `i-minimize-2`（`minimize-2`）；标签右键菜单其余两项的图形（刷新用 `rotate-cw` 或 `refresh-cw` · 关闭其他用 `square-x` · 关闭全部用 `equal`），实现时按 lucide 的实际名登记。
+- 已在：`i-plus` · `i-down`（`chevron-down`）· `i-split`（`columns-2`）· `i-rows`（`rows-2`）· `i-swap`（`arrow-left-right`）· `i-home`（`house`）· `i-globe`（`globe`）· `i-panel-left` / `i-panel-right`（`panel-left` / `panel-right`）· `i-maximize`（`maximize`）· `i-minimize-2`（`minimize-2`）· `i-act-close`（`x`，只用于标签右键菜单里的「关闭标签」）。`2d78d775`
+- 各处的图形：导航列收起键 `i-panel-left`、上区折起键 `i-dock` / `i-undock`（**未动**）；内容列头 `i-panel-left`（导航）与 `i-panel-right`（本栏）；标签栏新建 `i-plus`、左右分栏 `i-split`、上下分栏 `i-rows`、更多 `i-dots`（第 4 条落地时换成下拉键 `i-down`）；第 5 条的最大化 / 恢复用 `i-maximize` / `i-minimize-2`；第 6 条的顶栏关闭键取 `i-panel-right` / `i-panel-left`（与内容列头同一颗）。
+- 待补：标签右键菜单其余两项的图形（刷新用 `rotate-cw` 或 `refresh-cw` · 关闭其他用 `square-x` · 关闭全部用 `equal`），实现时按 lucide 的实际名登记。
 - 渲染口径：三列的图标键同一套——`Button` 的 `small` 档（24 × 24 命中区）· `plain` 变体 · 图标显示档 16 · lucide 24 网格描边 2；不引入风格不同的图形。曾试过把三处都提到 32 × 32（`medium` 档）并为此动过导航列，按 D14 全部回退。
 - 待修：`i-restore` 现挂 `copy` 图形，应改为恢复语义（或直接改用 `i-minimize-2` 并删除 `i-restore` 的多余映射）。
+
+## 6. 实现记录
+
+- **2026-10-14 · 第 2 至 5 条（顶栏结构）实现并回退**：已按设计改过一版——新建键移进标签行且只有首页时不渲染、下拉键换 `i-down`、分屏两键收进下拉菜单、后段加最大化/恢复与关闭两颗键、顶栏空白处右键开同一个菜单。跑既有用例时 15 条失败（分屏两键从顶栏收进菜单，用例点击路径全变；关闭/最大化换了位置），本轮未能把用例迁移完，工作区整体回退到绿色状态，改动未提交。
+- 下一轮把第 2 至 5 条与这 15 条用例的迁移放在一起做：`app/src/features/inbox/tests/layout.browser.ts` 里点击 `.browser__split` 的用例改为先开下拉菜单再点菜单项；固定用 `.browser__close`（第 6 条的常显关闭键）与 `.browser__maximize`；新键「只有首页不渲染」与右键开菜单补两条断言。
