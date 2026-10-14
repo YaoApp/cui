@@ -66,10 +66,10 @@ test('the close key only shows when the pointer or the keyboard is on the tab', 
 	const newKey = browser.locator('.browser__new')
 	const tabAtRest = (await tab.boundingBox())!
 	const newAtRest = (await newKey.boundingBox())!
-	await expect(close).toHaveCSS('opacity', '0')
+	await expect(close).toHaveCSS('visibility', 'hidden')
 
 	await tab.hover()
-	await expect(close).toHaveCSS('opacity', '1')
+	await expect(close).toHaveCSS('visibility', 'visible')
 
 	/* 悬停不许让标签或条里后面的键移动：宽、高、位置都要与静止时一致 */
 	const tabOnHover = (await tab.boundingBox())!
@@ -81,7 +81,7 @@ test('the close key only shows when the pointer or the keyboard is on the tab', 
 
 	// 指针移开又收回
 	await browser.getByRole('tab', { name: '首页' }).hover()
-	await expect(close).toHaveCSS('opacity', '0')
+	await expect(close).toHaveCSS('visibility', 'hidden')
 	const newBack = (await newKey.boundingBox())!
 	expect(Math.abs(newBack.x - newAtRest.x)).toBeLessThanOrEqual(1)
 })

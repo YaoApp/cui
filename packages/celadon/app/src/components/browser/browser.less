@@ -324,7 +324,9 @@
 }
 
 /* 关闭键默认不画，指针进到这块或键盘已走到这块时出现：非当前标签不被一串叉号占满。
-   命中区仍按本包的键口径 24，图形取图标梯最小档 14，看着小、点得到；悬停给自己一档底 */
+   命中区仍按本包的键口径 24，图形取图标梯最小档 14，看着小、点得到；悬停给自己一档底。
+   显隐用 visibility，不用 opacity：WebKit 里不透明度小于 1 的元素会单独成层，
+   指针一进一出就换一次层，旁边的字形与图形会跟着重栅格化，看着像被推了一下（本行实测过） */
 .browser__tab-close {
 	display: flex;
 	align-items: center;
@@ -334,8 +336,7 @@
 	block-size: var(--spacing-24);
 	border-radius: var(--radius-small);
 	cursor: pointer;
-	opacity: 0;
-	transition: opacity var(--duration-fast) var(--easing-decelerate);
+	visibility: hidden;
 }
 
 .browser__tab-close:hover {
@@ -344,7 +345,7 @@
 
 .browser__tab:hover .browser__tab-close,
 .browser__tab:has(:focus-visible) .browser__tab-close {
-	opacity: 1;
+	visibility: visible;
 }
 
 /* 标题超出标签宽度时省略，完整标题由 Tooltip 给（见组件的 title 属性） */
