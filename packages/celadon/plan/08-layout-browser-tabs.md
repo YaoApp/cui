@@ -57,7 +57,7 @@
 
 ## 3. 验证方式
 
-- 用例：`app/src/components/browser/tests/browser.browser.ts` 覆盖 §0 第 1 至 16 条；行高与中心线用 `boundingBox` 读数断言；显隐用「存在性」断言；右键菜单用 `click({ button: 'right' })`；拖动换序用 `mouse.down/move/up` 后断言标签次序。
+- 用例：浏览器用例（与组件同目录的 `tests/` 下，文件名按仓库惯例）覆盖 §0 第 1 至 16 条；行高与中心线用 `boundingBox` 读数断言；显隐用「存在性」断言；右键菜单用 `click({ button: 'right' })`；拖动换序用 `mouse.down/move/up` 后断言标签次序。
 - 量测：栏宽 300 / 400 / 600 三档各一张截图；三列键盒与图标中心线读数表；四语文案同段截图或长度断言。
 - 引擎：Chromium 与 WebKit 各量一遍。一帧内跳完这类问题只有 WebKit 量得出。
 - 门禁：`pnpm lint` · `pnpm check` · `pnpm test` · 全量 `test:browser`；推送前按关三再加 CI 等价与隔离复核。
