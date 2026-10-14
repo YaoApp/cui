@@ -121,9 +121,9 @@ export function AppLayout() {
 	   标签条上的点击落在**聚焦的那个面板**：面板 0 写全局当前页，面板 1 写它自己这一页 */
 	const secondaryTab = byKey(secondaryKey) ?? tabs.find((tab) => tabKey(tab) !== activeKey) ?? HOME_TAB
 
-	/* 新标签页上的「打开过的东西」：除首页以外的页，名字按当前标签名给 */
+	/* 新标签页上的「打开过的东西」：除首页与空页以外的页，名字按当前标签名给 */
 	const recent = tabs
-		.filter((tab) => tab.target.kind !== 'home')
+		.filter((tab) => tab.target.kind !== 'home' && tab.target.kind !== 'blank')
 		.map((tab) => ({ key: tabKey(tab), label: nameOf(tab) }))
 
 	/* 一页里的地址入口提交了：解析成目标后决定落在哪。
