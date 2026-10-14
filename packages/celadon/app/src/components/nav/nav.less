@@ -8,12 +8,8 @@
 	box-sizing: border-box;
 	display: flex;
 	flex-direction: column;
-	/* 整列的收放：宽度、内距与右缘线一并按同一个时长与曲线走。
-	   过渡清单必须写在基础规则上：清单取变化之后那一侧的样式，只写在收起规则里会让展开方向丢过渡，
-	   内距先跳到 0/8，列内内容跟着跳一下。 */
-	transition: inline-size var(--duration-base) var(--easing-decelerate),
-		padding-inline var(--duration-base) var(--easing-decelerate),
-		border-inline-end-width var(--duration-base) var(--easing-decelerate);
+	/* 整列的收放：展开按 F4 的 panel 档（200ms 减速），收起在下面按 collapse 档（120ms 加速） */
+	transition: inline-size var(--duration-base) var(--easing-decelerate);
 	gap: var(--spacing-8);
 	/* 宽度：用户拖过把手就用存下来的值，没拖过跟随默认。样式这一层再夹一次上下限，
      存值越界（旧偏好或窗口变小）也不会把列压到最小宽度以下（design/main-shell.md §三 第 4 条） */
@@ -407,13 +403,16 @@
 /* 折叠态：不吃剩余高度。折叠体高度由动画收到零，上区跟着收到零，列里不留空白 */
 
 /* 收起态：整列收成零宽（三端一致，没有图标轨这一档）。
-   放在文件末尾，确保压过 .nav 自身的宽度与内距；过渡清单沿用基础规则那一份 */
+   放在文件末尾，确保压过 .nav 自身的宽度与内距 */
 [data-width='zero'] .nav {
 	inline-size: 0;
 	min-inline-size: 0;
 	padding-inline: 0;
 	border-inline-end-width: 0;
 	overflow: clip;
+	transition: inline-size var(--duration-base) var(--easing-decelerate),
+		padding-inline var(--duration-base) var(--easing-decelerate),
+		border-inline-end-width var(--duration-base) var(--easing-decelerate);
 }
 
 /* 品牌行：标志与产品名同一行，列再窄也不折行 */

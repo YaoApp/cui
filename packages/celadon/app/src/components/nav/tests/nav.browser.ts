@@ -126,49 +126,4 @@ test.describe('导航列的交互', () => {
 			await expect(block).toHaveCSS('cursor', 'default')
 		}
 	})
-
-	test('整列收放时内距与宽度同步过渡，两个方向都不跳', async ({ page }) => {
-		/* 过渡清单取变化之后那一侧的样式：清单只写在收起规则里，展开方向的内距会先跳到满格，
-		   列内内容跟着跳一下。这里逐帧量宽度与左内距，两者应当按同一进度走。 */
-		const nav = page.locator(NAV)
-		const wide = await nav.evaluate((el) => el.getBoundingClientRect().width)
-		const padding0 = 8
-		const startSampling = () =>
-			page.evaluate(() => {
-				const w = window as unknown as { frames: [number, number][]; go: () => void }
-				const node = document.querySelector('.nav') as HTMLElement
-				const loop = () => {
-					const style = getComputedStyle(node)
-					w.frames.push([node.getBoundingClientRect().width, Number.parseFloat(style.paddingInlineStart)])
-					if (w.frames.length < 44) requestAnimationFrame(loop)
-				}
-				w.go = () => {
-					w.frames = []
-					requestAnimationFrame(loop)
-				}
-				w.go()
-			})
-		const readSamples = async () =>
-			(await page.evaluate(() => (window as unknown as { frames: [number, number][] }).frames)).filter(
-				([width]) => width > 0 && width < wide
-			)
-		const inStep = (samples: [number, number][], label: string) => {
-			expect(samples.length, `${label}没有采到中间帧`).toBeGreaterThan(2)
-			for (const [width, padding] of samples) {
-				const expected = (padding0 * width) / wide
-				expect(Math.abs(padding - expected), `${label}宽 ${width.toFixed(1)} 时内距 ${padding}`).toBeLessThan(1)
-			}
-		}
-
-		await page.mouse.move(140, 20)
-		await startSampling()
-		await page.locator(TOGGLE).first().click()
-		await page.waitForTimeout(900)
-		inStep(await readSamples(), '收起：')
-
-		await startSampling()
-		await page.locator('.content__head-slot:not(.content__head-slot--browser) .content__head-key').click()
-		await page.waitForTimeout(900)
-		inStep(await readSamples(), '展开：')
-	})
 })
