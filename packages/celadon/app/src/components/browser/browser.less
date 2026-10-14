@@ -245,7 +245,7 @@
 	gap: var(--spacing-4);
 	/* 与内容列头同一档内距；键是 small 档 24 高，40 高的栏里上下正好各留 8 */
 	padding: var(--spacing-8);
-	border-block-end: var(--border-width) solid var(--border-subtle);
+	/* 顶栏不加下边线：与窗口顶带连成一片，标签块自己承担分档 */
 	/* 顶带：拖窗口与双击最大化落在这条带子里，因此不参与文本选择，指针保持箭头 */
 	cursor: default;
 	user-select: none;
@@ -271,43 +271,53 @@
 	white-space: nowrap;
 }
 
+/* 标签是一整块：图标 · 标题（省略号）· 关闭键都在同一块底里，块自己给悬停与当前态。
+   块内两颗按钮都用 plain（无边框、无自己的底），状态一律由块表达，读起来才是一个完整组件 */
 .browser__tab {
 	display: flex;
 	align-items: center;
 	gap: var(--spacing-4);
-	padding-inline-end: var(--spacing-4);
-	border-radius: var(--radius-small);
-	/* 解剖：图标 16 · 标题（省略号）· 关闭键，整体宽度 96 到 200 */
 	min-inline-size: 96px;
 	max-inline-size: 200px;
+	block-size: var(--spacing-32);
+	padding-inline: var(--spacing-8) var(--spacing-4);
+	border-radius: var(--radius-small);
+	background: transparent;
 	/* 新建或新出现的一页：淡入加一点位移（关键帧在同文件上方），减少动态由 token 层统一归零 */
 	animation: browser-tab-in var(--duration-fast) var(--easing-decelerate);
 	transition: background var(--duration-fast) var(--easing-decelerate);
 }
 
-/* 悬停与焦点给同一档底：当前标签另给一档更深的灰，靠底色分档，不加分割线。
+/* 悬停与焦点给同一档底，当前标签另给一档更深的灰；不加边框，也不加分割线。
    两档取导航列同族的行状态灰：本栏底是浅灰的 --background-content，用白面的 --background-surface
    与它只差 5 阶，画不出参考图里那块清晰的标签底 */
-.browser__tab:hover {
-	background: var(--nav-hover);
-}
-
+.browser__tab:hover,
 .browser__tab:has(:focus-visible) {
 	background: var(--nav-hover);
 }
 
-.browser__tab:has([aria-selected='true']) {
-	background: var(--nav-select);
-}
-
+.browser__tab:has([aria-selected='true']),
 .browser__tab:has([aria-selected='true']):hover {
 	background: var(--nav-select);
 }
 
 .browser__tab-button {
-	min-inline-size: 0;
 	flex: 1;
+	min-inline-size: 0;
 	justify-content: flex-start;
+	background: transparent;
+}
+
+/* 块自己表达悬停与当前，块内的按钮不再叠一层自己的底 */
+.browser__tab-button:hover,
+.browser__tab-button:active,
+.browser__tab-close:hover,
+.browser__tab-close:active {
+	background: transparent;
+}
+
+.browser__tab-close {
+	flex: none;
 }
 
 /* 标题超出标签宽度时省略，完整标题由 Tooltip 给（见组件的 title 属性） */

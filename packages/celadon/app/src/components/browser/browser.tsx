@@ -3,22 +3,16 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { Menu as BaseMenu } from '@base-ui/react/menu'
 import { Button } from '@/components/base/button'
 import { Icon } from '@/components/base/icon'
-import { MotionPanel } from '@/components/base/motion'
 import { ScrollArea } from '@/components/base/scroll-area'
 import { Tooltip } from '@/components/base/tooltip'
 import { useTranslation } from '@/platform/i18n'
 import type { BrowserSplit } from '@/stores/layout/columns'
+import { BrowserTabs } from './parts/tab'
+import type { BrowserTab } from './types'
 import { useSplitResize } from './hooks/use-split-resize'
 import { useColumnResize } from './hooks/use-column-resize'
 
-export type BrowserTab = {
-  /** 一页的稳定标识 */
-  key: string
-  /** 标签上显示的名字 */
-  label: string
-  /** 首页不可关 */
-  closable: boolean
-}
+export type { BrowserTab } from './types'
 
 export type BrowserProps = {
   tabs: BrowserTab[]
@@ -151,53 +145,13 @@ export function Browser({
         }}
       >
         <ScrollArea className="browser__tabs" size="small">
-          <div className="browser__tabs-row" role="tablist" aria-label={t('shell.browser.label')}>
-            {tabs.map((tab) => (
-              /* 标签只做平移：新建与关闭时其余标签跟着挪，文字不参与尺寸投影 */
-              <MotionPanel as="span" position className="browser__tab" key={tab.key}>
-                <Button
-                  className="browser__tab-button"
-                  variant="ghost"
-                  size="small"
-                  role="tab"
-                  aria-selected={tab.key === activeKey}
-                  onClick={() => onActivate(tab.key)}
-                >
-                  <Icon name={tab.closable ? 'i-globe' : 'i-home'} size={16} />
-                  <span className="browser__tab-label">{tab.label}</span>
-                </Button>
-                {tab.closable ? (
-                  <Tooltip label={t('shell.browser.tab.close')} side="bottom">
-                    <Button
-                      className="browser__tab-close"
-                      iconOnly
-                      variant="ghost"
-                      size="small"
-                      aria-label={t('shell.browser.tab.close')}
-                      onClick={() => onClose(tab.key)}
-                    >
-                      <Icon name="i-act-close" size={14} />
-                    </Button>
-                  </Tooltip>
-                ) : null}
-              </MotionPanel>
-            ))}
-            {/* 新建键紧跟最后一个标签；只有一个首页标签时不画（不渲染，不是隐藏） */}
-            {tabs.length > 1 ? (
-              <Tooltip label={t('shell.browser.tab.new')} side="bottom">
-                <Button
-                  className="browser__new"
-                  iconOnly
-                  variant="plain"
-                  size="small"
-                  aria-label={t('shell.browser.tab.new')}
-                  onClick={onNew}
-                >
-                  <Icon name="i-plus" size={16} />
-                </Button>
-              </Tooltip>
-            ) : null}
-          </div>
+          <BrowserTabs
+            tabs={tabs}
+            activeKey={activeKey}
+            onActivate={onActivate}
+            onClose={onClose}
+            onNew={onNew}
+          />
         </ScrollArea>
         {/* 下拉：菜单上段放溢出的标签（第 14 条），下段是操作项；顶栏空白处点右键也开它 */}
         <BaseMenu.Root open={menuOpen} onOpenChange={setMenuOpen}>
