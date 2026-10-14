@@ -286,14 +286,13 @@
 	background: transparent;
 	/* 新建或新出现的一页：淡入加一点位移（关键帧在同文件上方），减少动态由 token 层统一归零 */
 	animation: browser-tab-in var(--duration-fast) var(--easing-decelerate);
-	transition: background var(--duration-fast) var(--easing-decelerate);
+	/* 只过渡具体属性，不写 background 简写：简写在 WebKit 上会带上图片与定位一起参与 */
+	transition: background-color var(--duration-fast) var(--easing-decelerate);
 }
 
-/* 悬停与焦点给同一档底，当前标签另给一档更深的灰；不加边框，也不加分割线。
-   两档取导航列同族的行状态灰：本栏底是浅灰的 --background-content，用白面的 --background-surface
-   与它只差 5 阶，画不出参考图里那块清晰的标签底 */
-.browser__tab:hover,
-.browser__tab:has(:focus-visible) {
+/* 悬停与当前两档底。这里不写 :has()：WebKit 在指针状态变化时会按 :has() 向上重算，
+   即使用不到那一条也会重排；键盘焦点那档改由主体自己的 outline 表达（见下） */
+.browser__tab:hover {
 	background: var(--nav-hover);
 }
 
@@ -304,13 +303,13 @@
 
 /* 块里的主体：图标与标题。它承担 tab 角色与点选，标题取 label 档（12），
    图标取与文字相称的 14 档，两者之间留 8 的呼吸。
-   按内容收、不外扩，右侧关闭键用 auto 外边距贴块右缘：整块的宽度不随悬停变化，
-   条里后面的新建键与下拉键因此不会跟着动 */
+   主体吃掉块内余量（flex: 1 1 auto），关闭键是定尺 24 的不可收缩项，
+   因此块的宽度由内容决定、悬停不参与计算，条里后面的键不会跟着动 */
 .browser__tab-main {
 	display: flex;
 	align-items: center;
 	gap: var(--spacing-8);
-	flex: 0 1 auto;
+	flex: 1 1 auto;
 	min-inline-size: 0;
 	font-size: var(--font-size-label);
 	color: var(--text-primary);
@@ -330,8 +329,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	flex: none;
-	margin-inline-start: auto;
+	flex: 0 0 var(--spacing-24);
 	inline-size: var(--spacing-24);
 	block-size: var(--spacing-24);
 	border-radius: var(--radius-small);
