@@ -36,7 +36,9 @@ export function BrowserTabItem({ tab, active, onActivate, onClose }: BrowserTabI
 		const check = () => {
 			const label = block.querySelector('.browser__tab-label')
 			if (!label) return
-			setTruncated(label.scrollWidth > label.clientWidth)
+			/* 两个读数都是取整后的整数，短标题在小数宽度上会出现一像素的假差，
+			   留一像素余量，避免没截断也弹提示 */
+			setTruncated(label.scrollWidth - label.clientWidth > 1)
 		}
 		check()
 		const observer = new ResizeObserver(check)
