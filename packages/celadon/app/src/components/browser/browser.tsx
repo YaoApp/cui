@@ -179,7 +179,7 @@ export function Browser({
           <Button
             className="browser__new"
             iconOnly
-            variant="ghost"
+            variant="plain"
             size="small"
             aria-label={t('shell.browser.tab.new')}
             onClick={onNew}
@@ -198,7 +198,7 @@ export function Browser({
           <Button
             className="browser__split"
             iconOnly
-            variant="ghost"
+            variant="plain"
             size="small"
             disabled={blocked && split === 'none'}
             aria-pressed={split === 'columns'}
@@ -219,7 +219,7 @@ export function Browser({
           <Button
             className="browser__split"
             iconOnly
-            variant="ghost"
+            variant="plain"
             size="small"
             disabled={blocked && split === 'none'}
             aria-pressed={split === 'rows'}
@@ -234,7 +234,7 @@ export function Browser({
           <BaseMenu.Trigger
             className="browser__more"
             aria-label={t('shell.browser.action.more')}
-            render={<Button iconOnly variant="ghost" size="small" />}
+            render={<Button iconOnly variant="plain" size="small" />}
           >
             <Icon name="i-dots" size={16} />
           </BaseMenu.Trigger>
