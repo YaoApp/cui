@@ -14,11 +14,15 @@ test('the home page draws no close key until it holds a target', async ({ page }
 	await page.goto('/app/inbox')
 	const home = page.locator('.browser__tab').first()
 	const block = (await home.boundingBox())!
+	const main = (await home.locator('.browser__tab-main').boundingBox())!
 	const icon = (await home.locator('.browser__tab-main svg').boundingBox())!
 
-	/* 还是首页那一页：不画关闭键，图形由模型给 i-home；左侧内距 8 */
+	/* 还是首页那一页：不画关闭键，图形由模型给 i-home。左侧内距 8；
+	   标签窄到设计的最小宽 48 时内容在块内居中，所以只要求左内距不小于 8、且内容是居中 */
 	await expect(home.locator('.browser__tab-close')).toHaveCount(0)
-	expect(Math.abs(icon.x - block.x - 8)).toBeLessThanOrEqual(1)
+	await expect(home).toHaveCSS('padding-inline-start', '8px')
+	expect(icon.x - block.x).toBeGreaterThanOrEqual(7)
+	expect(Math.abs(main.x + main.width / 2 - (block.x + block.width / 2))).toBeLessThanOrEqual(1)
 	expect(await home.locator('.browser__tab-main svg use').getAttribute('href')).toBe('#i-home')
 
 	/* 换上目标之后它就是普通一页，关闭键就出现了 */
