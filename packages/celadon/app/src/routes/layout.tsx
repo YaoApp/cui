@@ -112,8 +112,8 @@ export function AppLayout() {
 	const view: BrowserTab[] = tabs.map((tab) => ({
 		key: tabKey(tab),
 		label: nameOf(tab),
-		/* 每一页都能关：首页也能关掉，一个都不剩时它会重新出现（见标签集） */
-		closable: true,
+		/* 还是首页那一页时不可关；它换上目标成了普通一页之后就能关 */
+		closable: tab.target.kind !== 'home',
 		icon: iconOf(tab)
 	}))
 	const active = tabs.find((tab) => tabKey(tab) === activeKey) ?? HOME_TAB

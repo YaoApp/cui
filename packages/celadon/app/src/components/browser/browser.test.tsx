@@ -5,7 +5,7 @@ import { Browser } from './browser'
 import type { BrowserTab } from './browser'
 
 const tabs: BrowserTab[] = [
-  { key: 'home', label: '首页', closable: true, icon: 'i-home' },
+  { key: 'home', label: '首页', closable: false, icon: 'i-home' },
   { key: 'page-1', label: 'example.com', closable: true },
 ]
 
@@ -48,20 +48,23 @@ describe('Browser', () => {
     expect(screen.getByText('首页内容')).toBeVisible()
   })
 
-  it('draws every tab from the model, close key included', () => {
+  it('draws every tab from the model and keeps the close key off the home page', () => {
     renderBrowser()
     const home = screen.getByRole('tab', { name: '首页' }).closest('.browser__tab')
-    // 首页也是普通一页：有关闭键，图形由模型给
-    expect(home?.querySelectorAll('.browser__tab-close')).toHaveLength(1)
+    // 还是首页那一页：不画关闭键；图形由模型给
+    expect(home?.querySelectorAll('.browser__tab-close')).toHaveLength(0)
     expect(home?.querySelector('.browser__tab-main')).not.toBeNull()
     expect(home?.querySelector('svg use')?.getAttribute('href')).toBe('#i-home')
+    // 普通一页有关闭键
+    const page = screen.getByRole('tab', { name: 'example.com' }).closest('.browser__tab')
+    expect(page?.querySelectorAll('.browser__tab-close')).toHaveLength(1)
   })
 
   it('activates and closes pages through the caller', async () => {
     const { onActivate, onClose } = renderBrowser()
     await userEvent.click(screen.getByRole('tab', { name: 'example.com' }))
     expect(onActivate).toHaveBeenCalledWith('page-1')
-    await userEvent.click(screen.getAllByRole('button', { name: '关闭这个标签' })[1])
+    await userEvent.click(screen.getByRole('button', { name: '关闭这个标签' }))
     expect(onClose).toHaveBeenCalledWith('page-1')
   })
 

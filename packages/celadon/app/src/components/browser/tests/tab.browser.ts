@@ -8,20 +8,26 @@ async function markSignedIn(page: Page) {
 	)
 }
 
-test('the home tab is a normal page: icon, title and its own close key', async ({ page }) => {
+test('the home page draws no close key until it holds a target', async ({ page }) => {
 	await page.setViewportSize({ width: 1100, height: 800 })
 	await markSignedIn(page)
 	await page.goto('/app/inbox')
 	const home = page.locator('.browser__tab').first()
 	const block = (await home.boundingBox())!
 	const icon = (await home.locator('.browser__tab-main svg').boundingBox())!
-	const close = (await home.locator('.browser__tab-close').boundingBox())!
 
-	/* 左侧内距是 8；关闭键贴块右缘（上下与右侧的视觉间距一致由第 7 条的用例量） */
+	/* 还是首页那一页：不画关闭键，图形由模型给 i-home；左侧内距 8 */
+	await expect(home.locator('.browser__tab-close')).toHaveCount(0)
 	expect(Math.abs(icon.x - block.x - 8)).toBeLessThanOrEqual(1)
-	expect(Math.abs(close.x + close.width - (block.x + block.width))).toBeLessThanOrEqual(1)
-	/* 首页的图形由模型给：i-home */
 	expect(await home.locator('.browser__tab-main svg use').getAttribute('href')).toBe('#i-home')
+
+	/* 换上目标之后它就是普通一页，关闭键就出现了 */
+	await page.locator('.browser').getByLabel('外部地址').fill('example.com')
+	await page.locator('.browser').getByLabel('外部地址').press('Enter')
+	await page.mouse.move(10, 10)
+	const page$ = page.locator('.browser__tab').first()
+	await expect(page$.locator('.browser__tab-close')).toHaveCount(1)
+	await expect(page$.getByRole('tab', { name: 'example.com' })).toHaveAttribute('aria-selected', 'true')
 })
 
 async function openSecondTab(page: Page) {
