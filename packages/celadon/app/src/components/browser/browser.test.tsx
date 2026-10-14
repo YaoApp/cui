@@ -5,8 +5,8 @@ import { Browser } from './browser'
 import type { BrowserTab } from './browser'
 
 const tabs: BrowserTab[] = [
-  { key: 'browser-home:home', label: '首页', closable: false },
-  { key: 'browser-web:example.com', label: 'example.com', closable: true },
+  { key: 'home', label: '首页', closable: true, icon: 'i-home' },
+  { key: 'page-1', label: 'example.com', closable: true },
 ]
 
 function renderBrowser(props: Partial<Parameters<typeof Browser>[0]> = {}) {
@@ -18,7 +18,7 @@ function renderBrowser(props: Partial<Parameters<typeof Browser>[0]> = {}) {
   render(
     <Browser
       tabs={tabs}
-      activeKey="browser-home:home"
+      activeKey="home"
       side="right"
       onActivate={onActivate}
       onClose={onClose}
@@ -48,20 +48,21 @@ describe('Browser', () => {
     expect(screen.getByText('首页内容')).toBeVisible()
   })
 
-  it('never offers a close key on the home tab', () => {
+  it('draws every tab from the model, close key included', () => {
     renderBrowser()
     const home = screen.getByRole('tab', { name: '首页' }).closest('.browser__tab')
-    // 标签主体是块里的 tab 本体，首页没有关闭键
-    expect(home?.querySelectorAll('.browser__tab-close')).toHaveLength(0)
+    // 首页也是普通一页：有关闭键，图形由模型给
+    expect(home?.querySelectorAll('.browser__tab-close')).toHaveLength(1)
     expect(home?.querySelector('.browser__tab-main')).not.toBeNull()
+    expect(home?.querySelector('svg use')?.getAttribute('href')).toBe('#i-home')
   })
 
   it('activates and closes pages through the caller', async () => {
     const { onActivate, onClose } = renderBrowser()
     await userEvent.click(screen.getByRole('tab', { name: 'example.com' }))
-    expect(onActivate).toHaveBeenCalledWith('browser-web:example.com')
-    await userEvent.click(screen.getByRole('button', { name: '关闭这个标签' }))
-    expect(onClose).toHaveBeenCalledWith('browser-web:example.com')
+    expect(onActivate).toHaveBeenCalledWith('page-1')
+    await userEvent.click(screen.getAllByRole('button', { name: '关闭这个标签' })[1])
+    expect(onClose).toHaveBeenCalledWith('page-1')
   })
 
   it('reports its side, the four keys and the three menu actions', async () => {

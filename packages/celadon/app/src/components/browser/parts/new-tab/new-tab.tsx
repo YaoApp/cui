@@ -41,7 +41,7 @@ export function NewTab({ recent, onOpen }: NewTabProps) {
 					placeholder={t('shell.browser.address.placeholder')}
 				/>
 				<Button type="submit" variant="soft" size="small">
-					{t('shell.browser.tab.new')}
+					{t('shell.browser.address.open')}
 				</Button>
 			</form>
 			<div className="browser__recent">

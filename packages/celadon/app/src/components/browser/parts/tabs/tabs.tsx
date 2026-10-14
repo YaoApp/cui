@@ -13,8 +13,8 @@ export type BrowserTabsProps = {
 	onNew: () => void
 }
 
-/* 标签条：一行标签项加末尾的新建键。新建键紧跟最后一个标签；
-   只有一个首页标签时不画新建键（不渲染，不是隐藏），只留条外的下拉键。 */
+/* 标签条：一行标签项加末尾的新建键。新建键恒在，紧跟最后一个标签；
+   标签项本身负责「先出现一项、随后在本页里换内容」。 */
 export function BrowserTabs({ tabs, activeKey, onActivate, onClose, onNew }: BrowserTabsProps) {
 	const { t } = useTranslation()
 	return (
@@ -28,20 +28,20 @@ export function BrowserTabs({ tabs, activeKey, onActivate, onClose, onNew }: Bro
 					onClose={onClose}
 				/>
 			))}
-			{tabs.length > 1 ? (
-				<Tooltip label={t('shell.browser.tab.new')} side="bottom">
-					<Button
-						className="browser__new"
-						iconOnly
-						variant="plain"
-						size="small"
-						aria-label={t('shell.browser.tab.new')}
-						onClick={onNew}
-					>
-						<Icon name="i-plus" size={16} />
-					</Button>
-				</Tooltip>
-			) : null}
+			{/* 新建键恒在：首页也在自己的窗口里换内容，关掉所有页时首页才回来，
+			    所以「只有一个首页标签」时它同样是开第二页的唯一入口 */}
+			<Tooltip label={t('shell.browser.tab.new')} side="bottom">
+				<Button
+					className="browser__new"
+					iconOnly
+					variant="plain"
+					size="small"
+					aria-label={t('shell.browser.tab.new')}
+					onClick={onNew}
+				>
+					<Icon name="i-plus" size={16} />
+				</Button>
+			</Tooltip>
 		</div>
 	)
 }

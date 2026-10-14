@@ -8,23 +8,27 @@ async function markSignedIn(page: Page) {
 	)
 }
 
-test('the home tab keeps its left and right insets equal', async ({ page }) => {
+test('the home tab is a normal page: icon, title and its own close key', async ({ page }) => {
 	await page.setViewportSize({ width: 1100, height: 800 })
 	await markSignedIn(page)
 	await page.goto('/app/inbox')
 	const home = page.locator('.browser__tab').first()
-	/* 首页没有关闭键：块按内容居中，左右留白必须等值 */
 	const block = (await home.boundingBox())!
-	const icon = (await home.locator('svg').boundingBox())!
-	const label = (await home.locator('.browser__tab-label').boundingBox())!
-	const left = icon.x - block.x
-	const right = block.x + block.width - (label.x + label.width)
-	expect(Math.abs(left - right)).toBeLessThanOrEqual(1)
+	const icon = (await home.locator('.browser__tab-main svg').boundingBox())!
+	const close = (await home.locator('.browser__tab-close').boundingBox())!
+
+	/* 左侧内距是 8；关闭键贴块右缘（上下与右侧的视觉间距一致由第 7 条的用例量） */
+	expect(Math.abs(icon.x - block.x - 8)).toBeLessThanOrEqual(1)
+	expect(Math.abs(close.x + close.width - (block.x + block.width))).toBeLessThanOrEqual(1)
+	/* 首页的图形由模型给：i-home */
+	expect(await home.locator('.browser__tab-main svg use').getAttribute('href')).toBe('#i-home')
 })
 
 async function openSecondTab(page: Page) {
 	await page.goto('/app/inbox')
 	const browser = page.locator('.browser')
+	/* 新建键恒在：点它开一个空页，再在空页里填地址 */
+	await browser.getByRole('button', { name: '新建标签' }).click()
 	await browser.getByLabel('外部地址').fill('example.com')
 	await browser.getByLabel('外部地址').press('Enter')
 	await expect(browser.getByRole('tab', { name: 'example.com' })).toBeVisible()
@@ -90,6 +94,9 @@ test('the close key only shows when the pointer or the keyboard is on the tab', 
 	const tab = browser.getByRole('tab', { name: 'example.com' }).locator('..')
 	const close = tab.locator('.browser__tab-close')
 	const newKey = browser.locator('.browser__new')
+
+	/* 先把指针移开：开页那一下的落点可能正好留在标签上 */
+	await page.mouse.move(10, 10)
 	const tabAtRest = (await tab.boundingBox())!
 	const newAtRest = (await newKey.boundingBox())!
 	await expect(close).toHaveCSS('visibility', 'hidden')
