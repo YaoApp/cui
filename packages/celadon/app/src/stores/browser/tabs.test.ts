@@ -1,66 +1,124 @@
 import { describe, expect, it, beforeEach } from 'vitest'
-import { HOME_TAB, sameTab, tabKey, useTabsStore, type TabEntry } from './tabs'
+import type { TabTarget } from './targets'
+import { HOME_TAB, isHome, tabKey, useTabsStore, type TabEntry } from './tabs'
 
-const web = (id: string): TabEntry => ({ kind: 'browser-web', id })
+const external = (url: string): TabTarget => ({ kind: 'external', url })
+const at = (key: string): TabEntry | undefined => useTabsStore.getState().tabs.find((tab) => tab.key === key)
 
 const reset = () => {
-  useTabsStore.setState({ tabs: [HOME_TAB], activeKey: tabKey(HOME_TAB) })
+	useTabsStore.setState({ tabs: [HOME_TAB], activeKey: tabKey(HOME_TAB) })
 }
 
 describe('标签集', () => {
-  beforeEach(reset)
+	beforeEach(reset)
 
-  it('starts with the home tab active', () => {
-    const state = useTabsStore.getState()
-    expect(state.tabs).toEqual([HOME_TAB])
-    expect(state.activeKey).toBe('browser-home:home')
-  })
+	it('还是首页那一页时不可关；换成普通一页之后能关，关完首页重新出现', () => {
+		const state = useTabsStore.getState()
+		expect(state.tabs).toEqual([HOME_TAB])
+		expect(state.activeKey).toBe('home')
+		expect(isHome(state.tabs[0])).toBe(true)
 
-  it('opens a page and stops on it', () => {
-    useTabsStore.getState().open(web('https://example.com'))
-    const state = useTabsStore.getState()
-    expect(state.tabs).toHaveLength(2)
-    expect(state.activeKey).toBe('browser-web:https://example.com')
-  })
+		/* 还是首页：关不动 */
+		useTabsStore.getState().close('home')
+		expect(useTabsStore.getState().tabs).toEqual([HOME_TAB])
 
-  it('reuses the same page instead of opening a second one', () => {
-    useTabsStore.getState().open(web('https://example.com'))
-    useTabsStore.getState().open(HOME_TAB)
-    useTabsStore.getState().open(web('https://example.com'))
-    const state = useTabsStore.getState()
-    expect(state.tabs).toHaveLength(2)
-    expect(state.activeKey).toBe('browser-web:https://example.com')
-  })
+		/* 换上目标之后它就是普通一页，可以关；关完一个不剩，首页回来 */
+		useTabsStore.getState().navigate('home', external('example.com'))
+		expect(useTabsStore.getState().tabs).toHaveLength(1)
+		expect(isHome(useTabsStore.getState().tabs[0])).toBe(false)
+		useTabsStore.getState().close('home')
+		const after = useTabsStore.getState()
+		expect(after.tabs).toEqual([HOME_TAB])
+		expect(after.activeKey).toBe('home')
+	})
 
-  it('never closes the home tab', () => {
-    useTabsStore.getState().close(HOME_TAB)
-    expect(useTabsStore.getState().tabs).toEqual([HOME_TAB])
-  })
+	it('开一页：追加并停到它；同一目标再开只切过去', () => {
+		useTabsStore.getState().open(external('example.com'))
+		let state = useTabsStore.getState()
+		expect(state.tabs).toHaveLength(2)
+		const opened = state.tabs[1]
+		expect(state.activeKey).toBe(opened.key)
 
-  it('falls back to the left neighbour when the active page closes', () => {
-    useTabsStore.getState().open(web('a'))
-    useTabsStore.getState().open(web('b'))
-    useTabsStore.getState().close(web('b'))
-    expect(useTabsStore.getState().activeKey).toBe('browser-web:a')
-    useTabsStore.getState().close(web('a'))
-    expect(useTabsStore.getState().activeKey).toBe('browser-home:home')
-  })
+		useTabsStore.getState().activate('home')
+		useTabsStore.getState().open(external('example.com'))
+		state = useTabsStore.getState()
+		expect(state.tabs).toHaveLength(2)
+		expect(state.activeKey).toBe(opened.key)
+	})
 
-  it('keeps the active page when another one closes', () => {
-    useTabsStore.getState().open(web('a'))
-    useTabsStore.getState().open(web('b'))
-    useTabsStore.getState().close(web('a'))
-    expect(useTabsStore.getState().activeKey).toBe('browser-web:b')
-  })
+	it('新建空页：出现一项并激活，页里再开东西时原位换内容', () => {
+		useTabsStore.getState().openBlank()
+		let state = useTabsStore.getState()
+		expect(state.tabs).toHaveLength(2)
+		const blank = state.tabs[1]
+		expect(blank.target).toEqual({ kind: 'blank' })
+		expect(state.activeKey).toBe(blank.key)
 
-  it('activates an open page', () => {
-    useTabsStore.getState().open(web('a'))
-    useTabsStore.getState().activate(HOME_TAB)
-    expect(useTabsStore.getState().activeKey).toBe('browser-home:home')
-  })
+		useTabsStore.getState().navigate(blank.key, external('example.com'))
+		state = useTabsStore.getState()
+		expect(state.tabs).toHaveLength(2)
+		expect(state.tabs[1].key).toBe(blank.key)
+		expect(state.tabs[1].target).toEqual({ kind: 'external', url: 'example.com' })
+		expect(state.activeKey).toBe(blank.key)
+	})
 
-  it('compares entries by kind and id', () => {
-    expect(sameTab(web('a'), { kind: 'browser-web', id: 'a' })).toBe(true)
-    expect(sameTab(web('a'), { kind: 'app-slice', id: 'a' })).toBe(false)
-  })
+	it('当前页已经是空页时再点新建，不叠第二个', () => {
+		useTabsStore.getState().openBlank()
+		useTabsStore.getState().openBlank()
+		expect(useTabsStore.getState().tabs).toHaveLength(2)
+	})
+
+	it('首页也在自己的窗口里换内容：填上之后它就是那一页', () => {
+		useTabsStore.getState().navigate('home', external('example.com'))
+		const state = useTabsStore.getState()
+		expect(state.tabs).toHaveLength(1)
+		expect(state.tabs[0].key).toBe('home')
+		expect(state.tabs[0].target).toEqual({ kind: 'external', url: 'example.com' })
+		expect(state.activeKey).toBe('home')
+
+		/* 关掉它：一个都不剩，首页重新出现 */
+		useTabsStore.getState().close('home')
+		expect(useTabsStore.getState().tabs).toEqual([HOME_TAB])
+	})
+
+	it('关当前页按右邻优先，没有右邻取左邻，都没有落回首页', () => {
+		useTabsStore.getState().open(external('a'))
+		const first = useTabsStore.getState().activeKey
+		useTabsStore.getState().open(external('b'))
+		const second = useTabsStore.getState().activeKey
+		useTabsStore.getState().open(external('c'))
+		const third = useTabsStore.getState().activeKey
+
+		/* 关中间那页：右邻接上 */
+		useTabsStore.getState().activate(second)
+		useTabsStore.getState().close(second)
+		expect(useTabsStore.getState().activeKey).toBe(third)
+
+		/* 关最后一页：没有右邻，取左邻 */
+		useTabsStore.getState().close(third)
+		expect(useTabsStore.getState().activeKey).toBe(first)
+
+		/* 关掉最后一页：落回首页 */
+		useTabsStore.getState().close(first)
+		expect(useTabsStore.getState().activeKey).toBe('home')
+		expect(useTabsStore.getState().tabs).toEqual([HOME_TAB])
+	})
+
+	it('关的不是当前页时，当前页不动', () => {
+		useTabsStore.getState().open(external('a'))
+		const first = useTabsStore.getState().activeKey
+		useTabsStore.getState().open(external('b'))
+		const second = useTabsStore.getState().activeKey
+		useTabsStore.getState().close(first)
+		expect(useTabsStore.getState().activeKey).toBe(second)
+		expect(at(second)).toBeDefined()
+	})
+
+	it('页的 key 在换内容前后不变', () => {
+		useTabsStore.getState().openBlank()
+		const blank = useTabsStore.getState().tabs[1]
+		useTabsStore.getState().navigate(blank.key, { kind: 'internal', path: '/help' })
+		expect(useTabsStore.getState().tabs[1].key).toBe(blank.key)
+		expect(useTabsStore.getState().tabs[1].target).toEqual({ kind: 'internal', path: '/help' })
+	})
 })

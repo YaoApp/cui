@@ -201,14 +201,17 @@ export type I18nKey =
   | 'shell.browser.action.more'
   | 'shell.browser.action.move'
   | 'shell.browser.address.label'
+  | 'shell.browser.address.open'
   | 'shell.browser.address.placeholder'
   | 'shell.browser.home'
+  | 'shell.browser.internal.hint'
   | 'shell.browser.label'
   | 'shell.browser.recent'
   | 'shell.browser.recent.empty'
   | 'shell.browser.split.blocked'
   | 'shell.browser.split.columns'
   | 'shell.browser.split.rows'
+  | 'shell.browser.tab.blank'
   | 'shell.browser.tab.close'
   | 'shell.browser.tab.new'
   | 'shell.browser.web.hint'
@@ -444,14 +447,17 @@ declare module 'i18next' {
         'shell.browser.action.more': string
         'shell.browser.action.move': string
         'shell.browser.address.label': string
+        'shell.browser.address.open': string
         'shell.browser.address.placeholder': string
         'shell.browser.home': string
+        'shell.browser.internal.hint': string
         'shell.browser.label': string
         'shell.browser.recent': string
         'shell.browser.recent.empty': string
         'shell.browser.split.blocked': string
         'shell.browser.split.columns': string
         'shell.browser.split.rows': string
+        'shell.browser.tab.blank': string
         'shell.browser.tab.close': string
         'shell.browser.tab.new': string
         'shell.browser.web.hint': string

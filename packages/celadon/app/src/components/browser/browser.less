@@ -13,7 +13,9 @@
 	min-inline-size: var(--side-min);
 	max-inline-size: calc(100% - var(--nav-min) - var(--center-min) - var(--side-resize-handle));
 	min-block-size: 0;
-	background: var(--background-surface);
+	/* 本栏的底与内容区差一档（--background-content 比 --background-surface 深 5 到 6 阶），
+	   与内容区相邻时才分得出两栏；本栏自己的标签与面板仍用 --background-surface */
+	background: var(--background-content);
 	border-inline-start: var(--border-width) solid var(--border-subtle);
 	/* 收掉与展开：进场 decelerate，时长取 --duration-base；换边的列序变化由三栏的过渡一起带出；
 	   拖动分界线时由 [data-dragging] 关掉，保证跟手 */
@@ -234,12 +236,16 @@
 .browser__bar {
 	position: relative;
 	flex: none;
+	box-sizing: border-box;
 	block-size: var(--row-height);
+	/* 与内容列头、导航列头同一条基线：高度由 --row-height 定，键 32 上下各留 4，不被内容撑高 */
+	min-block-size: 0;
 	display: flex;
 	align-items: center;
 	gap: var(--spacing-4);
+	/* 与内容列头同一档内距；键是 small 档 24 高，40 高的栏里上下正好各留 8 */
 	padding: var(--spacing-8);
-	border-block-end: var(--border-width) solid var(--border-subtle);
+	/* 顶栏不加下边线：与窗口顶带连成一片，标签块自己承担分档 */
 	/* 顶带：拖窗口与双击最大化落在这条带子里，因此不参与文本选择，指针保持箭头 */
 	cursor: default;
 	user-select: none;
@@ -265,35 +271,123 @@
 	white-space: nowrap;
 }
 
+/* 标签是一整块：图标 · 标题（省略号）· 关闭键都在同一块底里，块自己给悬停与当前态。
+   块高取 24 档，与栏内上下内距 8 相加正好落在 40 的行高上，块的上留白因此与左留白等值；
+   最窄 48 就够，短标题不占一大片空底。
+   左右内距分两种：有可关闭的页时左 8 右 4（右侧由关闭键自己那 24 的命中区补足，
+   叉号到块右缘的视觉间距与左侧的 8 相当），只有首页这种没有关闭键的页时左右都取 8、
+   内容整体居中，块的左右边距因此严格相等 */
 .browser__tab {
 	display: flex;
 	align-items: center;
 	gap: var(--spacing-4);
-	padding-inline-end: var(--spacing-4);
+	min-inline-size: var(--spacing-48);
+	max-inline-size: 200px;
+	block-size: var(--spacing-24);
+	/* 右侧不留内距：关闭键的命中区贴块右缘，叉号因此离右缘 5，与上下留白（24 减 14 的一半）一致 */
+	padding-inline: var(--spacing-8) 0;
 	border-radius: var(--radius-small);
+	background: transparent;
 	/* 新建或新出现的一页：淡入加一点位移（关键帧在同文件上方），减少动态由 token 层统一归零 */
 	animation: browser-tab-in var(--duration-fast) var(--easing-decelerate);
+	/* 只过渡具体属性，不写 background 简写：简写在 WebKit 上会带上图片与定位一起参与 */
+	transition: background-color var(--duration-fast) var(--easing-decelerate);
 }
 
-.browser__tab:has([aria-selected='true']) {
-	background: var(--background-selected);
+.browser__tab:not([data-closable]) {
+	justify-content: center;
+	padding-inline: var(--spacing-8);
 }
 
-.browser__tab-button {
-	max-inline-size: var(--side-width-reading);
+.browser__tab:not([data-closable]) .browser__tab-main {
+	flex: 0 1 auto;
 }
 
+/* 悬停与当前两档底。这里不写 :has()：WebKit 在指针状态变化时会按 :has() 向上重算，
+   即使用不到那一条也会重排；键盘焦点那档改由主体自己的 outline 表达（见下） */
+.browser__tab:hover {
+	background: var(--nav-hover);
+}
+
+.browser__tab[data-active],
+.browser__tab[data-active]:hover {
+	background: var(--nav-select);
+}
+
+/* 块里的主体：图标与标题。它承担 tab 角色与点选，标题取 label 档（12），
+   图标取与文字相称的 14 档，两者之间留 8 的呼吸。
+   主体吃掉块内余量（flex: 1 1 auto），关闭键是定尺 24 的不可收缩项，
+   因此块的宽度由内容决定、悬停不参与计算，条里后面的键不会跟着动 */
+.browser__tab-main {
+	display: flex;
+	align-items: center;
+	gap: var(--spacing-8);
+	flex: 1 1 auto;
+	min-inline-size: 0;
+	font-size: var(--font-size-label);
+	color: var(--text-primary);
+	/* 整块可点，指针给手型 */
+	cursor: pointer;
+}
+
+.browser__tab-main:focus-visible {
+	outline: var(--focus-ring);
+	outline-offset: calc(-1 * var(--border-width));
+	border-radius: var(--radius-small);
+}
+
+/* 关闭键是纯图标：只有一个 24 的命中区，没有底也没有描边。
+   显隐用 visibility，不用 opacity：WebKit 里不透明度小于 1 的元素会单独建层，
+   指针一进一出就换一次层，旁边的字形与图形跟着重栅格化，看着像被推了一下（本行实测过）。
+   指针进来时放大 1.2 并把颜色从次级提到主级，此处不加底色，块底已经是灰的。
+   图层平时就提升（will-change），缩放发生在已有图层上，不会在悬停瞬间才建层 */
+.browser__tab-close {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 var(--spacing-24);
+	inline-size: var(--spacing-24);
+	block-size: var(--spacing-24);
+	color: var(--text-secondary);
+	cursor: pointer;
+	visibility: hidden;
+	will-change: transform;
+	transition:
+		transform var(--duration-fast) var(--easing-decelerate),
+		color var(--duration-fast) var(--easing-decelerate);
+}
+
+.browser__tab-close:hover {
+	color: var(--text-primary);
+	transform: scale(1.2);
+}
+
+.browser__tab:hover .browser__tab-close,
+.browser__tab:has(:focus-visible) .browser__tab-close {
+	visibility: visible;
+}
+
+/* 标题超出标签宽度时省略，完整标题由统一 Tooltip 给。
+   这一段取 pointer-events: none：WebKit 会给「正在被省略号截断的元素」自己弹一个原生提示，
+   它与 title 属性无关，空 title 也压不住；指针落不到它身上，原生提示就没有可瞄准的对象。
+   提示因此挂在覆盖整块主体的统一 Tooltip 上（见组件），截断信息只有一个来源。
+   不参与伸缩（flex: 0 0 auto）：标签行的可用宽度不够时，短标题不该被挤成省略号，
+   每个标签自己保住内容宽，超出的部分由标签行的溢出规则处理 */
 .browser__tab-label {
+	flex: 0 0 auto;
+	max-inline-size: 100%;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
+	pointer-events: none;
 }
 
 .browser__page {
 	padding: var(--spacing-16);
 }
 
-.browser__home {
+/* 新标签页：首页与 `＋` 新建出来的空页共用（地址入口 + 打开过的东西） */
+.browser__new-tab {
 	display: flex;
 	flex-direction: column;
 	gap: var(--spacing-16);

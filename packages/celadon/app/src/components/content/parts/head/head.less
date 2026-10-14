@@ -16,13 +16,11 @@
 	user-select: none;
 }
 
-/* 按钮按几何居中：定 32 命中区、图标在其中居中，不受基线影响；不展示时不渲染也不占位 */
+/* 按钮按几何居中：盒子尺寸交给 Button 的尺寸档（与导航列同一档），这里只管居中，不受基线影响 */
 .content__head-key {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	inline-size: var(--spacing-32);
-	block-size: var(--spacing-32);
 }
 
 /* 键的外层：提示挂在它身上，禁用态的按钮收不到指针事件时气泡仍能出现 */
@@ -49,6 +47,11 @@
 
 .content__head-slot--browser {
 	margin-inline-start: auto;
+}
+
+/* 本栏打开时这一颗整颗不画：零宽的槽不裁子元素，按钮会从槽里露出来 */
+.content__head-slot--browser[data-hidden='true'] {
+	display: none;
 }
 
 .content__head-key--browser {

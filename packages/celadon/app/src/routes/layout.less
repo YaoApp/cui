@@ -71,3 +71,9 @@
 .layout[data-width='zero'] .browser {
   max-inline-size: calc(100% - var(--center-min) - var(--side-resize-handle));
 }
+
+/* 独占与「导航区收起」同时成立时，独占优先：这一栏要占满整扇窗口，
+   否则上面那条把内容区最小宽留给了一个已经不存在的列，本栏右侧会空出一条。 */
+.layout[data-exclusive][data-width='zero'] > .browser {
+  max-inline-size: none;
+}
