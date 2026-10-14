@@ -1,7 +1,7 @@
 import './layout.less'
 import { useEffect, useState } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router'
-import { Browser, Home, Web, type BrowserTab } from '@/components/browser'
+import { Browser, TabPage, type BrowserTab } from '@/components/browser'
 import { Content } from '@/components/content'
 import { Nav, type NavItem } from '@/components/nav'
 import { useAuthStore } from '@/features/auth/auth.store'
@@ -10,8 +10,10 @@ import { InboxNav } from '@/features/inbox'
 import { client, useWindowChrome } from '@/platform/client'
 import { useMediaQuery } from '@/platform/client/use-media-query'
 import type { I18nKey } from '@/platform/i18n/i18n-types'
+import type { IconId } from '@/platform/icons'
 import { useTranslation } from '@/platform/i18n'
 import { HOME_TAB, tabKey, useTabsStore, type TabEntry } from '@/stores/browser/tabs'
+import { parseTarget, targetLabel } from '@/stores/browser/targets'
 import { useColumnsStore } from '@/stores/layout/columns'
 
 /* 一级导航的六项：**路由信息的投影**，写在装配层（`architecture/07-routing.md`）。
@@ -82,6 +84,8 @@ export function AppLayout() {
 	const tabs = useTabsStore((state) => state.tabs)
 	const activeKey = useTabsStore((state) => state.activeKey)
 	const openTab = useTabsStore((state) => state.open)
+	const openBlankTab = useTabsStore((state) => state.openBlank)
+	const navigateTab = useTabsStore((state) => state.navigate)
 	const closeTab = useTabsStore((state) => state.close)
 	const activateTab = useTabsStore((state) => state.activate)
 
@@ -95,32 +99,50 @@ export function AppLayout() {
 		.find((item) => location.pathname.startsWith(item.to))
 	const scene: I18nKey = current?.labelKey ?? 'shell.navigation.scene.none'
 
-	const nameOf = (tab: TabEntry): string => (tab.kind === 'browser-home' ? t('shell.browser.home') : tab.id)
+	const nameOf = (tab: TabEntry): string => {
+		if (tab.target.kind === 'home') return t('shell.browser.home')
+		if (tab.target.kind === 'blank') return t('shell.browser.tab.blank')
+		return tab.title ?? targetLabel(tab.target)
+	}
+	const iconOf = (tab: TabEntry): IconId | undefined => {
+		if (tab.target.kind === 'home') return 'i-home'
+		if (tab.target.kind === 'blank') return 'i-plus'
+		return tab.icon
+	}
 	const byKey = (key: string): TabEntry | undefined => tabs.find((tab) => tabKey(tab) === key)
 	const view: BrowserTab[] = tabs.map((tab) => ({
 		key: tabKey(tab),
 		label: nameOf(tab),
-		closable: tab.kind !== 'browser-home'
+		closable: tab.target.kind !== 'home',
+		icon: iconOf(tab)
 	}))
 	const active = tabs.find((tab) => tabKey(tab) === activeKey) ?? HOME_TAB
 	/* 第二个面板绑自己那一页：默认取第一个不是当前页的标签，没有别的页时停在首页。
 	   标签条上的点击落在**聚焦的那个面板**：面板 0 写全局当前页，面板 1 写它自己这一页 */
 	const secondaryTab = byKey(secondaryKey) ?? tabs.find((tab) => tabKey(tab) !== activeKey) ?? HOME_TAB
 
-	/* 一页的内容：两个面板共用同一个函数，分屏时各自渲染自己那一页 */
-	const renderTab = (tab: TabEntry) => {
-		if (tab.kind === 'browser-home')
-			return (
-				<Home
-					recent={tabs
-						.filter((item) => item.kind !== 'browser-home')
-						.map((item) => ({ key: tabKey(item), label: nameOf(item) }))}
-					onOpenAddress={(address) => openTab({ kind: 'browser-web', id: address })}
-				/>
-			)
-		if (tab.kind === 'browser-web') return <Web address={tab.id} />
-		return <p className='content__hint'>{t('shell.content.placeholder')}</p>
+	/* 新标签页上的「打开过的东西」：除首页以外的页，名字按当前标签名给 */
+	const recent = tabs
+		.filter((tab) => tab.target.kind !== 'home')
+		.map((tab) => ({ key: tabKey(tab), label: nameOf(tab) }))
+
+	/* 一页里的地址入口提交了：解析成目标后决定落在哪。
+	   空页（含 `＋` 新建出来的）在**本页**换内容；首页不装别的内容，另开一页。
+	   两个面板共用这一套，各自传自己那一页。 */
+	const openIn = (tab: TabEntry, input: string) => {
+		const target = parseTarget(input)
+		if (target.kind === 'blank') return
+		if (tab.target.kind === 'home') {
+			openTab(target)
+			return
+		}
+		navigateTab(tabKey(tab), target)
 	}
+
+	/* 一页的内容：两个面板共用同一个派发组件，分屏时各自渲染自己那一页 */
+	const renderTab = (tab: TabEntry) => (
+		<TabPage tab={tab} recent={recent} onOpen={(input) => openIn(tab, input)} />
+	)
 
 	return (
 		<div
@@ -185,14 +207,10 @@ export function AppLayout() {
 						setSecondaryKey(key)
 						return
 					}
-					const tab = byKey(key)
-					if (tab) activateTab(tab)
+					activateTab(key)
 				}}
-				onClose={(key) => {
-					const tab = byKey(key)
-					if (tab) closeTab(tab)
-				}}
-				onNew={() => activateTab(HOME_TAB)}
+				onClose={(key) => closeTab(key)}
+				onNew={() => openBlankTab()}
 				onMove={() => setBrowserSide(browserSide === 'right' ? 'left' : 'right')}
 				onCollapse={() => {
 					/* 独占档里收掉这一栏：先退出独占。否则导航区与内容区都在让位、本栏又收成零宽，
