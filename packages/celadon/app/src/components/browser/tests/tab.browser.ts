@@ -65,7 +65,16 @@ test('the tab label reads at the body size and the close key sits inside the blo
 	/* 关闭键只在指针进到标签块时可见：先悬停块，再悬停它 */
 	await tab.hover()
 	await closeBox.hover()
-	await expect(closeBox).toHaveCSS('background-color', 'rgb(232, 232, 235)')
+	/* 纯图标：悬停不给底色，改为放大 1.2 并把颜色提到主级 */
+	await expect(closeBox).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+	await expect(closeBox).toHaveCSS('transform', 'matrix(1.2, 0, 0, 1.2, 0, 0)')
+	await expect(closeBox).toHaveCSS('color', 'rgb(20, 18, 14)')
+
+	/* 叉号到块右缘的视觉间距与上下留白一致：24 的块高、14 的图形，上下各 5 */
+	const glyphBox = (await tab.locator('.browser__tab-close svg').boundingBox())!
+	const rightGap = block.x + block.width - (glyphBox.x + glyphBox.width)
+	const topGap = glyphBox.y - block.y
+	expect(Math.abs(rightGap - topGap)).toBeLessThanOrEqual(1)
 
 	/* 图标与文字之间留 8：图标的右缘到文字的起点不小于 8 */
 	const iconBox = (await tab.locator('.browser__tab-main svg').boundingBox())!
