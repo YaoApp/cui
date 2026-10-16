@@ -30,6 +30,40 @@ async function openMenuOn(page: Page, label: string) {
 	await expect(page.locator('.browser__menu:visible')).toHaveCount(1)
 }
 
+test('keeps the menu on the floating layer, above the tab strip', async ({ page }) => {
+	await page.setViewportSize({ width: 1280, height: 800 })
+	await markSignedIn(page)
+	await page.goto('/app/inbox')
+	await openTab(page, 'a.com')
+	await openMenuOn(page, '首页')
+
+	const result = await page.evaluate(() => {
+		const layer = document.querySelector('.browser__menu-layer')!
+		const menu = document.querySelector('.browser__menu--tab')!
+		const strip = document.querySelector('.browser__tabs')!
+		const scope = document.querySelector('.celadon') ?? document.documentElement
+		const token = getComputedStyle(scope).getPropertyValue('--z-overlay').trim()
+		const m = menu.getBoundingClientRect()
+		const t = strip.getBoundingClientRect()
+		const overlap = m.left < t.right && m.right > t.left && m.top < t.bottom && m.bottom > t.top
+		const x = (Math.max(m.left, t.left) + Math.min(m.right, t.right)) / 2
+		const y = (Math.max(m.top, t.top) + Math.min(m.bottom, t.bottom)) / 2
+		return {
+			overlap,
+			layerZ: getComputedStyle(layer).zIndex,
+			stripZ: Number(getComputedStyle(strip).zIndex),
+			token,
+			/* 重叠处最上层是菜单：层级只有加在带 transform 的定位层上才成立 */
+			onTop: Boolean(document.elementFromPoint(x, y)?.closest('.browser__menu--tab'))
+		}
+	})
+
+	expect(result.overlap).toBe(true)
+	expect(result.layerZ).toBe(result.token)
+	expect(Number(result.layerZ)).toBeGreaterThan(result.stripZ)
+	expect(result.onTop).toBe(true)
+})
+
 test('greys the close items on the home tab and ignores the click', async ({ page }) => {
 	await page.setViewportSize({ width: 1600, height: 900 })
 	await markSignedIn(page)
