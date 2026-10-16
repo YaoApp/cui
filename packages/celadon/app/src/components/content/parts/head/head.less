@@ -97,22 +97,12 @@
 	text-overflow: ellipsis;
 }
 
-/* 换边后本栏是次栏：它的左缘随收放移动，列头里的一切改成靠窗口右缘排。
-   列头本身已关掉布局投影（`project={false}`），宽度每帧直接变、内容不跟着平移：
-   窗口够宽时标题与键钉在右缘不动，宽度不够时从左侧被裁掉。
-   交通灯留白归窗口最左那一栏管，换边后那一栏是标签浏览器，所以这里置零。 */
+/* 换边后本栏是次栏：交通灯留白归窗口最左那一栏管，那一栏此时是标签浏览器，所以这里置零。
+   列头与正文照常按列宽布局：次栏的左缘就是随收放移动的那条边界，栏内内容因此随它平移，
+   这是镜像几何的直接结果。让它不动的做法只有把栏内内容钉死或整体平移，
+   两者都会让正文脱离正常布局与滚动，不做。 */
 .layout[data-mirror] .content__head {
-	justify-content: flex-end;
-
 	--head-inset: 0px;
-}
-
-/* 靠右排时不能再让自动外边距把某一端推开：自动外边距先吃掉空档，justify-content 就管不到标题，
-   标题会回到列首、跟着列的左缘滑。这里把三处自动外边距在镜像态一并取消。 */
-.layout[data-mirror] .content__head-slot--browser,
-.layout[data-mirror] .content__head-key--browser,
-.layout[data-mirror] .content__head-trailing {
-	margin-inline-start: 0;
 }
 
 .content__head-trailing {

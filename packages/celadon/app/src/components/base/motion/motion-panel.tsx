@@ -6,9 +6,6 @@ export type MotionPanelProps = HTMLMotionProps<'div'> & {
 	as?: 'div' | 'aside' | 'main' | 'section' | 'nav' | 'li' | 'header' | 'span'
 	/** 是否为位移型元素（行、文字、图标）：只平移不缩放，文字因此不变形 */
 	position?: boolean
-	/** 是否参与布局投影。关掉之后元素在宽度变化里不做任何投影动画，
-	    用于「宽度在变、但这一层不该跟着平移」的场合（例如换边后作为次栏的那一列列头） */
-	project?: boolean
 }
 
 /** 参与列联动的容器：位置与尺寸变化交给 Motion 的布局投影，动画期间不动布局。
@@ -19,17 +16,11 @@ export type MotionPanelProps = HTMLMotionProps<'div'> & {
  * - 减少动效偏好下退化为瞬时，不播放动画；
  * - 拖拽改宽期间传 `transition={PANEL_INSTANT}`，宽度跟手不做动画。
  */
-export function MotionPanel({
-	as = 'div',
-	position = false,
-	project = true,
-	transition,
-	...rest
-}: MotionPanelProps) {
+export function MotionPanel({ as = 'div', position = false, transition, ...rest }: MotionPanelProps) {
 	const reduced = useReducedMotion()
 	/* 标签由 `as` 选，Motion 的每个标签各有一套事件类型，这里统一按 div 那一套转交属性 */
 	const Component = motion[as] as typeof motion.div
-	const layout = project ? (position ? 'position' : true) : false
+	const layout = position ? 'position' : true
 	/* 首次落位不播动画：还原存值那一帧直接到位，之后的变化才走投影 */
 	return <Component initial={false} layout={layout} transition={transition ?? (reduced ? PANEL_INSTANT : PANEL_SPRING)} {...rest} />
 }

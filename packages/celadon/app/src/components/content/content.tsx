@@ -15,8 +15,6 @@ export type ContentProps = {
 	trail?: HeadKey
 	/** 本栏收掉了（换边后次栏是内容区）：内容不再可达，也从无障碍树里摘掉 */
 	hidden?: boolean
-	/** 本栏是次栏（换边后）：列头贴住窗口右缘，收放时标题不跟着滑 */
-	pinned?: boolean
 }
 
 /* 中栏：页面容器。栏宽由三栏的列轨给（让步顺序见 design/foundations.md F6），
@@ -29,14 +27,11 @@ export function Content({
 	navCollapsed = false,
 	lead,
 	trail,
-	hidden = false,
-	pinned = false
+	hidden = false
 }: ContentProps) {
 	return (
 		<main className='content' aria-hidden={hidden || undefined} inert={hidden || undefined}>
-			{title ? (
-				<ContentHead title={title} navCollapsed={navCollapsed} lead={lead} trail={trail} pinned={pinned} />
-			) : null}
+			{title ? <ContentHead title={title} navCollapsed={navCollapsed} lead={lead} trail={trail} /> : null}
 			<ScrollArea className='content__scroll' size='medium' persistent>
 				{children}
 			</ScrollArea>
