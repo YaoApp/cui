@@ -121,4 +121,57 @@ describe('标签集', () => {
 		expect(useTabsStore.getState().tabs[1].key).toBe(blank.key)
 		expect(useTabsStore.getState().tabs[1].target).toEqual({ kind: 'internal', path: '/help' })
 	})
+
+	it('重排：索引按移除该项之后的数组算，向前向后都成立', () => {
+		const state = useTabsStore.getState()
+		state.open(external('a.com'))
+		const second = useTabsStore.getState().tabs[1].key
+		state.open(external('b.com'))
+		const third = useTabsStore.getState().tabs[2].key
+		const order = () => useTabsStore.getState().tabs.map(tabKey)
+		expect(order()).toEqual([HOME_TAB.key, second, third])
+
+		/* 把第三项移到最前：移除它之后数组是 [首页, 第二项]，插到 0 */
+		useTabsStore.getState().move(third, 0)
+		expect(order()).toEqual([third, HOME_TAB.key, second])
+
+		/* 再把它移到末尾：此时移除它之后数组长 2，插到 2 */
+		useTabsStore.getState().move(third, 2)
+		expect(order()).toEqual([HOME_TAB.key, second, third])
+
+		/* 往前一位 */
+		useTabsStore.getState().move(third, 1)
+		expect(order()).toEqual([HOME_TAB.key, third, second])
+	})
+
+	it('重排：越界夹取、小数取整、原地不动与未知 key 都不改变顺序', () => {
+		const state = useTabsStore.getState()
+		state.open(external('a.com'))
+		const second = useTabsStore.getState().tabs[1].key
+		state.open(external('b.com'))
+		const third = useTabsStore.getState().tabs[2].key
+		const order = () => useTabsStore.getState().tabs.map(tabKey)
+
+		useTabsStore.getState().move(second, -5)
+		expect(order()).toEqual([second, HOME_TAB.key, third])
+		useTabsStore.getState().move(second, 99)
+		expect(order()).toEqual([HOME_TAB.key, third, second])
+		useTabsStore.getState().move(second, 99.7)
+		expect(order()).toEqual([HOME_TAB.key, third, second])
+		useTabsStore.getState().move('missing', 0)
+		expect(order()).toEqual([HOME_TAB.key, third, second])
+		/* 目标位置与现位置相同：不写状态，顺序不变 */
+		useTabsStore.getState().move(third, 1)
+		expect(order()).toEqual([HOME_TAB.key, third, second])
+	})
+
+	it('重排不动当前页', () => {
+		const state = useTabsStore.getState()
+		state.open(external('a.com'))
+		const second = useTabsStore.getState().tabs[1].key
+		state.activate(HOME_TAB.key)
+		useTabsStore.getState().move(second, 0)
+		expect(useTabsStore.getState().activeKey).toBe(HOME_TAB.key)
+		expect(useTabsStore.getState().tabs[0].key).toBe(second)
+	})
 })

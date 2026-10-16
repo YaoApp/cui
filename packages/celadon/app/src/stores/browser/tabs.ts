@@ -35,6 +35,9 @@ type TabsState = {
 	navigate: (key: string, target: TabTarget, meta?: OpenMeta) => void
 	/** 关一页：每一页都能关；关的是当前页时按右邻优先、没有右邻取左邻；一个都不剩时首页重新出现 */
 	close: (key: string) => void
+	/** 把一页移到目标位置：索引按**移除该项之后**的数组算，与拖放落点的语义一致；
+	    越界夹到 0 与长度之间，找不到该项不动作，当前页不变 */
+	move: (key: string, index: number) => void
 	activate: (key: string) => void
 }
 
@@ -109,6 +112,16 @@ export const useTabsStore = create<TabsState>()(
 					}
 					const fallback = next[index] ?? next[index - 1] ?? HOME_TAB
 					set({ tabs: next, activeKey: fallback.key }, false, 'browser/close')
+				},
+				move: (key, index) => {
+					const { tabs } = get()
+					const from = tabs.findIndex((tab) => tab.key === key)
+					if (from < 0) return
+					const rest = tabs.filter((tab) => tab.key !== key)
+					const to = Math.max(0, Math.min(rest.length, Math.trunc(index)))
+					if (to === from) return
+					const next = [...rest.slice(0, to), tabs[from], ...rest.slice(to)]
+					set({ tabs: next }, false, 'browser/move')
 				},
 				activate: (key) => set({ activeKey: key }, false, 'browser/activate')
 			}),
