@@ -176,3 +176,36 @@ test('exclusive fills the window when the mirrored secondary is collapsed', asyn
 		)
 		.toBe(sizes.window)
 })
+
+test('expands the mirrored secondary continuously and drops it from the a11y tree when collapsed', async ({
+	page
+}) => {
+	await page.setViewportSize({ width: 1500, height: 900 })
+	await markSignedIn(page)
+	await page.goto('/app/inbox')
+	await swapSide(page)
+
+	await page.locator('.content__head-key--browser').click()
+	await expect(page.locator('.layout > .content')).toHaveAttribute('inert', '')
+	await expect(page.locator('.layout > .content')).toHaveAttribute('aria-hidden', 'true')
+
+	/* 展开逐帧采样：主栏宽度连续收回，不能第一帧就到终值（上限夹住时会那样） */
+	const frames = await page.evaluate(
+		() =>
+			new Promise<number[]>((done) => {
+				const out: number[] = []
+				document.querySelector<HTMLElement>('.browser__secondary-key')!.click()
+				const tick = () => {
+					out.push(
+						Math.round(document.querySelector('.layout > .browser')!.getBoundingClientRect().width)
+					)
+					if (out.length < 15) requestAnimationFrame(tick)
+					else done(out)
+				}
+				requestAnimationFrame(tick)
+			})
+	)
+	const seen = [...new Set(frames)]
+	expect(seen.length).toBeGreaterThanOrEqual(4)
+	expect(seen[0]).toBeGreaterThan(seen[seen.length - 1] + 300)
+})
