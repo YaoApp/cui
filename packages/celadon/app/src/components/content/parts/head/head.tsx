@@ -34,19 +34,23 @@ export type ContentHeadProps = {
 	trail?: HeadKey
 	/** 右侧插槽：与当前页有关的动作，放在次栏操作键之前 */
 	trailing?: ReactNode
+	/** 本栏是次栏（换边后）：列头不参与布局投影，贴住窗口右缘，收放时标题与键都不跟着滑 */
+	pinned?: boolean
 }
 
 /* 内容列的标题栏（40 像素，与另两列列头等高）。
    三个区域固定：左槽位 · 中标题 · 右槽位与业务插槽。
    两颗键的显示与文案由装配层按主栏 / 次栏的角色给：主栏是中间那一栏，次栏是离导航最远的那一栏，
    这一层不认识角色，也不认识业务。 */
-export function ContentHead({ title, navCollapsed, lead, trail, trailing }: ContentHeadProps) {
+export function ContentHead({ title, navCollapsed, lead, trail, trailing, pinned = false }: ContentHeadProps) {
 	const chrome = useWindowChrome()
 	return (
-		/* 列头随列平移，不做显隐切换：尺寸变化的投影不允许缩到标题上 */
+		/* 主栏里列头随列平移：尺寸变化的投影不允许缩到标题上；
+		   次栏里关掉投影（`project={false}`），列头按窗口右缘摆，收放时标题不动，只被列的左缘裁掉 */
 		<MotionPanel
 			as='header'
 			position
+			project={!pinned}
 			className='content__head'
 			data-controls={chrome.controls}
 			data-nav={navCollapsed ? 'collapsed' : 'expanded'}

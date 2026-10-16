@@ -236,6 +236,7 @@ export function AppLayout() {
 				lead={contentLead}
 				trail={contentTrail}
 				hidden={contentHidden}
+				pinned={mirror}
 			>
 				<Outlet />
 			</Content>
