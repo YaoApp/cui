@@ -261,10 +261,11 @@ describe('标签集', () => {
 		useTabsStore.getState().navigate(again, external('b.com'))
 		expect(at(again)?.target).toEqual({ kind: 'external', url: 'b.com' })
 
-		/* 去重把首页那一格换下的页收掉之后，列表里可以暂时没有首页目标的一页；
+		/* 首页那一格自己换到已经在别的页上的目标：这一格被去重收掉，列表里暂时没有首页目标的一页；
 		   关完所有页首页照旧回来 */
-		useTabsStore.getState().navigate(again, external('a.com'))
+		useTabsStore.getState().navigate(HOME_TAB.key, external('a.com'))
 		expect(useTabsStore.getState().activeKey).toBe(first)
+		expect(useTabsStore.getState().tabs.some((tab) => tab.target.kind === 'home')).toBe(false)
 		useTabsStore.getState().closeAll()
 		expect(useTabsStore.getState().tabs.map(tabKey)).toEqual([HOME_TAB.key])
 		expect(at(useTabsStore.getState().activeKey)?.target.kind).toBe('home')

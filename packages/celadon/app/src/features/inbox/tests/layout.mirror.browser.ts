@@ -188,6 +188,22 @@ test('expands the mirrored secondary continuously and drops it from the a11y tre
 	await page.locator('.content__head-key--browser').click()
 	await expect(page.locator('.layout > .content')).toHaveAttribute('inert', '')
 	await expect(page.locator('.layout > .content')).toHaveAttribute('aria-hidden', 'true')
+	/* 收起是 200 毫秒的过渡：等它落定再采样展开，否则量到的是两段动画的叠加，结果随机。
+	   落定判据取内容区宽度到零、主栏右缘不出窗口（后者同时钉住收起态的目标值：
+	   目标若取 100%，导航区还在，整行会溢出窗口） */
+	await expect
+		.poll(() =>
+			page.evaluate(() => {
+				const layout = document.querySelector('.layout')!
+				const content = document.querySelector('.layout > .content')!.getBoundingClientRect()
+				const main = document.querySelector('.layout > .browser')!.getBoundingClientRect()
+				return {
+					content: Math.round(content.width),
+					overflow: Math.round(main.right - layout.getBoundingClientRect().right)
+				}
+			})
+		)
+		.toEqual({ content: 0, overflow: 0 })
 
 	/* 展开逐帧采样：主栏宽度连续收回、内容区宽度连续长出。
 	   判据放在内容区：下限若一步跳回 400，第一帧就是 400、整段也只剩一个值，这里会红；
