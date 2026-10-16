@@ -2,7 +2,7 @@
 
 - **版本**：v1.0
 - **日期**：2026-10-05
-- **状态**：**待处理**（本轮只记录，未改页面）
+- **状态**：**部分落地**（2026-10-16 按实现核对，见第 7 节）
 - **复核对象**：`design/prototype/` 的 `login.html` · `register.html` · `servers.html`，每页两种语境（独立页 / 客户端内 `?from=connect`）
 - **复核方式**：只读复核者，先读 [`design/AGENTS.md`](../design/AGENTS.md)，再看代码，最后看截图
 - **原始报告**：[`app/logs/2026-10-05/design-review-1057.md`](../../../../app/logs/2026-10-05/design-review-1057.md)（不进仓库，`app/logs/**` 已忽略）
@@ -60,3 +60,18 @@
 ## 6. 没能验证的（9）
 
 未重跑全部生成物（只核了本次新增 token）· 未读 `app/src/components/base` 逐项比对映射 · 未用屏幕阅读器实测 · 未测 `prefers-contrast: more` / `less` · 无真客户端（Tauri）截图 · 未测真实云站点接口 · 未验证繁体中文的断行 · 未测高倍缩放 · 未测触屏与窄屏交互。
+
+## 7. 落地核对（2026-10-16）
+
+按当前实现抽查五条，证据为 `design/prototype/` 里的原文，未逐页重跑对比度实算。
+
+| # | 结论 | 依据 |
+| --- | --- | --- |
+| B1 | 按**豁免**处理（登录与注册页） | 两页在 `login.html:104-105` · `register.html:120-121` 写明「有意弱化」，合规档与默认档也点明；服务器页是否同样写明未核 |
+| B2 | 未落地 | `register.html` 里 `.error-line` / `.is-error` / `.is-loading` 合计仍只有 1 处 |
+| I1 | 部分落地 | 文案已改成「跟随系统（中文…）」，不再直接显示 `system`；`data-lang="system"` 仍在，字体分栈是否受影响未核 |
+| I2 | 未落地 | `servers.html:255` 仍写着 `aria-labelledby="auth-title"`，同文件未出现该 id 的定义 |
+| I4 | 部分落地 | 三页各已引入 `--focus-ring`（各 5 到 6 处），是否覆盖 `.link` 未逐条核 |
+
+其余条目（I3 · I5 到 I9 · 第 3 节的次要项 · 第 4 节的两条建议）本轮未逐条重核，按原记录保留。
+

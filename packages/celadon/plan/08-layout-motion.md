@@ -2,7 +2,7 @@
 
 - 主文档：[08-layout-implemented.md](08-layout-implemented.md)（已实现的部分）· [08-layout-content-browser.md](08-layout-content-browser.md)（未完成的跟踪）
 - 分册：[08-layout-base.md](08-layout-base.md)（骨架）· 08-layout-shell.md（窗口封装）
-- 状态：方案已定，未落地
+- 状态：方案已落地（2026-10-16）。列与列头的宽度变化由列轨的 CSS 过渡承担，位移型元素走 Motion 的 `layout="position"`；实现事实与读数见 [08-layout-implemented.md](08-layout-implemented.md) 第 6、8 节，本册保留方案与接入范围。
 
 这一册把界面里所有**会移动的东西**收进一套动效方案，Web 与桌面客户端共用同一套实现。目标只有一个：变化过程中不许变形、不许跳，观感上是整块在平移。
 
@@ -15,10 +15,11 @@
 | 1 | 导航列整列收放 | 点收起键 · 窄视口自动 | `transition: inline-size var(--duration-base)` | 宽度逐帧变化导致条目与文字重排；收到底后整列不可见，因此不再有标志闪现 |
 | 2 | 主导航区折起 | 点分区收起 | 同上，折叠行 `margin-block-start` 过渡 | 折叠行位置变化也带动重排 |
 | 3 | 内容列左缘与列头内距 | 导航列收放 · 拖宽 | 列头 `padding-inline-start` 过渡 | 与 1 同步但不共用一套节奏，容易出现半拍 |
-| 4 | 标签浏览器列收放 | 收掉 · 换边 | 布局让位（`display: none` 一侧） | 没有过渡，直接跳；换边是列序对调，没有动画 |
+| 4 | 标签浏览器列收放 | 收掉 · 换边 | 宽度与 `min-inline-size` 的 CSS 过渡（`browser.less`），换边由列轨的 `order` 直接改序 | 换边没有动画（列序对调是瞬时的），收放有 |
 | 5 | 导航列宽度拖拽 | 拖右缘把手 · 键盘 | 逐帧写宽度 | 这是用户主动改宽，允许重排，不做动画 |
 | 6 | 内容区滚动与标签条滚动 | 内容溢出 | 原生滚动 | 不属于本册 |
 | 7 | 窗口动作（最小化 · 最大化 · 关闭） | 点窗口键 | 由系统负责 | 不属于本册 |
+| 8 | 后两栏换边后收掉次栏 | 点次栏收放键 · 窗口压到 `707px` 以下 | 宽度由主栏驱动：主栏的 `inline-size` 从定宽长到可用的一格（CSS 过渡），内容区吃剩余宽度、下限 `min-inline-size` 也走同一条过渡 | 不能用 `flex` 切换表达：`flex` 不可插值，切换那一下列会瞬变，看着只有列头在动 |
 
 ## 2. 为什么用 Motion
 
@@ -44,8 +45,8 @@
 | 2 | 导航列的条目与文字 | `components/nav/parts/item` · `parts/main` · `parts/list` · `parts/footer` | 行容器加 `layout="position"`；文字本身不再单独动 |
 | 3 | 列头与品牌行 | `parts/header` · `parts/brand` | 加 `layout="position"`，随列平移，不做显隐切换 |
 | 4 | 内容列 | `components/content/content.tsx` | `<motion.main layout transition={panel}>`；列头 `layout="position"` |
-| 5 | 内容列头的操作键与标题 | `components/content/parts/head` | 加 `layout="position"`；按键的出现与消失仍是条件渲染，位置由投影补 |
-| 6 | 标签浏览器列 | `components/browser/browser.tsx` | `<motion.aside layout transition={panel}>`；收掉与换边都走投影，不再用 `display: none` |
+| 5 | 内容列头的操作键与标题 | `components/content/parts/head` | 列头整体 `layout="position"`，随列平移；两颗键由装配层给描述子（图形 · 展开态 · 可见 · 是否置灰 · 文案 · 点击），列头不认识角色。**不给标题做钉死**：冻宽度加绝对定位或整体平移都会让正文脱离正常布局与滚动，不做 |
+| 6 | 标签浏览器列 | `components/browser/browser.tsx` | `<motion.aside layout transition={panel}>`；收掉与换边都不再用 `display: none`，收掉走宽度过渡，换边走列轨 `order` |
 | 7 | 标签条与标签 | `components/browser/parts/tabs` | 标签加 `layout="position"`，新建与关闭时其余标签平移 |
 | 8 | 成套联动 | `routes/layout.tsx` | 三列外层包 `<LayoutGroup>`，同一组共享一次投影计算 |
 | 9 | 折叠行 | `components/nav/parts/main` 与 `parts/scene` | 折叠行的进出用 `layout` 而不是切换 `margin`；文字用 `layout="position"` |
