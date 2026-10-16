@@ -151,6 +151,7 @@ export function AppLayout() {
 	/* 一页的内容：两个面板共用同一个派发组件，分屏时各自渲染自己那一页 */
 	const renderTab = (tab: TabEntry) => (
 		<TabPage
+			key={tab.key}
 			tab={tab}
 			recent={recent}
 			onOpen={(input) => openIn(tab, input)}

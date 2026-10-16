@@ -146,18 +146,18 @@ export const useTabsStore = create<TabsState>()(
 					const { tabs } = get()
 					const kept = tabs.find((tab) => tab.key === key)
 					if (!kept) return
-					/* 留下的这一页若是首页，就是「关掉其余」；不是首页则首页也一并关掉，
-					   但空状态要有落点，所以把首页补回首位（首页是空列表的默认页） */
-					const next = kept.target.kind === 'home' ? [kept] : [HOME_TAB, kept]
-					if (next.length === tabs.length && next.every((tab, index) => tab === tabs[index])) return
+					/* 留下的这一页若是首页那一格（key 为 home，目标可能已经换成别的），就是「关掉其余」；
+					   否则首页也一并关掉，但空状态要有落点，所以把首页补回首位 */
+					const next = kept.key === HOME_TAB.key ? [kept] : [HOME_TAB, kept]
 					set({ tabs: next, activeKey: key }, false, 'browser/closeOthers')
 				},
 				closeAll: () => {
 					const { tabs } = get()
-					/* 只关得动普通页；首页本来就不进关闭流程，关完由空状态补回 */
+					/* 只关得动普通页；首页那一格若已换上目标，就按空态的门重新放一个回去 */
 					const next = tabs.filter((tab) => tab.target.kind === 'home')
 					if (next.length === tabs.length) return
-					set({ tabs: next, activeKey: HOME_TAB.key }, false, 'browser/closeAll')
+					const kept = next.length > 0 ? next : [HOME_TAB]
+					set({ tabs: kept, activeKey: kept[0].key }, false, 'browser/closeAll')
 				},
 				move: (key, index) => {
 					const { tabs } = get()

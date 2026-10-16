@@ -53,6 +53,7 @@ export function BrowserTabs({
 	}
 
 	/* 当前页一变（点选、关闭、新开、换序）落点就跟着它；行里本来有焦点时把焦点也带过去 */
+	/* 当前页一变（点选、激活、关掉当前页、新开）：落点跟到当前页，行里本来有焦点时把焦点也带过去 */
 	useEffect(() => {
 		setFocusKey(activeKey)
 		const row = rowRef.current
@@ -61,9 +62,23 @@ export function BrowserTabs({
 		}
 	}, [activeKey])
 
+	/* 落点必须始终落在条上还在的一页：被关掉、被换序挪进溢出段时不落在零项上，
+	   否则整条标签的 tabIndex 会全为 -1、键盘就进不来了 */
+	useEffect(() => {
+		const keys = visibleTabs.map((tab) => tab.key)
+		if (keys.includes(focusKey)) return
+		const next = keys.includes(activeKey) ? activeKey : (keys[0] ?? '')
+		setFocusKey(next)
+		const row = rowRef.current
+		if (next && row?.contains(document.activeElement)) {
+			row.querySelector<HTMLElement>(`[data-tab-key="${next}"] .browser__tab-main`)?.focus()
+		}
+	}, [visibleTabs, focusKey, activeKey])
+
 	/* 键盘路径：左右箭头挪落点，Enter 与 Space 激活，Delete 关闭，Alt 加左右箭头在整表里挪一位。
-	   激活与换焦点分开：箭头只挪焦点，不换页。 */
+	   激活与换焦点分开：箭头只挪焦点，不换页。行里还有新建键，按键不是从标签上来的就不接 */
 	const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+		if (!(event.target as HTMLElement).closest('.browser__tab')) return
 		const index = visibleTabs.findIndex((tab) => tab.key === focusKey)
 		if (index < 0) return
 		const current = visibleTabs[index]

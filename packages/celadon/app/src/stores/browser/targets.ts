@@ -82,6 +82,6 @@ export function isAddressLike(input: string): boolean {
 	if (SHORTCUTS[head.trim().toLowerCase()] !== undefined) return true
 	const host = value.replace(/^[a-z][a-z0-9+.-]*:\/\//i, '').split(/[/?#]/)[0]
 	const bare = host.includes('@') ? host.slice(host.indexOf('@') + 1) : host
-	const name = bare.split(':')[0]
+	const name = bare.split(':')[0].toLowerCase()
 	return name === 'localhost' || name.includes('.')
 }
