@@ -31,9 +31,9 @@ app/src/
     browser/                 右栏：标签浏览器
       browser.tsx            顶栏 · 下拉菜单 · 后段两颗键 · 面板与分隔条 · 裁切层与内容壳
       types.ts               `BrowserTab`：`key` · `label` · `closable` · `icon`
-      hooks/                 `use-column-resize`（整栏分界线）· `use-split-resize`（面板分隔条）
+      hooks/                 `use-column-resize`（整栏分界线）· `use-split-resize`（面板分隔条）· `use-tab-overflow`（标签条的溢出测量）· `use-tab-drag`（标签拖动换序）
       parts/page/            `TabPage`：按目标派发内容
-      parts/tabs/            一条标签
+      parts/tabs/            标签条：一行标签与末尾的新建键 · 溢出后进菜单 · 拖动换序
       parts/item/            一项标签：图标 · 标题 · 关闭键
       parts/new-tab/         新标签页：地址入口与「打开过的东西」
       parts/web/             外部地址页（占位）
@@ -108,6 +108,9 @@ app/src/
 - **截断标题**：完整内容由本包统一 `Tooltip` 给，触发元素是覆盖整段标题的主体；被省略的那一层取 `pointer-events: none`，以避开 WebKit 对省略号元素自弹的原生提示；截断判定留 1 像素余量，并在指针进来之前算好。
 - **标签模型**：一项记为 `{ key, target, title?, icon? }`，`key` 在页的生命周期里不变，装什么由 `target` 决定（首页 · 空页 · 外部网址 · 内部路由 · 快捷方式）；`title` 与 `icon` 可由打开方给，不给时按目标推。关闭看的是这一页现在装什么：还是首页那一页时不可关，换上目标成了普通一页就能关。
 - **内容派发**：每一页都在自己的窗口里打开东西，首页也一样；提交后**在本页里换内容**，`key` 与位置不变、标签名与图形随之更新。关到一个都不剩时首页重新出现。输入解析规则见 `stores/browser/targets.ts`。
+- **溢出进菜单**：标签条不换行也不横向滚动。从前往后能放下的留在条上，放不下的进顶栏 `⌄` 菜单上段（图标加标题，点选即激活），上段与下段操作项之间只留一条分隔线。标签行始终渲染全部标签，放不下的由 `data-hidden` 收成不可见并脱离排布，宽度因此照量得到，不必另做一份测量副本；新建键在预算里被预留。**当前页一定留在条上**（激活态看得见）：它放不进可见段时替掉可见段末尾那一项，被替下来的那一项进菜单，可见段与数组次序之间因此有一次隐性的次序调整；一个都放不下时只留当前页。测量在 `hooks/use-tab-overflow.ts`，菜单上段在 `browser.tsx`。
+- **拖动换序**：标签在条上横向拖动，落点决定次序，落点处一条 2 像素插入指示线。位移不到 4 像素按点击处理，超过才进入拖动；指针捕获推迟到越过阈值之后，避免把随后的 click 重定向到整块而使点标签失效。拖动期间被拖的那一块抬到最上层跟手，其余标签**按各自宽度重新排一遍**（宽度不同的块换位后不留缝），换位后的次序在松手前先摆出来；拖动期间不做过渡、锁住文本选择，`Esc` 取消，松手提交并记本机。落点下标与让位位移都取起手时量下的一遍静止位置，否则让位挪动会反过来改下标。store 的 `move` 按移除该项之后的数组算索引（`stores/browser/tabs.ts`），交互在 `hooks/use-tab-drag.ts`。
+- **标签条不可选中**：标签标题不是可选内容，标签行常驻 `user-select: none`。WebKit 在指针按下那一刻就起选区，只靠在拖动开始后设 `user-select` 清不掉那一段高亮，所以起手时还要清一次已有选区并挡住 `selectstart`，拖动期间每帧再清一次。
 
 ## 7. 两处收放的动效
 
@@ -136,7 +139,7 @@ app/src/
 - 单元用例与组件同目录：`nav.test.tsx` · `nav.client.test.tsx` · `hooks/use-nav-resize.test.tsx` · `content.test.tsx` · `browser.test.tsx`（均在 `app/src/components/` 内）。
 - 标签集与目标解析：`app/src/stores/browser/tabs.test.ts` 与 `targets.test.ts`。
 - 浏览器用例按层拆开：`app/src/features/inbox/tests/layout.shell.browser.ts`（三栏骨架 · 导航 · 本栏收放与列头 · 换边 · 让位）· `layout.split.browser.ts`（分屏与分隔条）· `layout.exclusive.browser.ts`（上下分栏与独占）· `layout.motion.browser.ts`（动效），共用件在 `layout.helpers.ts`。
-- 组件自验：`app/src/components/browser/tests/tab.browser.ts`（标签与关闭键 · 截断提示）· `exclusive-width.browser.ts`（独占与导航收起同时成立时的栏宽）。
+- 组件自验：`app/src/components/browser/tests/tab.browser.ts`（标签与关闭键 · 截断提示）· `exclusive-width.browser.ts`（独占与导航收起同时成立时的栏宽）· `overflow.browser.ts`（溢出与菜单上段 · 当前页留在条上）· `drag.browser.ts`（拖动换序与让位预览 · 小位移按点击 · `Esc` 取消 · 关闭键上不起拖 · 拖动中锁选择）。
 
 ## 11. 不做
 

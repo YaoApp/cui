@@ -26,8 +26,6 @@ const ALLOW = new Map([
   ['app/src/components/window/', '规划中未建：08-layout-implemented.md 里的独占窗口，尚未开工'],
   ['app/src/components/dock/', '规划中未建：08-layout-implemented.md 里的悬浮入口，尚未开工'],
   ['app/src/components/modal/', '规划中未建：08-layout-implemented.md 里的弹窗，尚未开工'],
-  ['app/src/components/browser/hooks/use-tab-overflow.ts', '规划中未建：08-layout-browser-tabs.md 第 3 节的溢出测量钩子，落地时创建'],
-  ['app/src/components/browser/hooks/use-tab-drag.ts', '规划中未建：08-layout-browser-tabs.md 第 4 节的拖动钩子，落地时创建'],
   ['app/src/features/apps/', '规划中未建：08-layout-implemented.md 里的业务域，尚未开工'],
   ['app/src/features/board/', '规划中未建：08-layout-implemented.md 里的业务域，尚未开工'],
   ['app/src/features/workspace/', '规划中未建：08-layout-implemented.md 里的业务域，尚未开工'],
