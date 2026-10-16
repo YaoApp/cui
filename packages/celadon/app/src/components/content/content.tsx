@@ -1,51 +1,37 @@
 import './content.less'
 import type { ReactNode } from 'react'
 import { ScrollArea } from '@/components/base/scroll-area'
-import { ContentHead } from './parts/head'
+import { ContentHead, type HeadKey } from './parts/head'
 
 export type ContentProps = {
 	children: ReactNode
 	/** 列头标题；不传就不画列头 */
 	title?: string
-	/** 导航列是否收起：收起才展示导航操作按钮，并接管交通灯留白 */
+	/** 导航列是否收起：收起才接管交通灯留白 */
 	navCollapsed?: boolean
-	/** 窗口窄到由视口强制收起导航：切换键置灰并给出原因 */
-	navBlocked?: boolean
-	/** 标签浏览器列是否收起：收起才展示 Browser 操作按钮 */
-	browserCollapsed?: boolean
-	/** 窗口窄到放不下标签浏览器那一栏：切换键置灰并给出原因 */
-	browserBlocked?: boolean
-	onToggleNav?: () => void
-	onToggleBrowser?: () => void
+	/** 列头左端槽位的键；不传则留空 */
+	lead?: HeadKey
+	/** 列头右端槽位的键；不传则留空 */
+	trail?: HeadKey
+	/** 本栏收掉了（换边后次栏是内容区）：内容不再可达，也从无障碍树里摘掉 */
+	hidden?: boolean
 }
 
 /* 中栏：页面容器。栏宽由三栏的列轨给（让步顺序见 design/foundations.md F6），
    这一层只管最小宽与自己的滚动 —— 内容形态的其余三种等用到处再加。
-   列头（40 像素）与另外两列等高；标题与插槽都由装配层给。
+   列头（40 像素）与另外两列等高；两颗键与标题都由装配层给。
    宽度变化由列轨与 `content.less` 的过渡承担：不做尺寸投影，正文就不会被横向压缩。 */
 export function Content({
 	children,
 	title,
 	navCollapsed = false,
-	navBlocked = false,
-	browserCollapsed = false,
-	browserBlocked = false,
-	onToggleNav = () => {},
-	onToggleBrowser = () => {}
+	lead,
+	trail,
+	hidden = false
 }: ContentProps) {
 	return (
-		<main className='content'>
-			{title ? (
-				<ContentHead
-					title={title}
-					navCollapsed={navCollapsed}
-					navBlocked={navBlocked}
-					browserCollapsed={browserCollapsed}
-					browserBlocked={browserBlocked}
-					onToggleNav={onToggleNav}
-					onToggleBrowser={onToggleBrowser}
-				/>
-			) : null}
+		<main className='content' aria-hidden={hidden || undefined} inert={hidden || undefined}>
+			{title ? <ContentHead title={title} navCollapsed={navCollapsed} lead={lead} trail={trail} /> : null}
 			<ScrollArea className='content__scroll' size='medium' persistent>
 				{children}
 			</ScrollArea>

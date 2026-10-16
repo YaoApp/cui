@@ -313,10 +313,60 @@
 	gap: var(--spacing-4);
 	/* 与内容列头同一档内距；键是 small 档 24 高，40 高的栏里上下正好各留 8 */
 	padding: var(--spacing-8);
+	/* 本栏在左且导航区收起、平台有原生交通灯时，左端让出交通灯留白：
+	   顶栏左端此时就是窗口左缘，与内容列头在正常态下承担的是同一件事 */
+	padding-inline-start: calc(var(--spacing-8) + var(--bar-inset, 0px));
 	/* 顶栏不加下边线：与窗口顶带连成一片，标签块自己承担分档 */
 	/* 顶带：拖窗口与双击最大化落在这条带子里，因此不参与文本选择，指针保持箭头 */
 	cursor: default;
 	user-select: none;
+}
+
+/* 顶栏两侧的键槽：镜像态装导航找回键（标签条之前）与次栏找回键（收放键那一格）。
+   槽位展示时占 32，不展示时收成 0，标签区因此自然让出宽度；键的淡入淡出与内容列头两颗键同一套做法，
+   面板开合动画期间界面上不出现第二颗键。 */
+.browser__slot {
+	display: flex;
+	flex: none;
+	align-items: center;
+	justify-content: center;
+	inline-size: var(--spacing-32);
+	transition: inline-size var(--duration-base) var(--easing-standard);
+}
+
+.browser__slot[data-hidden='true'] {
+	inline-size: 0;
+	pointer-events: none;
+}
+
+.browser__slot-key,
+.browser__slot-key-wrap {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.browser__slot[data-hidden='true'] .browser__slot-key {
+	opacity: 0;
+	visibility: hidden;
+	transition:
+		opacity var(--duration-fast) var(--easing-standard),
+		visibility 0s linear var(--duration-fast);
+}
+
+.browser__slot:not([data-hidden='true']) .browser__slot-key {
+	animation: celadon-bar-key-in var(--duration-fast) var(--easing-standard)
+		calc(var(--duration-base) + var(--duration-fast)) both;
+}
+
+@keyframes celadon-bar-key-in {
+	from {
+		opacity: 0;
+	}
+
+	to {
+		opacity: 1;
+	}
 }
 
 /* 标签与 ＋ 号抬到拖动层之上，点击照旧 */
@@ -483,8 +533,10 @@
 	transform: scale(1.2);
 }
 
+/* 悬停、或键盘焦点落到标签主体上时露出关闭键。这里用兄弟选择器而不是 `:has()`：
+   `:has()` 在指针状态变化时要向上重算，WebKit 上会带出额外的重栅格化（见本文件悬停两档底的注释） */
 .browser__tab:hover .browser__tab-close,
-.browser__tab:has(:focus-visible) .browser__tab-close {
+.browser__tab-main:focus-visible ~ .browser__tab-close {
 	visibility: visible;
 }
 

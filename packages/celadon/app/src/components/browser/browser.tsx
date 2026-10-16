@@ -1,5 +1,5 @@
 import './browser.less'
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useState, type CSSProperties, type ReactNode } from 'react'
 import { Menu as BaseMenu } from '@base-ui/react/menu'
 import { Button } from '@/components/base/button'
 import { Icon } from '@/components/base/icon'
@@ -14,6 +14,13 @@ import { useSplitResize } from './hooks/use-split-resize'
 import { useColumnResize } from './hooks/use-column-resize'
 
 export type { BrowserTab } from './types'
+
+/** 主栏顶栏两侧的键：装配层给状态与动作，图形与文案由这一层按本栏来画（后两栏换边后本栏是主栏时才用） */
+export type BarKey = {
+	visible: boolean
+	blocked?: boolean
+	onClick: () => void
+}
 
 export type BrowserProps = {
   tabs: BrowserTab[]
@@ -46,6 +53,14 @@ export type BrowserProps = {
   onCloseAll?: () => void
   onMove: () => void
   onCollapse: () => void
+  /** 这一栏是主栏：主栏不画收起键，改画两侧找回键 */
+  primary?: boolean
+  /** 顶栏前段：导航找回键，放在标签条之前，只在主栏传 */
+  navKey?: BarKey
+  /** 本栏在左且导航区收起、平台有原生交通灯：顶栏左端让出交通灯留白（macOS 壳） */
+  barInset?: boolean
+  /** 顶栏后段：次栏的找回键，占用收起键原来的位置；`collapsed` 决定文案取展开还是收起 */
+  secondaryKey?: { collapsed: boolean; blocked?: boolean; onClick: () => void }
   /** 第一个面板的当前页：由装配层按标签的内容决定 */
   children: ReactNode
   /** 第二个面板的当前页；只有分屏时才渲染 */
@@ -84,6 +99,10 @@ export function Browser({
   onCloseAll,
   onMove,
   onCollapse,
+  primary = false,
+  navKey,
+  barInset = false,
+  secondaryKey,
   children,
   secondary = null,
   secondaryLabel = '',
@@ -164,11 +183,50 @@ export function Browser({
       {/* 顶栏：空白处点右键开同一个下拉菜单（标签上的右键留给标签自己的菜单，第 13 条） */}
       <div
         className="browser__bar"
+        style={barInset ? ({ "--bar-inset": "var(--traffic-lights-width)" } as CSSProperties) : undefined}
         onContextMenu={(event) => {
           event.preventDefault()
           setMenuOpen(true)
         }}
       >
+        {/* 前段槽位：镜像态装导航找回键，在标签条之前。它落在裁切容器与标签行之外，
+            因此不参与标签条的溢出预算，也不会被当成拖动起手 */}
+        {navKey ? (
+          <span className="browser__slot browser__slot--nav" data-hidden={!navKey.visible}>
+            <span className="browser__slot-key">
+              <Tooltip
+                label={
+                  navKey.blocked
+                    ? t('shell.navigation.action.blocked')
+                    : t('shell.navigation.action.expand')
+                }
+                side="bottom"
+              >
+                {/* 提示挂在外层 span 上：禁用态的按钮收不到指针事件，气泡否则不会出现 */}
+                <span
+                  className="browser__slot-key-wrap"
+                  title={navKey.blocked ? t('shell.navigation.action.blocked') : undefined}
+                >
+                  <Button
+                    className="browser__nav"
+                    iconOnly
+                    variant="plain"
+                    size="small"
+                    disabled={navKey.blocked}
+                    aria-label={
+                      navKey.blocked
+                        ? t('shell.navigation.action.blocked')
+                        : t('shell.navigation.action.expand')
+                    }
+                    onClick={navKey.onClick}
+                  >
+                    <Icon name="i-panel-left" size={16} />
+                  </Button>
+                </span>
+              </Tooltip>
+            </span>
+          </span>
+        ) : null}
         <BrowserTabs
           tabs={tabs}
           activeKey={activeKey}
@@ -327,20 +385,64 @@ export function Browser({
             <Icon name={exclusive ? 'i-minimize-2' : 'i-maximize'} size={16} />
           </Button>
         </Tooltip>
-        <Tooltip label={t('shell.browser.action.collapse')} side="bottom">
-          <Button
-            className="browser__close"
-            iconOnly
-            variant="plain"
-            size="small"
-            aria-label={t('shell.browser.action.collapse')}
-            onClick={onCollapse}
-          >
-            <Icon name={side === 'left' ? 'i-panel-left' : 'i-panel-right'} size={16} />
-          </Button>
-        </Tooltip>
+        {/* 本栏是次栏时留收起键；是主栏时这一格装次栏找回键（镜像态），主栏不画收起键 */}
+        {primary ? null : (
+          <Tooltip label={t('shell.browser.action.collapse')} side="bottom">
+            <Button
+              className="browser__close"
+              iconOnly
+              variant="plain"
+              size="small"
+              aria-label={t('shell.browser.action.collapse')}
+              onClick={onCollapse}
+            >
+              <Icon name={side === 'left' ? 'i-panel-left' : 'i-panel-right'} size={16} />
+            </Button>
+          </Tooltip>
+        )}
+        {/* 后段槽位：镜像态装次栏找回键；次栏还在时这一格空着（它的收起键在次栏自己的列头里） */}
+        {secondaryKey ? (
+          <span className="browser__slot browser__slot--trail" data-hidden={!secondaryKey.collapsed}>
+            <span className="browser__slot-key">
+              <Tooltip
+                label={
+                  secondaryKey.blocked
+                    ? t('shell.browser.action.blocked')
+                    : secondaryKey.collapsed
+                      ? t('shell.browser.action.expand')
+                      : t('shell.browser.action.collapse')
+                }
+                side="bottom"
+              >
+                {/* 提示挂在外层 span 上，与内容列头同一套；禁用时无障碍名也换成原因 */}
+                <span
+                  className="browser__slot-key-wrap"
+                  title={secondaryKey.blocked ? t('shell.browser.action.blocked') : undefined}
+                >
+                  <Button
+                    className="browser__secondary-key"
+                    iconOnly
+                    variant="plain"
+                    size="small"
+                    disabled={secondaryKey.blocked}
+                    aria-label={
+                      secondaryKey.blocked
+                        ? t('shell.browser.action.blocked')
+                        : secondaryKey.collapsed
+                          ? t('shell.browser.action.expand')
+                          : t('shell.browser.action.collapse')
+                    }
+                    aria-expanded={!secondaryKey.collapsed}
+                    onClick={secondaryKey.onClick}
+                  >
+                    <Icon name="i-panel-right" size={16} />
+                  </Button>
+                </span>
+              </Tooltip>
+            </span>
+          </span>
+        ) : null}
       </div>
-
       {/* 分屏：一层，左右或上下两个面板；单面板时只渲染 children，结构不变。
           第一面板的比例由分隔条拖动给出（跟手，见 hooks/use-split-resize）。 */}
       <div

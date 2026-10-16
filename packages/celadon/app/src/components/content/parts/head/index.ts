@@ -1,2 +1,2 @@
 export { ContentHead } from './head'
-export type { ContentHeadProps } from './head'
+export type { ContentHeadProps, HeadKey } from './head'

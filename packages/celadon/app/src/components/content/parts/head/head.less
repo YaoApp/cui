@@ -7,7 +7,7 @@
 	align-items: center;
 	gap: var(--spacing-8);
 	block-size: var(--row-height);
-	/* 左内距含交通灯留白：留白由组件按状态以内联自定义属性给出（--head-inset），
+	/* 左内距含交通灯留白：留白由列头自己的数据属性按平台与导航状态决定（见文件末尾两条规则），
 	   收起且平台有原生交通灯时为留白宽度，其余为 0。写成两条值的简写以通过样式检查 */
 	padding-inline: calc(var(--spacing-12) + var(--head-inset, 0px)) var(--spacing-12);
 	transition: padding-inline-start var(--duration-base) var(--easing-decelerate);
@@ -95,6 +95,20 @@
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
+}
+
+/* macOS 且导航区收起：这一行接管交通灯留白。平台与导航状态由列头自己的数据属性给，
+   写在这里而不是内联样式里，镜像态那条置零才压得住（内联样式权重最高，会盖掉样式表） */
+.content__head[data-controls='native'][data-nav='collapsed'] {
+	--head-inset: var(--traffic-lights-width);
+}
+
+/* 换边后本栏是次栏：交通灯留白归窗口最左那一栏管，那一栏此时是标签浏览器，所以这里置零。
+   列头与正文照常按列宽布局：次栏的左缘就是随收放移动的那条边界，栏内内容因此随它平移，
+   这是镜像几何的直接结果。让它不动的做法只有把栏内内容钉死或整体平移，
+   两者都会让正文脱离正常布局与滚动，不做。 */
+.layout[data-mirror] .content__head[data-controls] {
+	--head-inset: 0px;
 }
 
 .content__head-trailing {

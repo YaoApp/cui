@@ -110,6 +110,22 @@ export const useTabsStore = create<TabsState>()(
 					if (target.kind === 'blank') return
 					const { tabs } = get()
 					if (!tabs.some((tab) => tab.key === key)) return
+					/* 同一目标已经在别的页上：不并列第二页，把这一页收掉并切到那一页，
+					   与「同一个东西只复用一页」的规矩一致 */
+					const existing = tabs.find((tab) => tab.key !== key && sameTarget(tab.target, target))
+					if (existing) {
+						const kept = tabs.filter((tab) => tab.key !== key)
+						set(
+							{
+								tabs: kept,
+								activeKey: existing.key,
+								recent: remember(get().recent, target)
+							},
+							false,
+							'browser/navigate'
+						)
+						return
+					}
 					/* 每一页都在自己的窗口里换内容，首页也是这样：首页被填上目标之后就是那一页，
 					   再想回到新标签页，靠关掉所有页之后重新出现的首页 */
 					set(

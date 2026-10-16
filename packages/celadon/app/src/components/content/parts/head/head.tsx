@@ -1,106 +1,93 @@
-import type { CSSProperties, ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { Button, Icon } from '@/components/base'
 import { MotionPanel } from '@/components/base/motion'
 import { Tooltip } from '@/components/base/tooltip'
-import { useTranslation } from '@/platform/i18n'
 import { useWindowChrome } from '@/platform/client'
+import type { IconId } from '@/platform/icons'
 import './head.less'
+
+/** 列头两侧插槽里装的一颗键。装什么、显不显、禁不禁用都由装配层按角色算好，列头只负责画。 */
+export type HeadKey = {
+	/** 图形 */
+	icon: IconId
+	/** 这一栏当前是展开还是收起，决定 aria-expanded */
+	expanded: boolean
+	/** 不显示时槽位收成零宽，键本身淡出（沿用既有做法） */
+	visible: boolean
+	/** 受平台或窗口限制：置灰并说明原因，不出现按下去没有反应的键 */
+	blocked?: boolean
+	/** 无障碍名与气泡文案，由装配层翻译好 */
+	label: string
+	/** 置灰时的原因文案 */
+	blockedLabel?: string
+	onClick: () => void
+}
 
 export type ContentHeadProps = {
 	/** 这一页的标题；不传只画两侧插槽 */
 	title?: string
-	/** 导航列是否收起：收起才展示导航操作按钮，并接管交通灯留白 */
+	/** 导航列是否收起：收起才接管交通灯留白 */
 	navCollapsed: boolean
-	/** 窗口窄到由视口强制收起导航：切换键置灰并给出原因，按下去不会有任何变化 */
-	navBlocked?: boolean
-	/** 标签浏览器列是否收起：决定切换键的文案与 aria-expanded */
-	browserCollapsed: boolean
-	/** 窗口窄到放不下标签浏览器那一栏：切换键置灰并给出原因，按下去不会有任何变化 */
-	browserBlocked?: boolean
-	onToggleNav: () => void
-	onToggleBrowser: () => void
-	/** 右侧插槽：与当前页有关的动作，放在 Browser 操作按钮之前 */
+	/** 左端槽位：导航找回键；不传则留空 */
+	lead?: HeadKey
+	/** 右端槽位：次栏的收起键或找回键；不传则留空 */
+	trail?: HeadKey
+	/** 右侧插槽：与当前页有关的动作，放在次栏操作键之前 */
 	trailing?: ReactNode
 }
 
 /* 内容列的标题栏（40 像素，与另两列列头等高）。
-   三个区域固定：左导航操作按钮 · 中标题 · 右 Browser 操作按钮。
-   导航键按那一列的状态展示（列展开时不展示），标签浏览器键恒在；不展示用隐藏实现，占位保留，标题因此不跳。
-   它不认识业务：标题与右侧插槽都由装配层给。 */
-export function ContentHead({
-	title,
-	navCollapsed,
-	navBlocked = false,
-	browserCollapsed,
-	browserBlocked = false,
-	onToggleNav,
-	onToggleBrowser,
-	trailing
-}: ContentHeadProps) {
-	const { t } = useTranslation()
+   三个区域固定：左槽位 · 中标题 · 右槽位与业务插槽。
+   两颗键的显示与文案由装配层按主栏 / 次栏的角色给：主栏是中间那一栏，次栏是离导航最远的那一栏，
+   这一层不认识角色，也不认识业务。 */
+export function ContentHead({ title, navCollapsed, lead, trail, trailing }: ContentHeadProps) {
 	const chrome = useWindowChrome()
-	const navLabel = navCollapsed ? t('shell.navigation.action.expand') : t('shell.navigation.action.collapse')
-	const navTitle = navBlocked ? t('shell.navigation.action.blocked') : navLabel
-	const browserLabel = browserCollapsed ? t('shell.browser.action.expand') : t('shell.browser.action.collapse')
-	const browserTitle = browserBlocked ? t('shell.browser.action.blocked') : browserLabel
 	return (
-		/* 列头随列平移，不做显隐切换：尺寸变化的投影不允许缩到标题上 */
+		/* 列头随列平移，不做显隐切换：尺寸变化的投影不允许缩到标题上。
+		   交通灯留白只由 CSS 按平台与导航状态给（写在内联样式里会压过镜像态的置零规则） */
 		<MotionPanel
 			as='header'
 			position
 			className='content__head'
 			data-controls={chrome.controls}
 			data-nav={navCollapsed ? 'collapsed' : 'expanded'}
-			style={
-				{
-					/* macOS 且导航收起：这一行接管交通灯留白 */
-					'--head-inset':
-						navCollapsed && chrome.controls === 'native' ? 'var(--traffic-lights-width)' : '0px'
-				} as CSSProperties
-			}
 		>
-			{/* Windows 的收放键在自绘标题栏里，这一栏不重复展示打开按钮；
-			    窗口窄到由视口强制收起时置灰并给出原因，不出现按下去没有反应的键 */}
-			<span className='content__head-slot' data-hidden={!navCollapsed || chrome.controls === 'own'}>
-				<Tooltip label={navTitle} side='bottom'>
-					<span className='content__head-key-wrap' title={navBlocked ? navTitle : undefined}>
-						<Button
-							className='content__head-key'
-							iconOnly
-							variant='plain'
-							size='small'
-							disabled={navBlocked}
-							aria-label={navTitle}
-							aria-expanded={!navCollapsed}
-							onClick={onToggleNav}
-						>
-							<Icon name='i-panel-left' size={16} />
-						</Button>
-					</span>
-				</Tooltip>
-			</span>
+			{/* Windows 的收放键在自绘标题栏里，装配层因此不传导航键；窗口窄到由视口强制收起时置灰并给出原因 */}
+			{lead ? <HeadSlot slot={lead} trail={false} /> : null}
 			{title ? <h1 className='content__title'>{title}</h1> : null}
 			{trailing ? <span className='content__head-trailing'>{trailing}</span> : null}
-			{/* 本栏打开时不留键（顶栏有关闭键），收起后出现，用于把本栏找回来；窗口放不下时置灰并给出原因。
-			    提示挂在外层 span 上，因为禁用态的按钮收不到指针事件，气泡否则不会出现 */}
-			<span className='content__head-slot content__head-slot--browser' data-hidden={!browserCollapsed}>
-				<Tooltip label={browserTitle} side='bottom'>
-					<span className='content__head-key-wrap' title={browserBlocked ? browserTitle : undefined}>
-						<Button
-							className='content__head-key content__head-key--browser'
-							iconOnly
-							variant='plain'
-							size='small'
-							disabled={browserBlocked}
-							aria-label={browserTitle}
-							aria-expanded={!browserCollapsed}
-							onClick={onToggleBrowser}
-						>
-							<Icon name='i-panel-right' size={16} />
-						</Button>
-					</span>
-				</Tooltip>
-			</span>
+			{/* 提示挂在外层 span 上，因为禁用态的按钮收不到指针事件，气泡否则不会出现 */}
+			{trail ? <HeadSlot slot={trail} trail /> : null}
 		</MotionPanel>
+	)
+}
+
+/* 一颗键：槽位宽度由 CSS 给，不显示时收成零宽；键的淡入淡出也在 CSS 里 */
+function HeadSlot({ slot, trail }: { slot: HeadKey; trail: boolean }) {
+	const text = slot.blocked ? (slot.blockedLabel ?? slot.label) : slot.label
+	return (
+		<span
+			className={trail ? 'content__head-slot content__head-slot--browser' : 'content__head-slot'}
+			data-hidden={!slot.visible}
+		>
+			<Tooltip label={text} side='bottom'>
+				<span className='content__head-key-wrap' title={slot.blocked ? text : undefined}>
+					<Button
+						className={
+							trail ? 'content__head-key content__head-key--browser' : 'content__head-key'
+						}
+						iconOnly
+						variant='plain'
+						size='small'
+						disabled={slot.blocked}
+						aria-label={text}
+						aria-expanded={slot.expanded}
+						onClick={slot.onClick}
+					>
+						<Icon name={slot.icon} size={16} />
+					</Button>
+				</span>
+			</Tooltip>
+		</span>
 	)
 }
