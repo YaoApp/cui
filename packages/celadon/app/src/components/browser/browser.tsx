@@ -288,7 +288,8 @@ export function Browser({
                   disabled={otherClosableCount === 0}
                   onClick={() => onCloseOthers?.(tabMenu?.key ?? '')}
                 >
-                  <Icon name="i-act-close" size={16} />
+                  {/* 三项各用可区分的图形：关一个用叉，收成一页用减号，全清用清空 */}
+                  <Icon name="i-minus" size={16} />
                   <span>{t('shell.browser.tab.closeOthers')}</span>
                 </BaseMenu.Item>
                 <BaseMenu.Item
@@ -296,7 +297,7 @@ export function Browser({
                   disabled={closableCount === 0}
                   onClick={() => onCloseAll?.()}
                 >
-                  <Icon name="i-act-close" size={16} />
+                  <Icon name="i-act-trash" size={16} />
                   <span>{t('shell.browser.tab.closeAll')}</span>
                 </BaseMenu.Item>
               </BaseMenu.Popup>

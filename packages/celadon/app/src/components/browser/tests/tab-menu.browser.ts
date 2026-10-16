@@ -61,6 +61,12 @@ test('lists the tab actions and greys the ones that cannot run', async ({ page }
 	await openMenuOn(page, 'a.com')
 	const menu = page.locator('.browser__menu--tab')
 	await expect(menu.getByRole('menuitem')).toHaveCount(4)
+	/* 四项各用可区分的图形：三个关闭项不再共用同一个叉 */
+	const icons = await menu
+		.locator('svg use')
+		.evaluateAll((nodes) => nodes.map((node) => node.getAttribute('href') ?? ''))
+	expect(icons).toHaveLength(4)
+	expect(new Set(icons).size).toBe(4)
 	await expect(menu.locator('.browser__menu-separator')).toHaveCount(1)
 	await expect(page.getByRole('menuitem', { name: '刷新这个标签' })).toBeEnabled()
 	await expect(page.getByRole('menuitem', { name: '关闭其他标签' })).toBeDisabled()
