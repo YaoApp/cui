@@ -1,4 +1,12 @@
-import { useEffect, useRef, useState, type MouseEvent, type PointerEvent, type RefObject } from 'react'
+import {
+	useEffect,
+	useLayoutEffect,
+	useRef,
+	useState,
+	type MouseEvent,
+	type PointerEvent,
+	type RefObject
+} from 'react'
 import type { BrowserTab } from '../types'
 
 /** 位移不到 4 像素算点击，超过算拖动，两者互不误触 */
@@ -126,14 +134,30 @@ export function useTabDrag(options: {
 		windowUp.current = null
 	}
 
+	/** 清掉拖动期间写在标签上的位移与层级 */
+	const clearOffsets = () => {
+		const row = rowRef.current
+		if (!row) return
+		for (const element of row.querySelectorAll<HTMLElement>('.browser__tab')) {
+			element.style.transform = ''
+			element.style.zIndex = ''
+		}
+	}
+
+	/* 提交换序时不能立刻清位移：那样会先按旧次序画一帧（各块回到原位），
+	   等新次序渲染出来再各就各位，看上去所有标签一起闪一下。
+	   留到新次序已经进 DOM、下一次布局提交之前再清，清完才绘制，中间没有可见的一帧。 */
+	useLayoutEffect(() => {
+		clearOffsets()
+	}, [options.tabs])
+
 	const stop = (commit: boolean) => {
 		const current = gesture.current
 		if (!current) return
 		/* 落点要在清掉 gesture 之前换算 */
 		const to = toArrayIndex(stateRef.current?.index ?? 0)
-		current.block.style.transform = ''
-		current.block.style.zIndex = ''
-		for (const slot of current.slots) slot.element.style.transform = ''
+		/* 取消是回到原位，立刻清；提交换序留给上面那个布局时机 */
+		if (!commit) clearOffsets()
 		try {
 			current.block.releasePointerCapture(current.pointerId)
 		} catch {

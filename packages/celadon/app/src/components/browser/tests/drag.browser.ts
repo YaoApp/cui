@@ -190,3 +190,45 @@ test('keeps the strip when a tab already at the front is dropped at the front', 
 		'beta.example.com/two'
 	])
 })
+
+test('does not flash the strip back to the old order while the drop lands', async ({ page }) => {
+	await page.setViewportSize({ width: 1600, height: 900 })
+	await markSignedIn(page)
+	await page.goto('/app/inbox')
+	await openTab(page, 'a.com')
+	await openTab(page, 'b.com')
+
+	const from = await boxOf(page, 'b.com')
+	const home = await boxOf(page, '首页')
+	await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2)
+	await page.mouse.down()
+	await page.mouse.move(home.x + 4, from.y + from.height / 2, { steps: 8 })
+
+	/* 拖动已起、松手之前起录：逐帧记下条上各块的次序与内联位移，一直录到整理完 */
+	await page.evaluate(() => {
+		const samples: { order: string; cleared: boolean }[] = []
+		;(window as unknown as { __frames: typeof samples }).__frames = samples
+		const tick = () => {
+			const row = document.querySelector('.browser__tabs-row')
+			if (row) {
+				const tabs = [...row.querySelectorAll<HTMLElement>('.browser__tab')]
+				samples.push({
+					order: tabs.map((element) => element.dataset.tabKey).join(','),
+					cleared: tabs.every((element) => element.style.transform === '')
+				})
+			}
+			if (samples.length < 120) requestAnimationFrame(tick)
+		}
+		requestAnimationFrame(tick)
+	})
+
+	await page.mouse.up()
+	await page.waitForTimeout(600)
+	const bad = await page.evaluate(() => {
+		const samples = (window as unknown as { __frames: { order: string; cleared: boolean }[] }).__frames
+		const last = samples[samples.length - 1]
+		/* 松手之后不该再出现「旧次序 + 位移已清」的一帧：那正是各块先跳回原位、再跳到新位置的一闪 */
+		return samples.filter((sample) => sample.order !== last.order && sample.cleared).length
+	})
+	expect(bad).toBe(0)
+})
