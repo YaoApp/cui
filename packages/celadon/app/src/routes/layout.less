@@ -78,10 +78,23 @@
 }
 
 /* 镜像态里外壳始终按本栏当前宽度画：主栏在收放全程都在变宽，外壳若留着自己的过渡会追不上，
-   若只在收起态改成 100% 又会在展开那一帧因为过渡属性刚换回来而跳一下 */
-.layout[data-mirror] .browser__shell {
+   若只在收起态改成 100% 又会在展开那一帧因为过渡属性刚换回来而跳一下。
+   选择子要压过 `browser.less` 里分屏那两条同权重的规则，否则分屏时外壳会停在定宽档。 */
+.layout[data-mirror] > .browser .browser__shell {
   inline-size: 100%;
   transition: none;
+}
+
+/* 镜像态里内容区的下限也走同一条过渡：展开时它从 0 长回 --center-min，
+   主栏的宽度才是连续的（下限一步跳回 400，主栏第一帧就被夹到 828，看着是直接到位）。
+   主栏原来那条「最多到 100% 减导航最小与内容最小」的上限在镜像态整条放开：
+   它要保的正是内容区的那条下限，而内容区自己已经带 --center-min，留着它只会在展开首帧夹住主栏。 */
+.layout[data-mirror] > .content {
+  transition: min-inline-size var(--duration-base) var(--easing-decelerate);
+}
+
+.layout[data-mirror] > .browser {
+  max-inline-size: none;
 }
 
 /* 面板独占整扇窗口：导航区与内容区让位，标签浏览器占满（见 design/main-shell.md §七）。

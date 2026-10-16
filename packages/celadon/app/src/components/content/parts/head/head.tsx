@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { Button, Icon } from '@/components/base'
 import { MotionPanel } from '@/components/base/motion'
 import { Tooltip } from '@/components/base/tooltip'
@@ -43,20 +43,14 @@ export type ContentHeadProps = {
 export function ContentHead({ title, navCollapsed, lead, trail, trailing }: ContentHeadProps) {
 	const chrome = useWindowChrome()
 	return (
-		/* 列头随列平移，不做显隐切换：尺寸变化的投影不允许缩到标题上 */
+		/* 列头随列平移，不做显隐切换：尺寸变化的投影不允许缩到标题上。
+		   交通灯留白只由 CSS 按平台与导航状态给（写在内联样式里会压过镜像态的置零规则） */
 		<MotionPanel
 			as='header'
 			position
 			className='content__head'
 			data-controls={chrome.controls}
 			data-nav={navCollapsed ? 'collapsed' : 'expanded'}
-			style={
-				{
-					/* macOS 且导航收起：这一行接管交通灯留白 */
-					'--head-inset':
-						navCollapsed && chrome.controls === 'native' ? 'var(--traffic-lights-width)' : '0px'
-				} as CSSProperties
-			}
 		>
 			{/* Windows 的收放键在自绘标题栏里，装配层因此不传导航键；窗口窄到由视口强制收起时置灰并给出原因 */}
 			{lead ? <HeadSlot slot={lead} trail={false} /> : null}
