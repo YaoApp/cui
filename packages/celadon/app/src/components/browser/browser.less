@@ -336,6 +336,9 @@
 	align-items: center;
 	gap: var(--spacing-4);
 	white-space: nowrap;
+	/* 标签标题不是可选内容：不锁的话，指针按下再移动会先选中一段文字，
+	   拖动时那一段高亮跟着走（真机上看得很清楚），之后再设 user-select 也清不掉 */
+	user-select: none;
 }
 
 /* 拖动换序期间：本行与栏内都不做过渡、也锁住文本选择；被拖的那一块跟手，其余标签让位

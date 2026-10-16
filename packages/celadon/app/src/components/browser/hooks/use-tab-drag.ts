@@ -9,7 +9,8 @@ const blockSelect = (event: Event) => event.preventDefault()
 
 type DragState = { key: string; index: number }
 
-type RestRect = { element: HTMLElement; left: number; right: number }
+/** 起手时量下的一个可见标签：元素、静止时的左缘与宽度 */
+type Slot = { element: HTMLElement; left: number; width: number }
 
 export type TabDragResult = {
 	/** 是否正在拖动：标签行据此关掉行内过渡、锁住文本选择 */
@@ -24,7 +25,8 @@ export type TabDragResult = {
 }
 
 /* 标签拖动换序：按下起手、超过阈值才进入拖动、按指针位置算插入下标、松手提交。
-   拖动期间被拖的那一块跟手，其余可见标签**按落点让位**，提前把换位后的次序摆出来，
+   拖动期间被拖的那一块跟手，其余可见标签**按宽度重新排一遍**，提前把换位后的次序摆出来
+   （宽度不同的标签换位后若只按槽位平移会留下空隙，所以按每块自己的宽度累加目标左缘），
    落点另有一条插入指示线；位移一律用 transform 表达，不改布局、不重建节点。
 
    两个量都基于起手时量下的一遍静止位置：让位已经把元素挪开，若再按挪开后的位置算下标，
@@ -43,9 +45,10 @@ export function useTabDrag(options: {
 		pointerId: number
 		block: HTMLElement
 		moved: boolean
-		rests: RestRect[]
-		step: number
+		slots: Slot[]
 		draggedIndex: number
+		gap: number
+		targetLeft: number
 	} | null>(null)
 	const stateRef = useRef<DragState | null>(null)
 	stateRef.current = state
@@ -56,17 +59,35 @@ export function useTabDrag(options: {
 			(element) => element.dataset.tabKey
 		)
 
-	/** 让位：把被让开的那一段各挪一档，露出被拖那一块要去的位置 */
-	const shift = (index: number) => {
+	/** 指针落在第几个可见标签的中点之后，就把插入下标算到那里（被拖的那一块不算） */
+	const indexFor = (clientX: number) => {
+		const current = gesture.current
+		if (!current) return 0
+		let index = 0
+		current.slots.forEach((slot, position) => {
+			if (position === current.draggedIndex) return
+			if (clientX > slot.left + slot.width / 2) index += 1
+		})
+		return index
+	}
+
+	/** 让位：按目标次序把其余标签按各自宽度重新排一遍，露出被拖那块要落的位置 */
+	const pack = (index: number) => {
 		const current = gesture.current
 		if (!current) return
-		const { rests, step, draggedIndex } = current
-		rests.forEach((rest, position) => {
-			let offset = 0
-			if (draggedIndex < index && position >= draggedIndex && position < index) offset = -step
-			if (draggedIndex > index && position >= index && position < draggedIndex) offset = step
-			rest.element.style.transform = offset === 0 ? '' : `translateX(${offset}px)`
-		})
+		const { slots, draggedIndex, gap } = current
+		const dragged = slots[draggedIndex]
+		const rests = slots.filter((_, position) => position !== draggedIndex)
+		const order = [...rests.slice(0, index), dragged, ...rests.slice(index)]
+		let cursor = slots[0].left
+		for (const slot of order) {
+			if (slot.element === current.block) {
+				current.targetLeft = cursor - slots[0].left
+			} else {
+				slot.element.style.transform = `translateX(${Math.round(cursor - slot.left)}px)`
+			}
+			cursor += slot.width + gap
+		}
 	}
 
 	const stop = (commit: boolean) => {
@@ -74,7 +95,7 @@ export function useTabDrag(options: {
 		if (!current) return
 		current.block.style.transform = ''
 		current.block.style.zIndex = ''
-		for (const rest of current.rests) rest.element.style.transform = ''
+		for (const slot of current.slots) slot.element.style.transform = ''
 		try {
 			current.block.releasePointerCapture(current.pointerId)
 		} catch {
@@ -109,23 +130,21 @@ export function useTabDrag(options: {
 		const items = visibleItems()
 		const draggedIndex = items.indexOf(block)
 		if (draggedIndex < 0) return
-		const rests: RestRect[] = items
-			.filter((element) => element !== block)
-			.map((element) => {
-				const box = element.getBoundingClientRect()
-				return { element, left: box.left, right: box.right }
-			})
-		const box = block.getBoundingClientRect()
-		const gap = Math.max(box.left - (rests[0]?.right ?? box.left), 0)
+		const slots: Slot[] = items.map((element) => {
+			const box = element.getBoundingClientRect()
+			return { element, left: box.left, width: box.width }
+		})
+		const gap = slots.length > 1 ? Math.max(slots[1].left - (slots[0].left + slots[0].width), 0) : 0
 		gesture.current = {
 			key: block.dataset.tabKey,
 			startX: event.clientX,
 			pointerId: event.pointerId,
 			block,
 			moved: false,
-			rests,
-			step: Math.round(box.width + gap),
-			draggedIndex
+			slots,
+			draggedIndex,
+			gap,
+			targetLeft: slots[draggedIndex].left - slots[0].left
 		}
 		/* 一按下就锁住文本选择并清掉已有选区：等越过阈值再锁，浏览器已经先选中了一段文字，
 		   之后再设 user-select 也清不掉那一段高亮（真机上看得很清楚）。selectstart 也一并挡住，
@@ -148,7 +167,6 @@ export function useTabDrag(options: {
 			current.moved = true
 			suppress.current = true
 			current.block.style.zIndex = '2'
-			document.body.style.userSelect = 'none'
 			try {
 				current.block.setPointerCapture(event.pointerId)
 			} catch {
@@ -156,14 +174,12 @@ export function useTabDrag(options: {
 			}
 		}
 		current.block.style.transform = `translateX(${offset}px)`
+		/* WebKit 会一路把选区续下去，user-select 与 selectstart 都拦不住，每帧清一次 */
+		window.getSelection()?.removeAllRanges()
 
-		/* 下标只按起手时的静止位置算，让位挪动不影响它 */
-		let index = 0
-		for (const rest of current.rests) {
-			if (event.clientX > (rest.left + rest.right) / 2) index += 1
-		}
+		const index = indexFor(event.clientX)
 		if (stateRef.current?.index !== index) {
-			shift(index)
+			pack(index)
 			setState({ key: current.key, index })
 		}
 	}
@@ -179,22 +195,9 @@ export function useTabDrag(options: {
 		event.stopPropagation()
 	}
 
-	/** 指示线的位置：第 index 个静止位置的左侧，或末尾那一项的右侧 */
-	const indicatorFor = (index: number) => {
-		const current = gesture.current
-		const row = rowRef.current
-		if (!current || !row) return 0
-		const rowLeft = row.getBoundingClientRect().left
-		if (current.rests.length === 0) return 0
-		if (index <= 0) return current.rests[0].left - rowLeft - 2
-		if (index >= current.rests.length)
-			return current.rests[current.rests.length - 1].right - rowLeft + 2
-		return (current.rests[index - 1].right + current.rests[index].left) / 2 - rowLeft
-	}
-
 	return {
 		dragging: state !== null,
-		indicator: state ? indicatorFor(state.index) : null,
+		indicator: state ? gesture.current?.targetLeft ?? null : null,
 		onPointerDown,
 		onPointerMove,
 		onPointerUp,
