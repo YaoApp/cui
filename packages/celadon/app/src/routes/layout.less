@@ -87,13 +87,15 @@
 
 /* 镜像态里内容区的下限也走同一条过渡：展开时它从 0 长回 --center-min，
    主栏的宽度才是连续的（下限一步跳回 400，主栏第一帧就被夹到 828，看着是直接到位）。
-   主栏原来那条「最多到 100% 减导航最小与内容最小」的上限在镜像态整条放开：
-   它要保的正是内容区的那条下限，而内容区自己已经带 --center-min，留着它只会在展开首帧夹住主栏。 */
+   主栏原来那条「最多到 100% 减导航最小与内容最小」的上限在镜像态放开：它要保的正是内容区那条下限，
+   而内容区自己已经带 --center-min。上限放开的同时本栏必须可收缩（`flex: 0 1 auto`），
+   否则窗口略窄时三栏挤不下，内容区的右缘会被推出窗口外；收缩的程度由内容区那条下限兜底。 */
 .layout[data-mirror] > .content {
   transition: min-inline-size var(--duration-base) var(--easing-decelerate);
 }
 
 .layout[data-mirror] > .browser {
+  flex: 0 1 auto;
   max-inline-size: none;
 }
 

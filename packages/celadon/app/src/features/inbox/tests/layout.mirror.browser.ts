@@ -189,25 +189,30 @@ test('expands the mirrored secondary continuously and drops it from the a11y tre
 	await expect(page.locator('.layout > .content')).toHaveAttribute('inert', '')
 	await expect(page.locator('.layout > .content')).toHaveAttribute('aria-hidden', 'true')
 
-	/* 展开逐帧采样：主栏宽度连续收回，不能第一帧就到终值（上限夹住时会那样） */
+	/* 展开逐帧采样：主栏宽度连续收回、内容区宽度连续长出。
+	   判据放在内容区：下限若一步跳回 400，第一帧就是 400、整段也只剩一个值，这里会红；
+	   主栏首帧的绝对值会随采样时机浮动，不作为判据 */
 	const frames = await page.evaluate(
 		() =>
-			new Promise<number[]>((done) => {
-				const out: number[] = []
+			new Promise<{ main: number; content: number }[]>((done) => {
+				const out: { main: number; content: number }[] = []
 				document.querySelector<HTMLElement>('.browser__secondary-key')!.click()
 				const tick = () => {
-					out.push(
-						Math.round(document.querySelector('.layout > .browser')!.getBoundingClientRect().width)
-					)
+					out.push({
+						main: Math.round(document.querySelector('.layout > .browser')!.getBoundingClientRect().width),
+						content: Math.round(document.querySelector('.layout > .content')!.getBoundingClientRect().width)
+					})
 					if (out.length < 15) requestAnimationFrame(tick)
 					else done(out)
 				}
 				requestAnimationFrame(tick)
 			})
 	)
-	const seen = [...new Set(frames)]
-	expect(seen.length).toBeGreaterThanOrEqual(4)
-	expect(seen[0]).toBeGreaterThan(seen[seen.length - 1] + 300)
+	const seenMain = [...new Set(frames.map((frame) => frame.main))]
+	const seenContent = [...new Set(frames.map((frame) => frame.content))]
+	expect(seenMain.length).toBeGreaterThanOrEqual(4)
+	expect(seenContent.length).toBeGreaterThanOrEqual(4)
+	expect(seenContent[0]).toBeLessThan(200)
 })
 
 test('fills the shell when the mirrored secondary is collapsed while split', async ({ page }) => {

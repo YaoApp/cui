@@ -7,7 +7,7 @@
 	align-items: center;
 	gap: var(--spacing-8);
 	block-size: var(--row-height);
-	/* 左内距含交通灯留白：留白由组件按状态以内联自定义属性给出（--head-inset），
+	/* 左内距含交通灯留白：留白由列头自己的数据属性按平台与导航状态决定（见文件末尾两条规则），
 	   收起且平台有原生交通灯时为留白宽度，其余为 0。写成两条值的简写以通过样式检查 */
 	padding-inline: calc(var(--spacing-12) + var(--head-inset, 0px)) var(--spacing-12);
 	transition: padding-inline-start var(--duration-base) var(--easing-decelerate);
