@@ -44,25 +44,34 @@
   overflow: hidden;
 }
 
-/* 镜像态：次栏是内容区，收掉的是它；持定宽的标签浏览器是主栏，此时铺满其余空间。
-   内容区吃剩余宽度，所以这里要连 flex 一起收回，否则它会继续把空间撑开。 */
+/* 镜像态：次栏是内容区，收掉的是它。宽度由主栏驱动：主栏的 inline-size 从定宽长到可用的一格，
+   本栏自带的同一条过渡把这段走完，内容区吃剩余宽度、是主栏宽度的连续结果。
+   不用 flex 切换来表达收放：flex 不可插值，切换那一下列会瞬变，只有内容列头的标题在动。 */
 .layout[data-mirror][data-browser='collapsed'] > .content {
-  flex: none;
-  inline-size: 0;
   min-inline-size: 0;
-  max-inline-size: 0;
   padding-inline: 0;
   border-inline-width: 0;
   overflow: hidden;
 }
 
+/* 主栏的目标取「整行减去导航区最小宽与把手」，贴近真正可用的一格：取 100% 会向整行要空间，
+   过渡才走到一半就被收缩夹住，可见的那一段不到一条完整时长。导航区已经收起时把那一段也去掉。
+   本栏原来那条「最多到 100% 减导航最小与内容最小」的上限同时放开，否则它停在半路。 */
 .layout[data-mirror][data-browser='collapsed'] > .browser {
-  flex: 1;
+  flex: 0 1 auto;
+  inline-size: calc(100% - var(--nav-min) - var(--side-resize-handle));
   max-inline-size: none;
 }
 
+/* 导航区已经收起时，可用的一格就是整行：再减把手会剩一条 8 像素的内容区窄边 */
+.layout[data-mirror][data-browser='collapsed'][data-width='zero'] > .browser {
+  inline-size: 100%;
+}
+
+/* 主栏铺满时外壳跟着铺满，并且不带走自己的过渡：宽度每帧按当前列宽算，才跟得上列的变化 */
 .layout[data-mirror][data-browser='collapsed'] .browser__shell {
   inline-size: 100%;
+  transition: none;
 }
 
 /* 面板独占整扇窗口：导航区与内容区让位，标签浏览器占满（见 design/main-shell.md §七）。

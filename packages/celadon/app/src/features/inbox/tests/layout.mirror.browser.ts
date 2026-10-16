@@ -79,8 +79,9 @@ test('mirror collapses the content from its own head and brings it back from the
 	await page.locator('.browser__secondary-key').click()
 	await expect(page.locator('.layout')).not.toHaveAttribute('data-browser', 'collapsed')
 	await expect(page.locator('.browser__slot--trail')).toHaveAttribute('data-hidden', 'true')
+	/* 展开是一条过渡，等宽度回到展开前那一档再比 */
+	await expect.poll(async () => (await widths(page)).content).toBe(open.content)
 	const restored = await widths(page)
-	expect(restored.content).toBe(open.content)
 	expect(restored.browser).toBe(open.browser)
 })
 
