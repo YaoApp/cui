@@ -106,9 +106,12 @@ test('keeps the boundary drag instant while the layout animation is on', async (
 	await page.waitForTimeout(500)
 	expect(Math.abs((await browser.boundingBox())!.width - moved)).toBeLessThanOrEqual(2)
 
-	// 分栏与标签的动画仍在
+	// 分栏与标签的入场仍在（进场已从关键帧改成内层元素上的过渡，见 browser.less）
 	await openTabMenu(page, browser)
 	await page.getByRole('menuitem', { name: '左右分栏' }).click()
 	await expect(browser.locator('.browser__pane')).toHaveCount(2)
-	await expect(browser.locator('.browser__tab').first()).toHaveCSS('animation-name', 'browser-tab-in')
+	await expect(browser.locator('.browser__tab-main').first()).toHaveCSS(
+		'transition-property',
+		'opacity, transform'
+	)
 })

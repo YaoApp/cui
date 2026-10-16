@@ -8,6 +8,7 @@ import { Tooltip } from '@/components/base/tooltip'
 import { useTranslation } from '@/platform/i18n'
 import type { BrowserSplit } from '@/stores/layout/columns'
 import { BrowserTabs } from './parts/tabs'
+import { useTabOverflow } from './hooks/use-tab-overflow'
 import type { BrowserTab } from './types'
 import { useSplitResize } from './hooks/use-split-resize'
 import { useColumnResize } from './hooks/use-column-resize'
@@ -35,6 +36,8 @@ export type BrowserProps = {
   onClose: (key: string) => void
   /** 新建：开一个空页并停到它（空页里再开东西就在这一页里换内容） */
   onNew: () => void
+  /** 拖动换序提交：索引按移除该项之后的数组算 */
+  onReorder?: (key: string, index: number) => void
   onMove: () => void
   onCollapse: () => void
   /** 第一个面板的当前页：由装配层按标签的内容决定 */
@@ -51,9 +54,9 @@ export type BrowserProps = {
   onExclusive?: () => void
 }
 
-/* 标签浏览器：顶部标签条（首页固定第一个、新建吸附右端），下面当前页或两个面板。
-   标签是全局一套，与会话弱关联（`design/main-shell.md` §五）；标签数据与页内容都由装配层给，
-   组件不认识业务（`architecture/03-boundaries.md` §2 的层间方向）。 */
+/* 标签浏览器：顶部标签条（新建吸附右端，放不下的进下拉菜单上段，标签可拖动换序），
+   下面当前页或两个面板。标签是全局一套，与会话弱关联（`design/main-shell.md` §五）；
+   标签数据与页内容都由装配层给，组件不认识业务（`architecture/03-boundaries.md` §2 的层间方向）。 */
 export function Browser({
   tabs,
   activeKey,
@@ -69,6 +72,7 @@ export function Browser({
   onActivate,
   onClose,
   onNew,
+  onReorder,
   onMove,
   onCollapse,
   children,
@@ -104,6 +108,9 @@ export function Browser({
   /* 下拉菜单的开合：下拉键与在顶栏空白处点右键都开它 */
   const [menuOpen, setMenuOpen] = useState(false)
   const blocked = splitBlocked || tooNarrowToSplit
+  /* 标签条的溢出量在这里算：算出来的可见段交给标签条渲染，放不下的那些进菜单上段。
+     放在这一层是因为菜单也在这一层，不必再从下面把结果报上来 */
+  const { containerRef: tabsContainerRef, overflow } = useTabOverflow(tabs, activeKey)
   return (
     <aside
       className="browser"
@@ -148,16 +155,17 @@ export function Browser({
           setMenuOpen(true)
         }}
       >
-        <ScrollArea className="browser__tabs" size="small">
-          <BrowserTabs
-            tabs={tabs}
-            activeKey={activeKey}
-            onActivate={onActivate}
-            onClose={onClose}
-            onNew={onNew}
-          />
-        </ScrollArea>
-        {/* 下拉：菜单上段放溢出的标签（第 14 条），下段是操作项；顶栏空白处点右键也开它 */}
+        <BrowserTabs
+          tabs={tabs}
+          activeKey={activeKey}
+          containerRef={tabsContainerRef}
+          visibleKeys={overflow.visibleKeys}
+          onActivate={onActivate}
+          onClose={onClose}
+          onNew={onNew}
+          onReorder={onReorder}
+        />
+        {/* 下拉：菜单上段是放不下的标签，下段是操作项；顶栏空白处点右键也开它 */}
         <BaseMenu.Root open={menuOpen} onOpenChange={setMenuOpen}>
           <BaseMenu.Trigger
             className="browser__more"
@@ -169,6 +177,25 @@ export function Browser({
           <BaseMenu.Portal>
             <BaseMenu.Positioner side="bottom" align="end" sideOffset={4}>
               <BaseMenu.Popup className="browser__menu" aria-label={t('shell.browser.action.more')}>
+                {/* 上段：放不下的标签，点选即激活。当前页不会落在这里：可见段放不下它时，
+                    它替掉可见段末尾那一项留在条上 */}
+                {overflow.hiddenTabs.map((tab) => (
+                  <BaseMenu.Item
+                    key={tab.key}
+                    className="browser__menu-item"
+                    onClick={() => onActivate(tab.key)}
+                  >
+                    <Icon name={tab.icon ?? (tab.closable ? 'i-globe' : 'i-home')} size={16} />
+                    <span className="browser__menu-label">{tab.label}</span>
+                  </BaseMenu.Item>
+                ))}
+                {overflow.hiddenTabs.length > 0 ? (
+                  <span
+                    className="browser__menu-separator"
+                    role="separator"
+                    aria-orientation="horizontal"
+                  />
+                ) : null}
                 <BaseMenu.Item className="browser__menu-item" onClick={onMove}>
                   <Icon name="i-swap" size={16} />
                   <span>{t('shell.browser.action.move')}</span>

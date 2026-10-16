@@ -207,6 +207,21 @@
 	background: var(--background-hover);
 }
 
+.browser__menu-label {
+	flex: 1;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+/* 菜单两段之间的分隔线：只留一条线，不加小标题 */
+.browser__menu-separator {
+	flex: none;
+	block-size: var(--border-width);
+	margin-block: var(--spacing-4);
+	background: var(--border-subtle);
+}
+
 .browser__divider {
 	flex: none;
 	position: relative;
@@ -263,19 +278,7 @@
 	user-select: none;
 }
 
-/* 新建或新出现的一页：淡入加一点位移，进场 decelerate（design/foundations.md F4）。
-   减少动态由 token 层统一归零，这里不各自判断（architecture/12-motion.md） */
-@keyframes browser-tab-in {
-	from {
-		opacity: 0;
-		transform: translateY(-2px);
-	}
-
-	to {
-		opacity: 1;
-		transform: none;
-	}
-}
+/* 新建或新出现的一页：淡入加一点位移，做法见 `.browser__tab` 上的 `data-enter` 与过渡 */
 
 .browser__bar {
 	position: relative;
@@ -297,22 +300,58 @@
 
 /* 标签与 ＋ 号抬到拖动层之上，点击照旧 */
 .browser__tabs,
-.browser__new,
-.browser__move {
+.browser__new {
 	position: relative;
 	z-index: 1;
 }
 
+/* 标签区裁切：只渲染放得下的标签，新建键在预算里被预留，因此不会被裁掉 */
 .browser__tabs {
 	flex: 1;
 	min-inline-size: 0;
+	overflow: hidden;
 }
 
 .browser__tabs-row {
+	position: relative;
 	display: flex;
 	align-items: center;
 	gap: var(--spacing-4);
 	white-space: nowrap;
+	/* 标签标题不是可选内容：不锁的话，指针按下再移动会先选中一段文字，
+	   拖动时那一段高亮跟着走（真机上看得很清楚），之后再设 user-select 也清不掉 */
+	user-select: none;
+}
+
+/* 拖动换序期间：本行不做过渡、也锁住文本选择；被拖的那一块跟手，其余标签让位
+   （位移由钩子写在元素上，这里只管行为与选择）。
+   进场那一下的过渡挂在内层 `.browser__tab-main` 上，这里只关过渡；外层不写 `transform` 过渡，
+   否则松手清位移时会从「新槽位减旧位移」插值出来，看起来先生到最左、再滑到排序后的位置。 */
+.browser__tabs-row[data-dragging] {
+	user-select: none;
+}
+
+.browser__tabs-row[data-dragging] .browser__tab {
+	transition: none;
+}
+
+/* 插入指示线：落点处一条 2 像素竖线，高度取标签块的高 */
+.browser__tabs-indicator {
+	position: absolute;
+	inset-block: 50%;
+	inline-size: 2px;
+	block-size: var(--spacing-24);
+	transform: translateY(-50%);
+	border-radius: var(--radius-pill);
+	background: var(--text-primary);
+	pointer-events: none;
+}
+
+/* 放不下的标签：仍然渲染（宽度量得到），但不占排布、不进无障碍树，也不接指针 */
+.browser__tab[data-hidden] {
+	position: absolute;
+	visibility: hidden;
+	pointer-events: none;
 }
 
 /* 标签是一整块：图标 · 标题（省略号）· 关闭键都在同一块底里，块自己给悬停与当前态。
@@ -332,10 +371,21 @@
 	padding-inline: var(--spacing-8) 0;
 	border-radius: var(--radius-small);
 	background: transparent;
-	/* 新建或新出现的一页：淡入加一点位移（关键帧在同文件上方），减少动态由 token 层统一归零 */
-	animation: browser-tab-in var(--duration-fast) var(--easing-decelerate);
+	/* 新建或新出现的一页：淡入加一点位移。用 `data-enter` 加过渡，不用 CSS 动画：
+	   换序时 React 会重新插入节点，WebKit 会把动画从头再跑一遍，松手那一刻挪过位置的标签
+	   一起淡入，看上去整条闪一下；过渡只在属性值变化时走，重插不触发。
+	   这一层只过渡背景色：进场那一下的淡入与位移挂在内层 `.browser__tab-main` 上。
+	   本层要留给拖动写位移，若它有 `transform` 过渡，松手清位移时会从「新槽位减旧位移」
+	   插值出来，看起来先生到最左、再滑到排序后的位置（真机逐帧实测到这一步）。
+	   减少动态由 token 层统一归零，这里不各自判断（architecture/12-motion.md） */
 	/* 只过渡具体属性，不写 background 简写：简写在 WebKit 上会带上图片与定位一起参与 */
 	transition: background-color var(--duration-fast) var(--easing-decelerate);
+}
+
+/* 进场首帧：透明并上移 2 像素，下一帧摘掉 `data-enter` 之后由 `.browser__tab-main` 的过渡走完 */
+.browser__tab[data-enter] .browser__tab-main {
+	opacity: 0;
+	transform: translateY(-2px);
 }
 
 .browser__tab:not([data-closable]) {
@@ -372,6 +422,12 @@
 	color: var(--text-primary);
 	/* 整块可点，指针给手型 */
 	cursor: pointer;
+	/* 入场那一下的淡入与位移挂在这一层：外层 `.browser__tab` 要留给拖动写位移，
+	   若位移过渡挂在外层，松手清位移时会从「新槽位减旧位移」插值出来，
+	   看起来先生到最左、再滑到排序后的位置 */
+	transition:
+		opacity var(--duration-fast) var(--easing-decelerate),
+		transform var(--duration-fast) var(--easing-decelerate);
 }
 
 .browser__tab-main:focus-visible {

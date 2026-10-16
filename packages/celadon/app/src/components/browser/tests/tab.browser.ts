@@ -136,6 +136,14 @@ test('the new key opens a blank page first and fills it in place', async ({ page
 	const tabs = browser.getByRole('tab')
 	await expect(tabs).toHaveCount(2)
 
+	/* 先把这一栏拖宽到放得下三页：本册只看空页的来去，标签条放不下的情形另有用例 */
+	const edge = browser.locator('.browser__edge')
+	const grip = (await edge.boundingBox())!
+	await page.mouse.move(grip.x + grip.width / 2, grip.y + 300)
+	await page.mouse.down()
+	await page.mouse.move(grip.x + grip.width / 2 - 400, grip.y + 300, { steps: 8 })
+	await page.mouse.up()
+
 	await browser.getByRole('button', { name: '新建标签' }).click()
 
 	/* 先出现一项并激活，内容与首页相同：地址入口就在这一页里 */

@@ -1,6 +1,6 @@
 # 08 · 布局：第一阶段（骨架）
 
-- 主文档：[08-layout-index.md](08-layout-index.md)
+- 主文档：[08-layout-implemented.md](08-layout-implemented.md)（已实现的部分）· [08-layout-content-browser.md](08-layout-content-browser.md)（未完成的跟踪）
 - 依据：`design/main-shell.md`（结构与交互）· `architecture/03-boundaries.md` §1 与 §3（落位）
 - 做法：逐步细化。本阶段只搭外壳骨架与关键链路，内容与细节用占位，用到哪个组件才建哪个。
 - 状态：已实现 · 待验收（2026-10-10）
@@ -77,7 +77,7 @@ app/src/
 | # | 事 | 落点 | 算做完的样子 |
 | --- | --- | --- | --- |
 | 8 | 标签集 | `app/src/stores/browser/tabs.ts` | 开页、关页、激活与复用同一目标；换会话不清空 |
-| 9 | 标签条与页容器 | `app/src/components/browser/` | 首页固定第一个且不可关；新建入口紧跟最后一个标签；溢出不换行；收起状态与所在的一侧读 `stores/layout/columns.ts`，收掉后内容区让位 |
+| 9 | 标签条与页容器 | `app/src/components/browser/` | 首页也是普通一页，次序可自由调整，只在列表中一个都不剩时重新出现；还在首页那一页时不可关；新建入口紧跟最后一个标签；放不下的进下拉菜单上段；收起状态与所在的一侧读 `stores/layout/columns.ts`，收掉后内容区让位 |
 | 10 | 首页与外部地址占位 | `app/src/components/browser/` | 首页有打开外部地址的输入；输入任意地址开一页，页内容占位 |
 
 ### 3.5 窗口

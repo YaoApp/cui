@@ -4,6 +4,78 @@ import { columns, markSignedIn, metrics } from './layout.helpers'
 /* 三栏骨架这一层：列在不在、宽度按不按 F6、导航列的收起与折起、
    本栏收放与列头找回键、换边、Web 端不出现窗口键、最小窗口、让位顺序。 */
 
+test('eases the navigation row background on hover', async ({ page }) => {
+	await markSignedIn(page)
+	await page.goto('/app/inbox')
+	const row = page.locator('.nav__link').nth(1)
+	const timing = await row.evaluate((el) => {
+		const style = getComputedStyle(el)
+		return {
+			property: style.transitionProperty,
+			duration: style.transitionDuration,
+			easing: style.transitionTimingFunction
+		}
+	})
+	/* F4 的 hover 场景：120 毫秒、标准缓动，只过渡底色与文字色 */
+	expect(timing.property).toContain('background-color')
+	expect(timing.property).toContain('color')
+	expect(timing.duration).toContain('0.12s')
+	expect(timing.easing).toContain('cubic-bezier(0.4, 0, 0.2, 1)')
+
+	await row.hover()
+	await expect(row).toHaveCSS('background-color', 'rgb(237, 237, 240)')
+})
+
+test('keeps the head key away while a panel slides and fades it back after closing', async ({ page }) => {
+	await markSignedIn(page)
+	await page.goto('/app/inbox')
+	const browser = columns(page).browser
+	const wrap = page.locator('.content__head-slot--browser .content__head-key-wrap')
+
+	/* 两个方向的缓动不同：隐藏（点开面板）120ms 淡出，无延迟；显示（面板合上）用带 320ms 延迟的关键帧 */
+	await page.locator('.browser__close').click()
+	await expect(browser).toHaveCSS('inline-size', '0px')
+	await page.waitForTimeout(300)
+	await expect(wrap).toHaveCSS('opacity', '1')
+	const shown = await wrap.evaluate((el) => {
+		const style = getComputedStyle(el)
+		return { name: style.animationName, duration: style.animationDuration, delay: style.animationDelay }
+	})
+	expect(shown.name).toBe('celadon-head-key-in')
+	expect(shown.duration).toContain('0.12s')
+	expect(shown.delay).toContain('0.32s')
+
+	/* 点开：面板起来之后列头那颗键已经不画，隐藏方向是 120ms 的过渡 */
+	await page.locator('.content__head-key--browser').click()
+	await expect.poll(async () => Math.round((await browser.boundingBox())!.width)).toBeGreaterThan(380)
+	await expect(wrap).toHaveCSS('opacity', '0')
+	const hidden = await wrap.evaluate((el) => getComputedStyle(el).transitionDuration)
+	expect(hidden).toContain('0.12s')
+
+	/* 收起：面板滑动全程键不画，收完之后才淡入 */
+	const rows = await page.evaluate(async () => {
+		const target = document.querySelector('.content__head-slot--browser .content__head-key-wrap')!
+		const out: Array<[number, number]> = []
+		const tick = () => {
+			out.push([
+				Math.round(document.querySelector('.browser')!.getBoundingClientRect().width),
+				Number(getComputedStyle(target).opacity)
+			])
+			if (out.length < 60) requestAnimationFrame(tick)
+		}
+		requestAnimationFrame(tick)
+		await new Promise((resolve) => setTimeout(resolve, 80))
+		;(document.querySelector('.browser__close') as HTMLElement).click()
+		await new Promise((resolve) => setTimeout(resolve, 900))
+		return out
+	})
+	const moving = rows.filter(([width]) => width > 20)
+	expect(moving.length).toBeGreaterThan(3)
+	expect(moving.every(([, opacity]) => opacity === 0)).toBe(true)
+	expect(rows[rows.length - 1][1]).toBe(1)
+})
+
+
 test('lands on the inbox with the three columns in place', async ({ page }) => {
 	await markSignedIn(page)
 	await page.goto('/app/')
