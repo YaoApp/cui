@@ -10,7 +10,7 @@
 
 ### 0.1 标签浏览器内部
 
-- [ ] **键盘与鼠标**：标签条 roving tabindex（只当前标签可 Tab 到）· 左右箭头切换 · `Enter` 与 `Space` 激活 · `Delete` 关闭当前标签（中键关闭已成）· `Alt` 加左右箭头把当前标签左右移动一位（拖动换序的键盘替代，焦点跟着标签走）。Tab 序为 标签条 → 新建 → 下拉 → 最大化或恢复 → 关闭。指针位移不超过 4 像素算点击，超过算拖动，两者互不误触。落地后标签自身的焦点态随之可量，第 0.1 节里两条与之相关的缺项同时收口。
+- [x] **键盘与鼠标**：标签条走 roving tabindex（整条只有一个标签可 Tab 到，落点跟着当前页）· 左右箭头只挪焦点、不换页 · `Enter` 与 `Space` 激活 · `Delete` 关闭当前标签（中键关闭已成）· `Alt` 加左右箭头把当前标签在整表里挪一位、焦点跟着标签走。Tab 序为 标签条 → 新建 → 下拉 → 最大化或恢复 → 关闭。指针位移不超过 4 像素算点击，超过算拖动，两者互不误触。用例在 `app/src/components/browser/tests/keyboard.browser.ts`（四条）。
 - [ ] **标签右键菜单**：刷新 · 关闭标签 · 分隔线 · 关闭其他标签 · 关闭全部标签；后两项按可用性置灰。「刷新」先接上回调（外部页目前是占位，回调暂无可见变化）。关闭当前标签后的激活规则为「右邻优先，没有右邻取左邻，都没有则落回首页」，现行 `stores/browser/tabs.ts` 的 `close` 已是这一条。
 - [ ] **首页的「打开过的东西」**：按使用顺序记录打开过的页，同一份内容复用同一页；空态四语齐；有单元用例与一条浏览器用例。
 - [ ] **地址的错误态**：空输入与非法地址有错误态，四语齐。
@@ -20,7 +20,7 @@
 ### 0.2 收口与复核
 
 - [x] **回写与用例（收口项）**：设计侧已写侧栏切换键的显隐、第三栏一节、两个底档用途、F4 的两条 WebKit 规则、标签条与两处菜单的口径（`design/layout.md` §5.1 与 `design/main-shell.md` §五）、入场的做法（`architecture/12-motion.md` 改为 CSS 过渡）。键盘与右键菜单两条落地的口径与用例随各自条目补。
-- [ ] **隔离复核处置**：上一轮复核跑通四条门禁、未发现功能性缺陷，列出九项文档与注释层面的处置。已办三项：① 组件 README 与各处用例路径；③ `browser.tsx` 引用计划条目号与描述不存在结构的注释；⑧ `browser.less` 的 `.browser__move` 死选择器。未办六项：② `components/browser/types.ts` 的 `closable` 注释与 `parts/new-tab/new-tab.tsx` 的注释仍是旧口径；④ `stores/browser/tabs.ts` 的 `open` 在生产代码里已无调用者、图标回退的注释指向的模块里没有这条推断；⑤ `browser.less` 里 `:has(:focus-visible)` 那条与「不写 `:has()`」的记录不一致（标签现在有 `tabIndex={-1}`，但键盘路径未落，该分支仍走不到）；⑥ 内容列头关于浏览器槽位「键恒在、占位保留」的注释与实现的 `display: none` 不符；⑦ 分屏时两个面板可能同时渲染新标签页，`new-tab.tsx` 固定的 `id="browser-address"` 会出现同 id；⑨ `navigate` 不去重，重复一次会得到两个同目标标签，与「不做并列的第二页」相抵，随真实内容接线一并定。
+- [ ] **隔离复核处置**：上一轮复核跑通四条门禁、未发现功能性缺陷，列出九项文档与注释层面的处置。已办三项：① 组件 README 与各处用例路径；③ `browser.tsx` 引用计划条目号与描述不存在结构的注释；⑧ `browser.less` 的 `.browser__move` 死选择器。未办六项：② `components/browser/types.ts` 的 `closable` 注释与 `parts/new-tab/new-tab.tsx` 的注释仍是旧口径；④ `stores/browser/tabs.ts` 的 `open` 在生产代码里已无调用者、图标回退的注释指向的模块里没有这条推断；⑤ `browser.less` 里 `:has(:focus-visible)` 那条与「不写 `:has()`」的记录不一致（标签现已可键盘到达，这条会走到，需连同记录一起定）；⑥ 内容列头关于浏览器槽位「键恒在、占位保留」的注释与实现的 `display: none` 不符；⑦ 分屏时两个面板可能同时渲染新标签页，`new-tab.tsx` 固定的 `id="browser-address"` 会出现同 id；⑨ `navigate` 不去重，重复一次会得到两个同目标标签，与「不做并列的第二页」相抵，随真实内容接线一并定。
 - [ ] **第三栏收放的收尾**：裁切层加定尺内容壳已落地，`min-inline-size` 与宽度一起过渡后，真 Safari 里 300 宽的跳变已消；仍留三项：点击到动画起步之间约 110 毫秒的静止期（7 帧）、起步那一帧 31 毫秒、以及收起状态下刷新时列头找回键约 320 毫秒不可见（那条带延迟的关键帧在首帧也会跑一遍）。前两项同源，都是布局翻面那一下的重排与首绘。
 
 ### 0.3 待定的设计与窄栏
@@ -39,7 +39,7 @@
 | 标签模型与内容派发 | `stores/browser/tabs.ts` · `targets.ts` · `parts/page/` | 完成；内容页仍是占位 |
 | 顶栏键与菜单 | `components/browser/browser.tsx` | 完成（含上段溢出标签列表） |
 | 标签样式与关闭键 | `parts/item/` · `browser.less` | 完成 |
-| 标签键盘路径与右键菜单 | `parts/tabs/` · `parts/item/` | 未做（标签已有 `tabIndex={-1}`，roving tabindex 与右键菜单未落） |
+| 标签键盘路径与右键菜单 | `parts/tabs/` · `parts/item/` | 键盘路径完成（roving tabindex · 箭头 · `Enter` 与 `Space` · `Delete` · `Alt` 加箭头换序）；右键菜单未做 |
 | 溢出进菜单与拖动换序 | `parts/tabs/` · `hooks/use-tab-overflow.ts` · `hooks/use-tab-drag.ts` · `stores/browser/tabs.ts` | 完成（可见段与菜单上段 · `move` 与落点换算 · 让位与插入指示线 · 松手落位不闪 · 标签条不可选中；用例在 `parts/../tests/overflow.browser.ts` 与 `drag.browser.ts`） |
 | 首页记录与地址错误态 | `parts/new-tab/` | 未做 |
 
