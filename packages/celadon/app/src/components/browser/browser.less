@@ -374,15 +374,16 @@
 	/* 新建或新出现的一页：淡入加一点位移。用 `data-enter` 加过渡，不用 CSS 动画：
 	   换序时 React 会重新插入节点，WebKit 会把动画从头再跑一遍，松手那一刻挪过位置的标签
 	   一起淡入，看上去整条闪一下；过渡只在属性值变化时走，重插不触发。
+	   这一层只过渡背景色：进场那一下的淡入与位移挂在内层 `.browser__tab-main` 上。
+	   本层要留给拖动写位移，若它有 `transform` 过渡，松手清位移时会从「新槽位减旧位移」
+	   插值出来，看起来先生到最左、再滑到排序后的位置（真机逐帧实测到这一步）。
 	   减少动态由 token 层统一归零，这里不各自判断（architecture/12-motion.md） */
-	transition:
-		opacity var(--duration-fast) var(--easing-decelerate),
-		transform var(--duration-fast) var(--easing-decelerate),
-		background-color var(--duration-fast) var(--easing-decelerate);
+	/* 只过渡具体属性，不写 background 简写：简写在 WebKit 上会带上图片与定位一起参与 */
+	transition: background-color var(--duration-fast) var(--easing-decelerate);
 }
 
-/* 入场首帧：透明并上移 2 像素，下一帧摘掉之后由上面的过渡走完 */
-.browser__tab[data-enter] {
+/* 进场首帧：透明并上移 2 像素，下一帧摘掉 `data-enter` 之后由 `.browser__tab-main` 的过渡走完 */
+.browser__tab[data-enter] .browser__tab-main {
 	opacity: 0;
 	transform: translateY(-2px);
 }
@@ -421,6 +422,12 @@
 	color: var(--text-primary);
 	/* 整块可点，指针给手型 */
 	cursor: pointer;
+	/* 入场那一下的淡入与位移挂在这一层：外层 `.browser__tab` 要留给拖动写位移，
+	   若位移过渡挂在外层，松手清位移时会从「新槽位减旧位移」插值出来，
+	   看起来先生到最左、再滑到排序后的位置 */
+	transition:
+		opacity var(--duration-fast) var(--easing-decelerate),
+		transform var(--duration-fast) var(--easing-decelerate);
 }
 
 .browser__tab-main:focus-visible {
