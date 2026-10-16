@@ -45,7 +45,8 @@
 | 持久化 | 已在 `cui.layout` 里持久化（`partialize` 收了 `browserSide`），第 5 条不需要新增存储 |
 | 主栏 | `browserSide === 'right'` 时是内容区，`'left'` 时是标签浏览器 |
 | 次栏 | 主栏之外的那一栏 |
-| 宽度归属 | 现状是标签浏览器持有定宽（`--side-width-*`，上限 `calc(100% - --center-min - 把手)`），内容区吃剩余宽度；镜像态保持这一归属不变，因此镜像态仍是「标签浏览器一条定宽、内容区填满其余」 |
+| 宽度归属 | 标签浏览器那一栏是定宽：值由 store 的 `browserWidth` 经装配层传下，落在外壳 `.browser__shell` 的 `--side-width` 上（默认 `--side-width-reading`，分屏时 `--side-width-tool`），上限受 `calc(100% - --center-min - --side-resize-handle)` 约束；内容区吃剩余宽度。镜像态保持这一归属不变 |
+| 壳定位 | 外壳是绝对定位，`[data-side='right']` 贴右缘、`[data-side='left']` 贴左缘（`components/browser/browser.less`），镜像态的滑入定位已由这两条规则处理，键位推导不与它重复 |
 | 推导落点 | 装配层（`routes/layout.tsx`）一处算出两个槽位要装什么，内容列头与标签浏览器顶栏只按传进来的槽位渲染，不各写判断 |
 
 **按这条口径推出的键位**
@@ -63,7 +64,7 @@
 
 **槽位的占位口径**：槽位在任何状态下都占住宽度，收起态与展开态的键在同一个槽位里换内容，键的显隐不带动画、也不推动邻居（沿用内容列头现在「不展示用隐藏实现，占位保留，标题因此不跳」的做法）。镜像态前段那个槽位因此常驻，标签条的起点固定，不因导航列的收放而抖动。
 
-**文案复用**：导航找回键用 `shell.navigation.action.expand`，次栏收放键用 `shell.browser.action.collapse`（镜像态它收的是内容列，文案本身只说「这一栏」）、不可用时用 `shell.browser.action.blocked`，都不新增键。
+**文案复用**：导航找回键用 `shell.navigation.action.expand`，次栏的收放键与找回键用 `shell.browser.action.collapse` 与 `shell.browser.action.expand`（这两条文案只说「这一栏」，镜像态收的是内容列也成立），窗宽放不下时的提示沿用 `shell.browser.action.blocked`（属于第 7 节那条已暂缓的浮层口径），都不新增语言键。
 
 ## 3 正常与镜像的对照
 
@@ -107,8 +108,7 @@
 
 | 风险 | 为什么会坏 | 防法 | 要同步的既有物 |
 | --- | --- | --- | --- |
-| 标签条前段多一颗键 | 它落在标签条行内，`use-tab-overflow` 现在只把新建键从预算里扣掉 | 前段那颗键与新建键同一处扣预算，槽位常驻 | `hooks/use-tab-overflow.ts` · `tests/overflow.browser.ts` |
-| 拖动与点击误触 | 标签行接了指针事件，关闭键靠 `closest('.browser__tab-close')` 豁免；前段那颗键没有豁免会被当成拖动起手 | 前段那颗键加同样的豁免 | `hooks/use-tab-drag.ts` · `tests/drag.browser.ts` |
+| 前段那颗键放错层 | 标签条的溢出预算按裁切容器 `.browser__tabs` 的 `clientWidth` 算（`hooks/use-tab-overflow.ts`），拖动指针事件接在 `.browser__tabs-row` 上（`parts/tabs/tabs.tsx`）；那颗键若放进容器或行内，会被一起裁切、参与滚动，还要额外扣预算并加拖动豁免 | 放在 `.browser__shell` 里、`.browser__tabs` 之前，即裁切容器之外、标签行之外；容器可用宽度自然变小，预算与拖动两处都不需要改 | `hooks/use-tab-overflow.ts` · `hooks/use-tab-drag.ts`（放对了都不用改） |
 | 键盘 Tab 序 | 前段新增一颗会插在标签条之前 | 按第 6 节更新 Tab 序并加用例 | `design/main-shell.md` §五 · `tests/keyboard.browser.ts` |
 | 顶栏拖动带 | 顶栏空白处是窗口拖动区，前段那颗键必须不参与拖动 | 沿用键的 `cursor: default` 与拖动豁免口径 | `platform/client/window.ts` 的用例 |
 | 窄窗最后收掉谁 | `routes/layout.tsx` 现在恒按 `narrowForBrowser` 把标签浏览器收掉，与列序无关；按第 2 节的让位口径，镜像态要收掉的是次栏（内容区） | 把「最后收掉的那一栏」改成按次栏判定；正常态结果不变 | `routes/layout.tsx` 的 `narrowForBrowser` · `tests/layout.shell.browser.ts` |
@@ -117,7 +117,7 @@
 
 1. 装配层按「主栏 / 次栏」推导键位（见第 2 节的推导表），一处判断；镜像状态沿用 `stores/layout/columns.ts` 的 `browserSide`，已在 `cui.layout` 里持久化。
 2. 两个头部改成按槽位渲染：内容列头与标签浏览器顶栏各接「导槽 / 尾槽」两个描述子（装什么键 · 是否显示 · 是否禁用 · 点击回调 · 无障碍名），不各自判断角色。
-3. 标签浏览器顶栏前段新增导航找回键的槽位，槽位常驻，标签条整体右移其宽度；溢出预算里扣掉它；行内给它关闭键同样的拖动豁免；它不参与顶栏拖动。
+3. 标签浏览器顶栏前段新增导航找回键的槽位，槽位常驻，标签条整体右移其宽度。它放在 `.browser__shell` 里、`.browser__tabs` 之前，即裁切容器与标签行之外，因此溢出预算与拖动豁免都不需要改；它不参与顶栏拖动。
 4. 内容列头的槽位按角色装键：正常态左端导航找回、右端标签浏览器找回；镜像态右端装次栏（内容）收放键，左端空着但占位保留（主栏一直在，导航找回键不需要落到这一栏）。
 5. 让位顺序的最后一步改成按次栏判定：正常态收标签浏览器（现状不变），镜像态收内容区；`narrowForBrowser` 那一档的判据与注释一并更新，改完把 1000 / 969 / 706 三档在镜像态各量一遍（前两步压的是谁没变，但最后一步换了栏，读数可能与本册记的正常态不同），如实记录。
 6. Tab 序更新为：前段导航找回 → 标签条 → 新建 → 下拉 → 最大化或恢复 → 收起；写进 `design/main-shell.md` §五并加断言。
