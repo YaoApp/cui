@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
 import type { IconId } from '@/platform/icons'
-import { sameTarget, type TabTarget } from './targets'
+import { sameTarget, targetKey, targetLabel, type TabTarget } from './targets'
 
 /** 一页：`key` 在页的生命周期里不变，装什么由 `target` 决定（在页里打开什么就换成什么）。
     标签条上「先出现一项、随后内容变成目标」靠的就是这一条：页本身就是那一项，换的是内容。 */
@@ -23,10 +23,25 @@ export const isHome = (tab: TabEntry): boolean => tab.target.kind === 'home'
 
 type OpenMeta = { title?: string; icon?: IconId }
 
+/** 打开过的一页：首页那一页的下半部分按使用顺序列出它们，点一条就重新打开、复用同一页 */
+export type RecentEntry = { key: string; target: TabTarget; label: string }
+
+/** 最近打开保留的条数 */
+const RECENT_LIMIT = 8
+
+/** 记一条「打开过」：同一目标已经在就提到最前，超出上限的从末尾去掉 */
+const remember = (recent: RecentEntry[], target: TabTarget): RecentEntry[] => {
+	if (target.kind === 'home' || target.kind === 'blank') return recent
+	const entry: RecentEntry = { key: targetKey(target), target, label: targetLabel(target) }
+	return [entry, ...recent.filter((item) => !sameTarget(item.target, target))].slice(0, RECENT_LIMIT)
+}
+
 type TabsState = {
 	/** 打开的页；首页也是普通一页，次序可自由调整，只在列表中一个都不剩时重新出现 */
 	tabs: TabEntry[]
 	activeKey: string
+	/** 打开过的页，按使用顺序、最近的在前；首页那一页的下半部分列它 */
+	recent: RecentEntry[]
 	/** 开一页：同一目标已在则切到它；不在则追加并停到它 */
 	open: (target: TabTarget, meta?: OpenMeta) => void
 	/** 新建一个空页并停到它；当前页已经是空页时只切回它，不再叠一个 */
@@ -35,6 +50,10 @@ type TabsState = {
 	navigate: (key: string, target: TabTarget, meta?: OpenMeta) => void
 	/** 关一页：每一页都能关；关的是当前页时按右邻优先、没有右邻取左邻；一个都不剩时首页重新出现 */
 	close: (key: string) => void
+	/** 只留这一页：能关的都关掉，这一页成为当前页；首页没被留下时补回首位，一个都不剩时首页重新出现 */
+	closeOthers: (key: string) => void
+	/** 关掉所有能关的页：一个都不剩时首页重新出现 */
+	closeAll: () => void
 	/** 把一页移到目标位置：索引按**移除该项之后**的数组算，与拖放落点的语义一致；
 	    越界夹到 0 与长度之间，找不到该项不动作，当前页不变 */
 	move: (key: string, index: number) => void
@@ -57,6 +76,7 @@ export const useTabsStore = create<TabsState>()(
 			(set, get) => ({
 				tabs: [HOME_TAB],
 				activeKey: HOME_TAB.key,
+				recent: [],
 				open: (target, meta) => {
 					if (target.kind === 'blank') {
 						get().openBlank()
@@ -65,11 +85,19 @@ export const useTabsStore = create<TabsState>()(
 					const { tabs } = get()
 					const existing = tabs.find((tab) => sameTarget(tab.target, target))
 					if (existing) {
-						set({ activeKey: existing.key }, false, 'browser/open')
+						set(
+							{ activeKey: existing.key, recent: remember(get().recent, target) },
+							false,
+							'browser/open'
+						)
 						return
 					}
 					const tab: TabEntry = { key: nextKey(tabs), target, ...meta }
-					set({ tabs: [...tabs, tab], activeKey: tab.key }, false, 'browser/open')
+					set(
+						{ tabs: [...tabs, tab], activeKey: tab.key, recent: remember(get().recent, target) },
+						false,
+						'browser/open'
+					)
 				},
 				openBlank: () => {
 					const { tabs, activeKey } = get()
@@ -88,7 +116,8 @@ export const useTabsStore = create<TabsState>()(
 						{
 							tabs: tabs.map((tab) =>
 								tab.key === key ? { key: tab.key, target, title: meta?.title, icon: meta?.icon } : tab
-							)
+							),
+							recent: remember(get().recent, target)
 						},
 						false,
 						'browser/navigate'
@@ -113,6 +142,23 @@ export const useTabsStore = create<TabsState>()(
 					const fallback = next[index] ?? next[index - 1] ?? HOME_TAB
 					set({ tabs: next, activeKey: fallback.key }, false, 'browser/close')
 				},
+				closeOthers: (key) => {
+					const { tabs } = get()
+					const kept = tabs.find((tab) => tab.key === key)
+					if (!kept) return
+					/* 留下的这一页若是首页那一格（key 为 home，目标可能已经换成别的），就是「关掉其余」；
+					   否则首页也一并关掉，但空状态要有落点，所以把首页补回首位 */
+					const next = kept.key === HOME_TAB.key ? [kept] : [HOME_TAB, kept]
+					set({ tabs: next, activeKey: key }, false, 'browser/closeOthers')
+				},
+				closeAll: () => {
+					const { tabs } = get()
+					/* 只关得动普通页；首页那一格若已换上目标，就按空态的门重新放一个回去 */
+					const next = tabs.filter((tab) => tab.target.kind === 'home')
+					if (next.length === tabs.length) return
+					const kept = next.length > 0 ? next : [HOME_TAB]
+					set({ tabs: kept, activeKey: kept[0].key }, false, 'browser/closeAll')
+				},
 				move: (key, index) => {
 					const { tabs } = get()
 					const from = tabs.findIndex((tab) => tab.key === key)
@@ -129,13 +175,21 @@ export const useTabsStore = create<TabsState>()(
 			}),
 			{
 				name: 'cui.browser',
-				version: 2,
-				/* 只留数据，不收动作：打开的页与当前页记本机，换会话不清空 */
-				partialize: (state) => ({ tabs: state.tabs, activeKey: state.activeKey }),
-				/* 第一版记的是 `{ kind, id }`：首页照旧，外部页把地址搬进 target */
+				version: 3,
+				/* 只留数据，不收动作：打开的页、当前页与打开过的页都记本机，换会话不清空 */
+				partialize: (state) => ({
+					tabs: state.tabs,
+					activeKey: state.activeKey,
+					recent: state.recent
+				}),
+				/* 第一版记的是 `{ kind, id }`：首页照旧，外部页把地址搬进 target；
+				   第二版之前没有「打开过的页」，补一个空表 */
 				migrate: (persisted, version) => {
-					const state = persisted as { tabs?: unknown[]; activeKey?: string }
-					if (version >= 2 || !Array.isArray(state.tabs)) return state as never
+					const state = persisted as { tabs?: unknown[]; activeKey?: string; recent?: unknown }
+					const recent = Array.isArray(state.recent) ? state.recent : []
+					if (version >= 2 || !Array.isArray(state.tabs)) {
+						return { ...state, recent } as never
+					}
 					const tabs: TabEntry[] = state.tabs.map((raw, index) => {
 						const item = raw as { kind?: string; id?: string }
 						if (item.kind === 'browser-home') return HOME_TAB
@@ -146,7 +200,7 @@ export const useTabsStore = create<TabsState>()(
 					const activeKey = withHome.some((tab) => tab.key === state.activeKey)
 						? (state.activeKey as string)
 						: HOME_TAB.key
-					return { tabs: withHome, activeKey } as never
+					return { tabs: withHome, activeKey, recent } as never
 				}
 			}
 		),

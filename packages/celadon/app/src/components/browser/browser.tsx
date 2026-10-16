@@ -38,6 +38,12 @@ export type BrowserProps = {
   onNew: () => void
   /** 拖动换序提交：索引按移除该项之后的数组算 */
   onReorder?: (key: string, index: number) => void
+  /** 刷新这一页：外部页目前是占位，回调暂无可见变化 */
+  onRefresh?: (key: string) => void
+  /** 只留这一页 */
+  onCloseOthers?: (key: string) => void
+  /** 关掉所有能关的页 */
+  onCloseAll?: () => void
   onMove: () => void
   onCollapse: () => void
   /** 第一个面板的当前页：由装配层按标签的内容决定 */
@@ -73,6 +79,9 @@ export function Browser({
   onClose,
   onNew,
   onReorder,
+  onRefresh,
+  onCloseOthers,
+  onCloseAll,
   onMove,
   onCollapse,
   children,
@@ -107,6 +116,11 @@ export function Browser({
   const tooNarrowToSplit = (width ?? limits.defaultWidth) < limits.sideMin * 2
   /* 下拉菜单的开合：下拉键与在顶栏空白处点右键都开它 */
   const [menuOpen, setMenuOpen] = useState(false)
+  /* 标签自己的右键菜单：记下点的是哪一页与指针位置，菜单按指针位置定位 */
+  const [tabMenu, setTabMenu] = useState<{ key: string; point: { x: number; y: number } } | null>(null)
+  const contextTab = tabMenu ? (tabs.find((tab) => tab.key === tabMenu.key) ?? null) : null
+  const closableCount = tabs.filter((tab) => tab.closable).length
+  const otherClosableCount = tabs.filter((tab) => tab.closable && tab.key !== tabMenu?.key).length
   const blocked = splitBlocked || tooNarrowToSplit
   /* 标签条的溢出量在这里算：算出来的可见段交给标签条渲染，放不下的那些进菜单上段。
      放在这一层是因为菜单也在这一层，不必再从下面把结果报上来 */
@@ -164,6 +178,7 @@ export function Browser({
           onClose={onClose}
           onNew={onNew}
           onReorder={onReorder}
+          onTabContextMenu={(key, point) => setTabMenu({ key, point })}
         />
         {/* 下拉：菜单上段是放不下的标签，下段是操作项；顶栏空白处点右键也开它 */}
         <BaseMenu.Root open={menuOpen} onOpenChange={setMenuOpen}>
@@ -175,7 +190,12 @@ export function Browser({
             <Icon name="i-down" size={16} />
           </BaseMenu.Trigger>
           <BaseMenu.Portal>
-            <BaseMenu.Positioner side="bottom" align="end" sideOffset={4}>
+            <BaseMenu.Positioner
+              className="browser__menu-layer"
+              side="bottom"
+              align="end"
+              sideOffset={4}
+            >
               <BaseMenu.Popup className="browser__menu" aria-label={t('shell.browser.action.more')}>
                 {/* 上段：放不下的标签，点选即激活。当前页不会落在这里：可见段放不下它时，
                     它替掉可见段末尾那一项留在条上 */}
@@ -217,6 +237,74 @@ export function Browser({
                 >
                   <Icon name="i-rows" size={16} />
                   <span>{t('shell.browser.split.rows')}</span>
+                </BaseMenu.Item>
+              </BaseMenu.Popup>
+            </BaseMenu.Positioner>
+          </BaseMenu.Portal>
+        </BaseMenu.Root>
+        {/* 标签自己的右键菜单：指针位置开，刷新 / 关闭 / 分隔线 / 关闭其他 / 关闭全部，
+            后两项按可用性置灰（还有别的可关页、还有可关页） */}
+        <BaseMenu.Root open={tabMenu !== null} onOpenChange={(next) => !next && setTabMenu(null)}>
+          <BaseMenu.Portal>
+            <BaseMenu.Positioner
+              className="browser__menu-layer"
+              side="bottom"
+              align="start"
+              sideOffset={4}
+              anchor={
+                tabMenu
+                  ? {
+                      getBoundingClientRect: () => ({
+                        x: tabMenu.point.x,
+                        y: tabMenu.point.y,
+                        top: tabMenu.point.y,
+                        left: tabMenu.point.x,
+                        right: tabMenu.point.x,
+                        bottom: tabMenu.point.y,
+                        width: 0,
+                        height: 0,
+                        toJSON: () => ({})
+                      })
+                    }
+                  : undefined
+              }
+            >
+              <BaseMenu.Popup
+                className="browser__menu browser__menu--tab"
+                aria-label={t('shell.browser.label')}
+              >
+                <BaseMenu.Item
+                  className="browser__menu-item"
+                  onClick={() => onRefresh?.(tabMenu?.key ?? '')}
+                >
+                  <Icon name="i-act-refresh" size={16} />
+                  <span>{t('shell.browser.tab.refresh')}</span>
+                </BaseMenu.Item>
+                <BaseMenu.Item
+                  className="browser__menu-item"
+                  disabled={!contextTab?.closable}
+                  onClick={() => onClose(tabMenu?.key ?? '')}
+                >
+                  <Icon name="i-act-close" size={16} />
+                  <span>{t('shell.browser.tab.close')}</span>
+                </BaseMenu.Item>
+                <span className="browser__menu-separator" role="separator" aria-orientation="horizontal" />
+                <BaseMenu.Item
+                  className="browser__menu-item"
+                  disabled={otherClosableCount === 0}
+                  onClick={() => onCloseOthers?.(tabMenu?.key ?? '')}
+                >
+                  {/* 关闭类的三项一律用叉，与浏览器的通行做法一致；刷新另用刷新图形 */}
+                  <Icon name="i-act-close" size={16} />
+                  <span>{t('shell.browser.tab.closeOthers')}</span>
+                </BaseMenu.Item>
+                <BaseMenu.Item
+                  className="browser__menu-item"
+                  disabled={closableCount === 0}
+                  onClick={() => onCloseAll?.()}
+                >
+                  <Icon name="i-act-close" size={16} />
+                  <span>{t('shell.browser.tab.closeAll')}</span>
                 </BaseMenu.Item>
               </BaseMenu.Popup>
             </BaseMenu.Positioner>

@@ -200,6 +200,8 @@ export type I18nKey =
   | 'shell.browser.action.expand'
   | 'shell.browser.action.more'
   | 'shell.browser.action.move'
+  | 'shell.browser.address.empty'
+  | 'shell.browser.address.invalid'
   | 'shell.browser.address.label'
   | 'shell.browser.address.open'
   | 'shell.browser.address.placeholder'
@@ -213,7 +215,10 @@ export type I18nKey =
   | 'shell.browser.split.rows'
   | 'shell.browser.tab.blank'
   | 'shell.browser.tab.close'
+  | 'shell.browser.tab.closeAll'
+  | 'shell.browser.tab.closeOthers'
   | 'shell.browser.tab.new'
+  | 'shell.browser.tab.refresh'
   | 'shell.browser.web.hint'
   | 'shell.content.demoTitle'
   | 'shell.content.placeholder'
@@ -446,6 +451,8 @@ declare module 'i18next' {
         'shell.browser.action.expand': string
         'shell.browser.action.more': string
         'shell.browser.action.move': string
+        'shell.browser.address.empty': string
+        'shell.browser.address.invalid': string
         'shell.browser.address.label': string
         'shell.browser.address.open': string
         'shell.browser.address.placeholder': string
@@ -459,7 +466,10 @@ declare module 'i18next' {
         'shell.browser.split.rows': string
         'shell.browser.tab.blank': string
         'shell.browser.tab.close': string
+        'shell.browser.tab.closeAll': string
+        'shell.browser.tab.closeOthers': string
         'shell.browser.tab.new': string
+        'shell.browser.tab.refresh': string
         'shell.browser.web.hint': string
         'shell.content.demoTitle': string
         'shell.content.placeholder': string

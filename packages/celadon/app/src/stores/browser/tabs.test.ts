@@ -6,7 +6,7 @@ const external = (url: string): TabTarget => ({ kind: 'external', url })
 const at = (key: string): TabEntry | undefined => useTabsStore.getState().tabs.find((tab) => tab.key === key)
 
 const reset = () => {
-	useTabsStore.setState({ tabs: [HOME_TAB], activeKey: tabKey(HOME_TAB) })
+	useTabsStore.setState({ tabs: [HOME_TAB], activeKey: tabKey(HOME_TAB), recent: [] })
 }
 
 describe('标签集', () => {
@@ -178,5 +178,67 @@ describe('标签集', () => {
 		useTabsStore.getState().move(second, 0)
 		expect(useTabsStore.getState().activeKey).toBe(HOME_TAB.key)
 		expect(useTabsStore.getState().tabs[0].key).toBe(second)
+	})
+
+	it('只留一页：留下的成为当前页，首页补回首位', () => {
+		const state = useTabsStore.getState()
+		state.open(external('a.com'))
+		const first = useTabsStore.getState().tabs[1].key
+		state.open(external('b.com'))
+
+		useTabsStore.getState().closeOthers(first)
+		const after = useTabsStore.getState()
+		expect(after.tabs.map(tabKey)).toEqual([HOME_TAB.key, first])
+		expect(after.activeKey).toBe(first)
+
+		/* 留下的是首页时，其余全关，首页仍是当前页 */
+		useTabsStore.getState().closeOthers(HOME_TAB.key)
+		expect(useTabsStore.getState().tabs.map(tabKey)).toEqual([HOME_TAB.key])
+		expect(useTabsStore.getState().activeKey).toBe(HOME_TAB.key)
+
+		/* 找不到这一页时不动 */
+		state.open(external('c.com'))
+		const third = useTabsStore.getState().tabs[1].key
+		useTabsStore.getState().closeOthers('missing')
+		expect(useTabsStore.getState().tabs.map(tabKey)).toEqual([HOME_TAB.key, third])
+	})
+
+	it('关掉所有能关的页：首页重新出现并成为当前页', () => {
+		const state = useTabsStore.getState()
+		state.open(external('a.com'))
+		state.open(external('b.com'))
+		useTabsStore.getState().closeAll()
+		const after = useTabsStore.getState()
+		expect(after.tabs.map(tabKey)).toEqual([HOME_TAB.key])
+		expect(after.activeKey).toBe(HOME_TAB.key)
+
+		/* 只有首页时再关一次不写状态 */
+		useTabsStore.getState().closeAll()
+		expect(useTabsStore.getState().tabs.map(tabKey)).toEqual([HOME_TAB.key])
+	})
+
+	it('打开过的页按使用顺序记着：最近在前，同一目标只留一条，关掉页也不消失', () => {
+		const state = useTabsStore.getState()
+		state.open(external('a.com'))
+		state.open(external('b.com'))
+		expect(useTabsStore.getState().recent.map((item) => item.label)).toEqual(['b.com', 'a.com'])
+
+		/* 再打开 a.com：复用已有那一页，并把它提到最前 */
+		state.open(external('a.com'))
+		expect(useTabsStore.getState().tabs).toHaveLength(3)
+		expect(useTabsStore.getState().recent.map((item) => item.label)).toEqual(['a.com', 'b.com'])
+
+		/* 关掉页不影响记录 */
+		useTabsStore.getState().closeAll()
+		expect(useTabsStore.getState().recent.map((item) => item.label)).toEqual(['a.com', 'b.com'])
+
+		/* 首页与空页不进记录，条数有上限 */
+		state.openBlank()
+		expect(useTabsStore.getState().recent).toHaveLength(2)
+		for (let index = 0; index < 10; index += 1) {
+			state.open(external(`site-${index}.com`))
+		}
+		expect(useTabsStore.getState().recent).toHaveLength(8)
+		expect(useTabsStore.getState().recent[0].label).toBe('site-9.com')
 	})
 })

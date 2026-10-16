@@ -174,6 +174,13 @@
 
 /* 标签条右端的「…」更多菜单：口径与导航列折叠菜单一致 ——
    项内距纵向 8、横向 12，行高凑到 32（design/layout.md §3 的列表项），项间距 4，悬停与键盘高亮同一底色 */
+/* 菜单是 L2 浮层（design/foundations.md F3）：层级要加在**定位层**上。
+   定位层带 `transform`（菜单按锚点定位），它自成层叠上下文，加在菜单自己身上只在它内部生效；
+   标签条容器是 `z-index: 1` 的定位元素，于是 Chrome 把标签条画在菜单上面、Safari 恰好相反。 */
+.browser__menu-layer {
+	z-index: var(--z-overlay);
+}
+
 .browser__menu {
 	display: flex;
 	flex-direction: column;
@@ -205,6 +212,20 @@
 .browser__menu-item:hover,
 .browser__menu-item[data-highlighted] {
 	background: var(--background-hover);
+}
+
+/* 按可用性置灰的项：文字退到禁用档，也不给悬停底，指针保持默认 */
+.browser__menu-item[data-disabled],
+.browser__menu-item[aria-disabled='true'] {
+	color: var(--text-disabled);
+	cursor: default;
+}
+
+.browser__menu-item[data-disabled]:hover,
+.browser__menu-item[aria-disabled='true']:hover,
+.browser__menu-item[data-disabled][data-highlighted],
+.browser__menu-item[aria-disabled='true'][data-highlighted] {
+	background: transparent;
 }
 
 .browser__menu-label {
