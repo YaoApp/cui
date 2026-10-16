@@ -87,6 +87,8 @@ export function AppLayout() {
 	const navigateTab = useTabsStore((state) => state.navigate)
 	const closeTab = useTabsStore((state) => state.close)
 	const moveTab = useTabsStore((state) => state.move)
+	const closeOthersTabs = useTabsStore((state) => state.closeOthers)
+	const closeAllTabs = useTabsStore((state) => state.closeAll)
 	const activateTab = useTabsStore((state) => state.activate)
 
 	const mark = (item: NavItem): NavItem => ({
@@ -209,6 +211,13 @@ export function AppLayout() {
 				onClose={(key) => closeTab(key)}
 				onNew={() => openBlankTab()}
 				onReorder={(key, index) => moveTab(key, index)}
+				onRefresh={(key) => {
+					/* 外部页与内部页目前都是占位，重开同一目标看不出变化；接上真实内容后在这里重取 */
+					const tab = tabs.find((item) => item.key === key)
+					if (tab) navigateTab(key, tab.target)
+				}}
+				onCloseOthers={(key) => closeOthersTabs(key)}
+				onCloseAll={() => closeAllTabs()}
 				onMove={() => setBrowserSide(browserSide === 'right' ? 'left' : 'right')}
 				onCollapse={() => {
 					/* 独占档里收掉这一栏：先退出独占。否则导航区与内容区都在让位、本栏又收成零宽，

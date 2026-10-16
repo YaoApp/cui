@@ -35,6 +35,10 @@ type TabsState = {
 	navigate: (key: string, target: TabTarget, meta?: OpenMeta) => void
 	/** 关一页：每一页都能关；关的是当前页时按右邻优先、没有右邻取左邻；一个都不剩时首页重新出现 */
 	close: (key: string) => void
+	/** 只留这一页：能关的都关掉，这一页成为当前页；首页没被留下时补回首位，一个都不剩时首页重新出现 */
+	closeOthers: (key: string) => void
+	/** 关掉所有能关的页：一个都不剩时首页重新出现 */
+	closeAll: () => void
 	/** 把一页移到目标位置：索引按**移除该项之后**的数组算，与拖放落点的语义一致；
 	    越界夹到 0 与长度之间，找不到该项不动作，当前页不变 */
 	move: (key: string, index: number) => void
@@ -112,6 +116,23 @@ export const useTabsStore = create<TabsState>()(
 					}
 					const fallback = next[index] ?? next[index - 1] ?? HOME_TAB
 					set({ tabs: next, activeKey: fallback.key }, false, 'browser/close')
+				},
+				closeOthers: (key) => {
+					const { tabs } = get()
+					const kept = tabs.find((tab) => tab.key === key)
+					if (!kept) return
+					/* 留下的这一页若是首页，就是「关掉其余」；不是首页则首页也一并关掉，
+					   但空状态要有落点，所以把首页补回首位（首页是空列表的默认页） */
+					const next = kept.target.kind === 'home' ? [kept] : [HOME_TAB, kept]
+					if (next.length === tabs.length && next.every((tab, index) => tab === tabs[index])) return
+					set({ tabs: next, activeKey: key }, false, 'browser/closeOthers')
+				},
+				closeAll: () => {
+					const { tabs } = get()
+					/* 只关得动普通页；首页本来就不进关闭流程，关完由空状态补回 */
+					const next = tabs.filter((tab) => tab.target.kind === 'home')
+					if (next.length === tabs.length) return
+					set({ tabs: next, activeKey: HOME_TAB.key }, false, 'browser/closeAll')
 				},
 				move: (key, index) => {
 					const { tabs } = get()

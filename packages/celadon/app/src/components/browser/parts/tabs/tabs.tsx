@@ -19,6 +19,8 @@ export type BrowserTabsProps = {
 	onNew: () => void
 	/** 拖动换序提交：索引按移除该项之后的数组算 */
 	onReorder?: (key: string, index: number) => void
+	/** 在标签上点右键：把点的是哪一页与指针位置交给装配层去开菜单 */
+	onTabContextMenu?: (key: string, point: { x: number; y: number }) => void
 }
 
 /* 标签条：一行标签项加末尾的新建键，外面套一层裁切容器。
@@ -33,7 +35,8 @@ export function BrowserTabs({
 	onActivate,
 	onClose,
 	onNew,
-	onReorder
+	onReorder,
+	onTabContextMenu
 }: BrowserTabsProps) {
 	const { t } = useTranslation()
 	const rowRef = useRef<HTMLDivElement>(null)
@@ -107,6 +110,13 @@ export function BrowserTabs({
 				onPointerCancel={drag.onPointerCancel}
 				onClickCapture={drag.onClickCapture}
 				onKeyDown={onKeyDown}
+				onContextMenu={(event) => {
+					const key = (event.target as HTMLElement).closest<HTMLElement>('.browser__tab')?.dataset
+						.tabKey
+					if (!key || !onTabContextMenu) return
+					event.preventDefault()
+					onTabContextMenu(key, { x: event.clientX, y: event.clientY })
+				}}
 			>
 				{tabs.map((tab) => (
 					<BrowserTabItem

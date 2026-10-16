@@ -213,7 +213,10 @@ export type I18nKey =
   | 'shell.browser.split.rows'
   | 'shell.browser.tab.blank'
   | 'shell.browser.tab.close'
+  | 'shell.browser.tab.closeAll'
+  | 'shell.browser.tab.closeOthers'
   | 'shell.browser.tab.new'
+  | 'shell.browser.tab.refresh'
   | 'shell.browser.web.hint'
   | 'shell.content.demoTitle'
   | 'shell.content.placeholder'
@@ -459,7 +462,10 @@ declare module 'i18next' {
         'shell.browser.split.rows': string
         'shell.browser.tab.blank': string
         'shell.browser.tab.close': string
+        'shell.browser.tab.closeAll': string
+        'shell.browser.tab.closeOthers': string
         'shell.browser.tab.new': string
+        'shell.browser.tab.refresh': string
         'shell.browser.web.hint': string
         'shell.content.demoTitle': string
         'shell.content.placeholder': string

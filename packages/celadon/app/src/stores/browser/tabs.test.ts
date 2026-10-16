@@ -179,4 +179,41 @@ describe('标签集', () => {
 		expect(useTabsStore.getState().activeKey).toBe(HOME_TAB.key)
 		expect(useTabsStore.getState().tabs[0].key).toBe(second)
 	})
+
+	it('只留一页：留下的成为当前页，首页补回首位', () => {
+		const state = useTabsStore.getState()
+		state.open(external('a.com'))
+		const first = useTabsStore.getState().tabs[1].key
+		state.open(external('b.com'))
+
+		useTabsStore.getState().closeOthers(first)
+		const after = useTabsStore.getState()
+		expect(after.tabs.map(tabKey)).toEqual([HOME_TAB.key, first])
+		expect(after.activeKey).toBe(first)
+
+		/* 留下的是首页时，其余全关，首页仍是当前页 */
+		useTabsStore.getState().closeOthers(HOME_TAB.key)
+		expect(useTabsStore.getState().tabs.map(tabKey)).toEqual([HOME_TAB.key])
+		expect(useTabsStore.getState().activeKey).toBe(HOME_TAB.key)
+
+		/* 找不到这一页时不动 */
+		state.open(external('c.com'))
+		const third = useTabsStore.getState().tabs[1].key
+		useTabsStore.getState().closeOthers('missing')
+		expect(useTabsStore.getState().tabs.map(tabKey)).toEqual([HOME_TAB.key, third])
+	})
+
+	it('关掉所有能关的页：首页重新出现并成为当前页', () => {
+		const state = useTabsStore.getState()
+		state.open(external('a.com'))
+		state.open(external('b.com'))
+		useTabsStore.getState().closeAll()
+		const after = useTabsStore.getState()
+		expect(after.tabs.map(tabKey)).toEqual([HOME_TAB.key])
+		expect(after.activeKey).toBe(HOME_TAB.key)
+
+		/* 只有首页时再关一次不写状态 */
+		useTabsStore.getState().closeAll()
+		expect(useTabsStore.getState().tabs.map(tabKey)).toEqual([HOME_TAB.key])
+	})
 })
