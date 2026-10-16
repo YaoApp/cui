@@ -59,12 +59,36 @@ test('keeps the strip free of horizontal scroll and lists the rest in the menu',
 	expect(await labels.allInnerTexts()).toEqual(expected)
 	await expect(page.locator('.browser__menu-separator')).toHaveCount(1)
 
-	/* 点菜单里的第一项：这一页被激活、页面切到它；它仍在溢出段里，菜单里标出当前态 */
+	/* 点菜单里的第一项：这一页被激活，并且被换到条上（激活态看得见） */
 	const target = expected[0]
 	await labels.first().click()
-	await expect(browser.locator('.browser__page').getByText(target)).toBeVisible()
+	await expect(visibleTabs(page).getByRole('tab', { name: target })).toHaveAttribute(
+		'aria-selected',
+		'true'
+	)
+	expect(await page.locator('.browser__tabs .browser__tab[data-active]:not([data-hidden])').count()).toBe(1)
+})
+
+test('keeps the current page on the strip when it would not fit', async ({ page }) => {
+	await page.setViewportSize({ width: 1100, height: 800 })
+	await markSignedIn(page)
+	await page.goto('/app/inbox')
+	const browser = page.locator('.browser')
+	for (const address of ADDRESSES) await openLongTab(page, address)
+	await page.waitForTimeout(400)
+
+	/* 当前页一定在条上，并且带激活态 */
+	const active = page.locator('.browser__tabs .browser__tab[data-active]')
+	await expect(active).toHaveCount(1)
+	await expect(active).not.toHaveAttribute('data-hidden', 'true')
+	await expect(active.getByRole('tab')).toHaveAttribute('aria-selected', 'true')
+
+	/* 放不下的那些在菜单里，条上与菜单加起来正好是全部四页 */
+	const visibleCount = await visibleTabs(page).count()
 	await browser.locator('.browser__more').click()
-	await expect(page.locator('.browser__menu-item[data-active] .browser__menu-label')).toHaveText(target)
+	const hiddenLabels = await page.locator('.browser__menu-item .browser__menu-label').allInnerTexts()
+	expect(hiddenLabels).toHaveLength(4 - visibleCount)
+	expect(hiddenLabels.length).toBeGreaterThan(0)
 })
 
 test('brings the hidden tabs back when the column grows', async ({ page }) => {

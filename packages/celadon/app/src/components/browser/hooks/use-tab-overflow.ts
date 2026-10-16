@@ -51,14 +51,19 @@ export function useTabOverflow(tabs: BrowserTab[], activeKey: string): TabOverfl
 				budget -= cost
 				fits += 1
 			}
-			/* 从头开始能放下的那一段，条上因此始终是连续的一段；一个都放不下时只留当前页，
-			   没有当前页则留第一项。当前页落在溢出段里时，菜单里那一项标出当前态 */
-			const keys =
-				fits > 0
-					? tabs.slice(0, fits).map((tab) => tab.key)
-					: tabs.some((tab) => tab.key === activeKey)
-						? [activeKey]
-						: tabs.slice(0, 1).map((tab) => tab.key)
+			/* 条上从头放下多少就是多少；当前页落在放不下的那一段里时，用它替掉可见段末尾那一项，
+			   被替下来的那一项连同更后面的都进菜单。这样当前页始终在条上（激活态看得到），
+			   代价是可见段与数组次序之间有一次隐性的次序调整。一个都放不下时只留当前页，
+			   没有当前页则留第一项 */
+			let keys = tabs.slice(0, fits).map((tab) => tab.key)
+			if (fits > 0 && !keys.includes(activeKey)) {
+				const anchor = tabs.find((tab) => tab.key === activeKey)
+				if (anchor) keys = [...keys.slice(0, fits - 1), anchor.key]
+			} else if (fits === 0) {
+				keys = tabs.some((tab) => tab.key === activeKey)
+					? [activeKey]
+					: tabs.slice(0, 1).map((tab) => tab.key)
+			}
 
 			/* 签名要连标签全集一起比：可见段没变、但后面又开了新页时，
 			   隐藏段变了，也要把新的隐藏项交给菜单 */
