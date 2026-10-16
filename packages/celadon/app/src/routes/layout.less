@@ -24,11 +24,14 @@
   order: 3;
 }
 
-.layout[data-browser='left'] > .content {
+/* 后两栏的次序只看换边状态，不看收放状态：收放与次序分成两个属性，
+   否则一收起 `data-browser` 就变成 collapsed，下面这两条按 left 匹配的规则会同时失效，
+   两栏在动画中途换位。 */
+.layout[data-browser-side='left'] > .content {
   order: 3;
 }
 
-.layout[data-browser='left'] > .browser {
+.layout[data-browser-side='left'] > .browser {
   order: 2;
 }
 

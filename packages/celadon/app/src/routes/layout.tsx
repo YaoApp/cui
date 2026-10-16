@@ -207,7 +207,9 @@ export function AppLayout() {
 			data-os={client.os || 'unknown'}
 			data-width={collapsed || narrow ? 'zero' : 'panel'}
 			data-nav={collapsed || narrow ? 'collapsed' : 'expanded'}
-			data-browser={secondaryHidden ? 'collapsed' : browserSide}
+			/* 收放与次序分成两个属性：收放一变 data-browser 就是 collapsed，次序另由 data-browser-side 给 */
+			data-browser={secondaryHidden ? 'collapsed' : 'expanded'}
+			data-browser-side={browserSide}
 			data-mirror={mirror ? 'true' : undefined}
 			data-exclusive={exclusive ? 'true' : undefined}
 		>
