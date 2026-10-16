@@ -33,14 +33,36 @@
 }
 
 /* 第三栏收掉：整条让给内容区（再引用一次又切回来，见 design/main-shell.md §五）。
-   用零宽收起而不是 display: none，布局动画才量得到前后状态。 */
-.layout[data-browser='collapsed'] .browser {
+   用零宽收起而不是 display: none，布局动画才量得到前后状态。
+   镜像态（[data-mirror]）不适用这一条：那时次栏是内容区，收掉的是它，见下面一组规则。 */
+.layout:not([data-mirror])[data-browser='collapsed'] .browser {
   inline-size: 0;
   min-inline-size: 0;
   /* 不写 max-inline-size: 0：它会把宽度当场夹到零，inline-size 的过渡就看不见了 */
   padding-inline: 0;
   border-inline-width: 0;
   overflow: hidden;
+}
+
+/* 镜像态：次栏是内容区，收掉的是它；持定宽的标签浏览器是主栏，此时铺满其余空间。
+   内容区吃剩余宽度，所以这里要连 flex 一起收回，否则它会继续把空间撑开。 */
+.layout[data-mirror][data-browser='collapsed'] > .content {
+  flex: none;
+  inline-size: 0;
+  min-inline-size: 0;
+  max-inline-size: 0;
+  padding-inline: 0;
+  border-inline-width: 0;
+  overflow: hidden;
+}
+
+.layout[data-mirror][data-browser='collapsed'] > .browser {
+  flex: 1;
+  max-inline-size: none;
+}
+
+.layout[data-mirror][data-browser='collapsed'] .browser__shell {
+  inline-size: 100%;
 }
 
 /* 面板独占整扇窗口：导航区与内容区让位，标签浏览器占满（见 design/main-shell.md §七）。

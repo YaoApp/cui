@@ -2,7 +2,7 @@ import './layout.less'
 import { useEffect, useState } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router'
 import { Browser, TabPage, type BrowserTab } from '@/components/browser'
-import { Content } from '@/components/content'
+import { Content, type HeadKey } from '@/components/content'
 import { Nav, type NavItem } from '@/components/nav'
 import { useAuthStore } from '@/features/auth/auth.store'
 import { useLandingRecord } from '@/features/auth/use-landing-record'
@@ -44,13 +44,13 @@ export function AppLayout() {
      区别只在来源，视口驱动的这一档不写偏好。阈值取 token --nav-auto-collapse（972：导航区最小 + 内容区最小 + 侧栏最小 + 把手），
      即前两栏已经各自压到最小之后才轮到导航区收起（design/foundations.md F6）。 */
 	const narrow = useMediaQuery('(width <= 971px)')
-	/* 继续压窄到内容区最小 + 侧栏最小 + 把手（400 + 300 + 8），侧栏也让不动了，整条收起（F6 的最后一步）。 */
-	const narrowForBrowser = useMediaQuery('(width <= 707px)')
+	/* 继续压窄到主栏最小 + 次栏最小 + 把手（400 + 300 + 8），次栏也让不动了，整条收起（F6 的最后一步）。
+	   收掉的是次栏：正常态是标签浏览器，镜像态是内容区。 */
+	const narrowForSecondary = useMediaQuery('(width <= 707px)')
 	const toggleNav = useColumnsStore((state) => state.toggleNav)
 	const mainFolded = useColumnsStore((state) => state.navMainCollapsed)
 	const toggleMain = useColumnsStore((state) => state.toggleNavMain)
 	const browserCollapsed = useColumnsStore((state) => state.browserCollapsed)
-	const browserHidden = browserCollapsed || narrowForBrowser
 	const browserSplit = useColumnsStore((state) => state.browserSplit)
 	const setBrowserSplit = useColumnsStore((state) => state.setBrowserSplit)
 	const splitRatio = useColumnsStore((state) => state.splitRatio)
@@ -76,6 +76,12 @@ export function AppLayout() {
 	const splitBlocked = useMediaQuery('(width <= 1287px)')
 	const toggleBrowser = useColumnsStore((state) => state.toggleBrowser)
 	const browserSide = useColumnsStore((state) => state.browserSide)
+	/* 主栏是中间那一栏：正常态（本栏在右）是内容区，镜像态（本栏在左）是标签浏览器；
+	   次栏是离导航最远的那一栏，也就是会被整条收掉的那一栏。收放键与找回键都按这两个角色给。 */
+	const mirror = browserSide === 'left'
+	const secondaryHidden = browserCollapsed || narrowForSecondary
+	const browserHidden = !mirror && secondaryHidden
+	const navCollapsed = collapsed || narrow
 	const setBrowserSide = useColumnsStore((state) => state.setBrowserSide)
 	const navWidth = useColumnsStore((state) => state.navWidth)
 	const setNavWidth = useColumnsStore((state) => state.setNavWidth)
@@ -160,6 +166,39 @@ export function AppLayout() {
 		/>
 	)
 
+	/* 列头两颗键按角色给：
+	   正常态主栏是内容区，左端导航找回、右端标签浏览器找回；
+	   镜像态主栏是标签浏览器（两颗找回键搬到它的顶栏），内容区是次栏，右端装它自己的收起键、左端留空。 */
+	const navHeadKey: HeadKey = {
+		icon: 'i-panel-left',
+		expanded: !navCollapsed,
+		visible: navCollapsed && chrome.controls !== 'own',
+		blocked: narrow,
+		label: t('shell.navigation.action.expand'),
+		blockedLabel: t('shell.navigation.action.blocked'),
+		onClick: toggleNav
+	}
+	const contentLead = mirror ? undefined : navHeadKey
+	const contentTrail: HeadKey = mirror
+		? {
+				icon: 'i-panel-right',
+				expanded: true,
+				visible: true,
+				label: t('shell.browser.action.collapse'),
+				onClick: toggleBrowser
+			}
+		: {
+				icon: 'i-panel-right',
+				expanded: !secondaryHidden,
+				visible: secondaryHidden,
+				blocked: narrowForSecondary,
+				label: secondaryHidden
+					? t('shell.browser.action.expand')
+					: t('shell.browser.action.collapse'),
+				blockedLabel: t('shell.browser.action.blocked'),
+				onClick: toggleBrowser
+			}
+
 	return (
 		<div
 			className='layout'
@@ -168,7 +207,8 @@ export function AppLayout() {
 			data-os={client.os || 'unknown'}
 			data-width={collapsed || narrow ? 'zero' : 'panel'}
 			data-nav={collapsed || narrow ? 'collapsed' : 'expanded'}
-			data-browser={browserHidden ? 'collapsed' : browserSide}
+			data-browser={secondaryHidden ? 'collapsed' : browserSide}
+			data-mirror={mirror ? 'true' : undefined}
 			data-exclusive={exclusive ? 'true' : undefined}
 		>
 			<Nav
@@ -189,15 +229,9 @@ export function AppLayout() {
 			</Nav>
 			<Content
 				title={t('shell.content.demoTitle')}
-				navCollapsed={collapsed || narrow}
-				/* 视口窄到自动收起导航时，列头那颗展开键置灰并给出原因，不出现按下去没有反应的键 */
-				navBlocked={narrow}
-				/* 给列头的是**实际**状态：窗口窄到放不下这一栏时它本来就是收起的，
-				   切换键同时置灰并给出原因，避免按下去什么都不发生 */
-				browserCollapsed={browserHidden}
-				browserBlocked={narrowForBrowser}
-				onToggleNav={toggleNav}
-				onToggleBrowser={toggleBrowser}
+				navCollapsed={navCollapsed}
+				lead={contentLead}
+				trail={contentTrail}
 			>
 				<Outlet />
 			</Content>
@@ -206,6 +240,25 @@ export function AppLayout() {
 				activeKey={activeKey}
 				side={browserSide}
 				collapsed={browserHidden}
+				primary={mirror}
+				navKey={
+					mirror
+						? {
+								visible: navCollapsed && chrome.controls !== 'own',
+								blocked: narrow,
+								onClick: toggleNav
+							}
+						: undefined
+				}
+				secondaryKey={
+					mirror
+						? {
+								collapsed: secondaryHidden,
+								blocked: narrowForSecondary,
+								onClick: toggleBrowser
+							}
+						: undefined
+				}
 				split={browserSplit}
 				splitBlocked={splitBlocked}
 				splitRatio={splitRatio}

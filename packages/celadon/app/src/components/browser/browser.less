@@ -319,6 +319,52 @@
 	user-select: none;
 }
 
+/* 顶栏两侧的键槽：镜像态装导航找回键（标签条之前）与次栏找回键（收放键那一格）。
+   槽位展示时占 32，不展示时收成 0，标签区因此自然让出宽度；键的淡入淡出与内容列头两颗键同一套做法，
+   面板开合动画期间界面上不出现第二颗键。 */
+.browser__slot {
+	display: flex;
+	flex: none;
+	align-items: center;
+	justify-content: center;
+	inline-size: var(--spacing-32);
+	transition: inline-size var(--duration-base) var(--easing-standard);
+}
+
+.browser__slot[data-hidden='true'] {
+	inline-size: 0;
+	pointer-events: none;
+}
+
+.browser__slot-key {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.browser__slot[data-hidden='true'] .browser__slot-key {
+	opacity: 0;
+	visibility: hidden;
+	transition:
+		opacity var(--duration-fast) var(--easing-standard),
+		visibility 0s linear var(--duration-fast);
+}
+
+.browser__slot:not([data-hidden='true']) .browser__slot-key {
+	animation: celadon-bar-key-in var(--duration-fast) var(--easing-standard)
+		calc(var(--duration-base) + var(--duration-fast)) both;
+}
+
+@keyframes celadon-bar-key-in {
+	from {
+		opacity: 0;
+	}
+
+	to {
+		opacity: 1;
+	}
+}
+
 /* 标签与 ＋ 号抬到拖动层之上，点击照旧 */
 .browser__tabs,
 .browser__new {

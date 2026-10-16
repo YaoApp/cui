@@ -12,7 +12,7 @@ type ColumnsState = {
   navCollapsed: boolean
   /** 主导航那一段折叠：只折上区，不是整列 */
   navMainCollapsed: boolean
-  /** 标签浏览器收掉：整栏让给内容区 */
+  /** 次栏收掉：整栏让给主栏。主栏是中间那一栏，次栏是离导航最远的那一栏；正常态次栏是标签浏览器，镜像态是内容区 */
   browserCollapsed: boolean
   browserSide: BrowserSide
   /** 分屏方向；`none` 是单面板 */
