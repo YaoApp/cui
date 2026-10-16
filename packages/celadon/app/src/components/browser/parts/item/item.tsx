@@ -10,6 +10,8 @@ export type BrowserTabItemProps = {
 	active: boolean
 	/** 放不下、进了下拉菜单：仍渲染（宽度量得到），但收成不可见并脱离排布 */
 	hidden?: boolean
+	/** 键盘落点：roving tabindex，当前落点为 0，其余为 -1 */
+	tabIndex?: number
 	onActivate: (key: string) => void
 	onClose: (key: string) => void
 }
@@ -25,7 +27,14 @@ export type BrowserTabItemProps = {
    元素上写空 title 也压不住。所以标题这一段取 pointer-events: none，指针永远落不到它身上，
    截断信息由覆盖整块主体的统一 Tooltip 承担。观测因此挂在最外层块上：
    主体在截断时会交给基础件当触发元素，ref 会被接管，外层块是我们自己的元素，稳定。 */
-export function BrowserTabItem({ tab, active, hidden = false, onActivate, onClose }: BrowserTabItemProps) {
+export function BrowserTabItem({
+	tab,
+	active,
+	hidden = false,
+	tabIndex = -1,
+	onActivate,
+	onClose
+}: BrowserTabItemProps) {
 	const { t } = useTranslation()
 	const blockRef = useRef<HTMLSpanElement>(null)
 	/* 标题被省略号截断时才挂统一 Tooltip。截断与否必须在指针进来之前就定下来：
@@ -63,6 +72,7 @@ export function BrowserTabItem({ tab, active, hidden = false, onActivate, onClos
 		<span
 			className="browser__tab-main"
 			role="tab"
+			tabIndex={tabIndex}
 			aria-selected={active}
 			onClick={() => onActivate(tab.key)}
 		>
