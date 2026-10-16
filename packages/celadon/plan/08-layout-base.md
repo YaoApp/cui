@@ -1,6 +1,6 @@
 # 08 · 布局：第一阶段（骨架）
 
-- 主文档：[08-layout-index.md](08-layout-index.md)
+- 主文档：[08-layout-implemented.md](08-layout-implemented.md)（已实现的部分）· [08-layout-content-browser.md](08-layout-content-browser.md)（未完成的跟踪）
 - 依据：`design/main-shell.md`（结构与交互）· `architecture/03-boundaries.md` §1 与 §3（落位）
 - 做法：逐步细化。本阶段只搭外壳骨架与关键链路，内容与细节用占位，用到哪个组件才建哪个。
 - 状态：已实现 · 待验收（2026-10-10）

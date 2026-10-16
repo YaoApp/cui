@@ -1,8 +1,7 @@
 # 08 · 布局：窗口封装（壳）
 
-- 主文档：[08-layout-index.md](08-layout-index.md)
-- 依据：`内部文档/design/桌面客户端壳.md`（窗口封装的实施方案，含三端差异、标题栏规格、拖动规则与验证方式）· `design/foundations.md`（窗口尺寸与分割线规则）· `architecture/10-icons.md`（图标取用与新增流程）· `architecture/03-boundaries.md` §1 与 §3（落位与组件归属）
-- 前一分册：[08-layout-nav.md](08-layout-nav.md)（导航列）
+- 主文档：[08-layout-implemented.md](08-layout-implemented.md)（已实现的部分）· [08-layout-content-browser.md](08-layout-content-browser.md)（未完成的跟踪）
+- 依据：`design/foundations.md`（窗口尺寸与分割线规则）· `architecture/10-icons.md`（图标取用与新增流程）· `architecture/03-boundaries.md` §1 与 §3（落位与组件归属）
 - 状态：Windows 标题栏已落地，产品级细节待做
 
 这一册只讲一件事：**窗口最外面那一层**。桌面客户端没有原生标题栏时，顶部那一条由应用自己画，它要同时承担标题栏、拖动区与窗口按钮的职责；macOS 走系统透明标题栏，交通灯仍是原生的；Web 没有窗口可管，这条不画。三端渲染同一套组件，差异只有内边距与窗口按钮由谁提供。

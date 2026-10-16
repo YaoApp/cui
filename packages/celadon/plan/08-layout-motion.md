@@ -1,8 +1,7 @@
 # 08 · 布局：动效（Motion）
 
-- 主文档：[08-layout-index.md](08-layout-index.md)
-- 分册：[08-layout-base.md](08-layout-base.md)（骨架）· [08-layout-nav.md](08-layout-nav.md)（导航列）· [08-layout-shell.md](08-layout-shell.md)（窗口封装）
-- 依据：`内部文档/design/导航列收放动效方案.md`（观察标准 · 变形来源 · 业界做法 · FLIP 与 Motion 的接法）
+- 主文档：[08-layout-implemented.md](08-layout-implemented.md)（已实现的部分）· [08-layout-content-browser.md](08-layout-content-browser.md)（未完成的跟踪）
+- 分册：[08-layout-base.md](08-layout-base.md)（骨架）· 08-layout-shell.md（窗口封装）
 - 状态：方案已定，未落地
 
 这一册把界面里所有**会移动的东西**收进一套动效方案，Web 与桌面客户端共用同一套实现。目标只有一个：变化过程中不许变形、不许跳，观感上是整块在平移。
