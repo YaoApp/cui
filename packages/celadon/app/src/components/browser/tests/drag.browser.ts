@@ -204,9 +204,9 @@ test('does not flash the strip back to the old order while the drop lands', asyn
 	await page.mouse.down()
 	await page.mouse.move(home.x + 4, from.y + from.height / 2, { steps: 8 })
 
-	/* 拖动已起、松手之前起录：逐帧记下条上各块的次序与内联位移，一直录到整理完 */
+	/* 拖动已起、松手之前起录：逐帧记下条上各块的次序、内联位移与最小不透明度，一直录到整理完 */
 	await page.evaluate(() => {
-		const samples: { order: string; cleared: boolean }[] = []
+		const samples: { order: string; cleared: boolean; minOpacity: number }[] = []
 		;(window as unknown as { __frames: typeof samples }).__frames = samples
 		const tick = () => {
 			const row = document.querySelector('.browser__tabs-row')
@@ -214,7 +214,8 @@ test('does not flash the strip back to the old order while the drop lands', asyn
 				const tabs = [...row.querySelectorAll<HTMLElement>('.browser__tab')]
 				samples.push({
 					order: tabs.map((element) => element.dataset.tabKey).join(','),
-					cleared: tabs.every((element) => element.style.transform === '')
+					cleared: tabs.every((element) => element.style.transform === ''),
+					minOpacity: Math.min(...tabs.map((element) => Number(getComputedStyle(element).opacity)))
 				})
 			}
 			if (samples.length < 120) requestAnimationFrame(tick)
@@ -224,11 +225,18 @@ test('does not flash the strip back to the old order while the drop lands', asyn
 
 	await page.mouse.up()
 	await page.waitForTimeout(600)
-	const bad = await page.evaluate(() => {
-		const samples = (window as unknown as { __frames: { order: string; cleared: boolean }[] }).__frames
+	const result = await page.evaluate(() => {
+		const samples = (
+			window as unknown as { __frames: { order: string; cleared: boolean; minOpacity: number }[] }
+		).__frames
 		const last = samples[samples.length - 1]
-		/* 松手之后不该再出现「旧次序 + 位移已清」的一帧：那正是各块先跳回原位、再跳到新位置的一闪 */
-		return samples.filter((sample) => sample.order !== last.order && sample.cleared).length
+		return {
+			/* 「旧次序 + 位移已清」的一帧：各块先跳回原位、再跳到新位置的一闪 */
+			stale: samples.filter((sample) => sample.order !== last.order && sample.cleared).length,
+			/* 某一帧里标签淡下去：入场的那一下在换序时被重新触发 */
+			dipped: samples.filter((sample) => sample.minOpacity < 1).length
+		}
 	})
-	expect(bad).toBe(0)
+	expect(result.stale).toBe(0)
+	expect(result.dipped).toBe(0)
 })

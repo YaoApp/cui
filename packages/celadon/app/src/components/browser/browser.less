@@ -278,19 +278,7 @@
 	user-select: none;
 }
 
-/* 新建或新出现的一页：淡入加一点位移，进场 decelerate（design/foundations.md F4）。
-   减少动态由 token 层统一归零，这里不各自判断（architecture/12-motion.md） */
-@keyframes browser-tab-in {
-	from {
-		opacity: 0;
-		transform: translateY(-2px);
-	}
-
-	to {
-		opacity: 1;
-		transform: none;
-	}
-}
+/* 新建或新出现的一页：淡入加一点位移，做法见 `.browser__tab` 上的 `data-enter` 与过渡 */
 
 .browser__bar {
 	position: relative;
@@ -335,14 +323,15 @@
 	user-select: none;
 }
 
-/* 拖动换序期间：本行与栏内都不做过渡、也锁住文本选择；被拖的那一块跟手，其余标签让位
-   （位移由钩子写在元素上，这里只管行为与选择） */
+/* 拖动换序期间：本行不做过渡、也锁住文本选择；被拖的那一块跟手，其余标签让位
+   （位移由钩子写在元素上，这里只管行为与选择）。
+   这里不动 `animation`：进场动画由 `animation-name` 的有无驱动，拖动期间关掉、松手再放开，
+   等于让每一块在松手那一刻重跑一遍进场动画，看上去所有标签一起闪一下。 */
 .browser__tabs-row[data-dragging] {
 	user-select: none;
 }
 
 .browser__tabs-row[data-dragging] .browser__tab {
-	animation: none;
 	transition: none;
 }
 
@@ -382,10 +371,20 @@
 	padding-inline: var(--spacing-8) 0;
 	border-radius: var(--radius-small);
 	background: transparent;
-	/* 新建或新出现的一页：淡入加一点位移（关键帧在同文件上方），减少动态由 token 层统一归零 */
-	animation: browser-tab-in var(--duration-fast) var(--easing-decelerate);
-	/* 只过渡具体属性，不写 background 简写：简写在 WebKit 上会带上图片与定位一起参与 */
-	transition: background-color var(--duration-fast) var(--easing-decelerate);
+	/* 新建或新出现的一页：淡入加一点位移。用 `data-enter` 加过渡，不用 CSS 动画：
+	   换序时 React 会重新插入节点，WebKit 会把动画从头再跑一遍，松手那一刻挪过位置的标签
+	   一起淡入，看上去整条闪一下；过渡只在属性值变化时走，重插不触发。
+	   减少动态由 token 层统一归零，这里不各自判断（architecture/12-motion.md） */
+	transition:
+		opacity var(--duration-fast) var(--easing-decelerate),
+		transform var(--duration-fast) var(--easing-decelerate),
+		background-color var(--duration-fast) var(--easing-decelerate);
+}
+
+/* 入场首帧：透明并上移 2 像素，下一帧摘掉之后由上面的过渡走完 */
+.browser__tab[data-enter] {
+	opacity: 0;
+	transform: translateY(-2px);
 }
 
 .browser__tab:not([data-closable]) {

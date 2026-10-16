@@ -19,7 +19,7 @@ export type BrowserTabItemProps = {
 
    刻意不用 MotionPanel：它基于 motion 的布局投影，会在元素上写 transform，
    而投影测量在 WebKit 里会对小数宽度（本行实测 75.25）来回取整，指针一进一出就看见跳。
-   入场的淡入位移由 browser.less 的 browser-tab-in 关键帧给，纯 CSS，不碰布局投影。
+   入场的淡入位移由 `data-enter` 加过渡给（见下），纯 CSS，不碰布局投影。
 
    WebKit 会给「正在被省略号截断的元素」自己弹一个原生提示，它与 title 属性无关，
    元素上写空 title 也压不住。所以标题这一段取 pointer-events: none，指针永远落不到它身上，
@@ -32,6 +32,15 @@ export function BrowserTabItem({ tab, active, hidden = false, onActivate, onClos
 	   若等悬停时才挂上 Tooltip，第一次悬停赶不上这次指针事件，气泡不会出现；
 	   所以挂尺寸观测，标签宽度或文字一变就重算，指针进来时 Tooltip 已经在树上 */
 	const [truncated, setTruncated] = useState(false)
+	/* 入场的淡入位移：只在挂载后的第一帧挂上 data-enter，下一帧摘掉，由过渡走完。
+	   不用 CSS 动画：换序时 React 会把节点重新插入，WebKit 会把动画从头再跑一遍，
+	   松手那一刻所有挪过位置的标签一起淡入，看上去就是整条闪一下。过渡只在属性值变化时走，
+	   重插不触发。 */
+	const [entering, setEntering] = useState(true)
+	useEffect(() => {
+		const id = requestAnimationFrame(() => setEntering(false))
+		return () => cancelAnimationFrame(id)
+	}, [])
 	useEffect(() => {
 		const block = blockRef.current
 		if (!block) return
@@ -68,6 +77,7 @@ export function BrowserTabItem({ tab, active, hidden = false, onActivate, onClos
 			data-active={active || undefined}
 			data-closable={tab.closable || undefined}
 			data-hidden={hidden || undefined}
+			data-enter={entering || undefined}
 			data-tab-key={tab.key}
 			onAuxClick={(event) => {
 				// 中键关闭（首页不可关）
