@@ -34,6 +34,8 @@ test('keeps the strip free of horizontal scroll and lists the rest in the menu',
 	const browser = page.locator('.browser')
 
 	for (const address of ADDRESSES) await openLongTab(page, address)
+	/* 等溢出的重算落定：它在观察者回调里做，紧接着读会读到上一版 */
+	await page.waitForTimeout(400)
 
 	/* 标签区不横向滚动；放不下的不进可见排布（首页占一项，所以总共有四项） */
 	const scroll = await browser.locator('.browser__tabs').evaluate((el) => el.scrollWidth - el.clientWidth)
@@ -57,13 +59,12 @@ test('keeps the strip free of horizontal scroll and lists the rest in the menu',
 	expect(await labels.allInnerTexts()).toEqual(expected)
 	await expect(page.locator('.browser__menu-separator')).toHaveCount(1)
 
-	/* 点菜单里的第一项：这一页被激活；它随即进入可见段，选出的是它自己 */
+	/* 点菜单里的第一项：这一页被激活、页面切到它；它仍在溢出段里，菜单里标出当前态 */
 	const target = expected[0]
 	await labels.first().click()
-	await expect(visibleTabs(page).getByRole('tab', { name: target })).toHaveAttribute(
-		'aria-selected',
-		'true'
-	)
+	await expect(browser.locator('.browser__page').getByText(target)).toBeVisible()
+	await browser.locator('.browser__more').click()
+	await expect(page.locator('.browser__menu-item[data-active] .browser__menu-label')).toHaveText(target)
 })
 
 test('brings the hidden tabs back when the column grows', async ({ page }) => {

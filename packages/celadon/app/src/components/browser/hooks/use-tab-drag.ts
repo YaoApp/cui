@@ -4,6 +4,9 @@ import type { BrowserTab } from '../types'
 /** 位移不到 4 像素算点击，超过算拖动，两者互不误触 */
 const THRESHOLD = 4
 
+/** 起手到松手之间挡住选区：WebKit 在指针按下那一刻就会起一段选区 */
+const blockSelect = (event: Event) => event.preventDefault()
+
 type DragState = { key: string; index: number }
 
 type RestRect = { element: HTMLElement; left: number; right: number }
@@ -68,17 +71,17 @@ export function useTabDrag(options: {
 
 	const stop = (commit: boolean) => {
 		const current = gesture.current
-		if (current) {
-			current.block.style.transform = ''
-			current.block.style.zIndex = ''
-			for (const rest of current.rests) rest.element.style.transform = ''
-			try {
-				current.block.releasePointerCapture(current.pointerId)
-			} catch {
-				/* 指针已经不在这块上时释放会抛，忽略 */
-			}
-			document.body.style.userSelect = ''
+		if (!current) return
+		current.block.style.transform = ''
+		current.block.style.zIndex = ''
+		for (const rest of current.rests) rest.element.style.transform = ''
+		try {
+			current.block.releasePointerCapture(current.pointerId)
+		} catch {
+			/* 指针已经不在这块上时释放会抛，忽略 */
 		}
+		document.body.style.userSelect = ''
+		window.removeEventListener('selectstart', blockSelect)
 		gesture.current = null
 		const settled = stateRef.current
 		setState(null)
@@ -124,6 +127,14 @@ export function useTabDrag(options: {
 			step: Math.round(box.width + gap),
 			draggedIndex
 		}
+		/* 一按下就锁住文本选择并清掉已有选区：等越过阈值再锁，浏览器已经先选中了一段文字，
+		   之后再设 user-select 也清不掉那一段高亮（真机上看得很清楚）。selectstart 也一并挡住，
+		   WebKit 在指针按下那一刻就起选区，只设 user-select 有时来不及 */
+		document.body.style.userSelect = 'none'
+		window.getSelection()?.removeAllRanges()
+		window.addEventListener('selectstart', blockSelect)
+		window.addEventListener('pointerup', onWindowUp, { once: true })
+		window.addEventListener('pointercancel', onWindowUp, { once: true })
 		/* 捕获推迟到越过阈值之后再做：按下就捕获会把随后的 click 重定向到整块上，
 		   子元素上的激活处理就收不到了（点标签因此失效） */
 	}
@@ -159,6 +170,7 @@ export function useTabDrag(options: {
 
 	const onPointerUp = () => stop(true)
 	const onPointerCancel = () => stop(false)
+	const onWindowUp = () => stop(true)
 
 	const onClickCapture = (event: MouseEvent<HTMLElement>) => {
 		if (!suppress.current) return

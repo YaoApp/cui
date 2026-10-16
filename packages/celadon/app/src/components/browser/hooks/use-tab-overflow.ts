@@ -51,19 +51,19 @@ export function useTabOverflow(tabs: BrowserTab[], activeKey: string): TabOverfl
 				budget -= cost
 				fits += 1
 			}
-			/* 从头开始能放下的那一段；当前页落在这一段之外时，用它替掉这一段末尾那一项，
-			   保证「开了新页就看得到新页」；一个都放不下时只留当前页，没有当前页则留第一项 */
-			let keys = tabs.slice(0, fits).map((tab) => tab.key)
-			if (fits > 0 && !keys.includes(activeKey)) {
-				const anchor = tabs.find((tab) => tab.key === activeKey)
-				if (anchor) keys = [...keys.slice(0, fits - 1), anchor.key]
-			} else if (fits === 0) {
-				keys = tabs.some((tab) => tab.key === activeKey)
-					? [activeKey]
-					: tabs.slice(0, 1).map((tab) => tab.key)
-			}
+			/* 从头开始能放下的那一段，条上因此始终是连续的一段；一个都放不下时只留当前页，
+			   没有当前页则留第一项。当前页落在溢出段里时，菜单里那一项标出当前态 */
+			const keys =
+				fits > 0
+					? tabs.slice(0, fits).map((tab) => tab.key)
+					: tabs.some((tab) => tab.key === activeKey)
+						? [activeKey]
+						: tabs.slice(0, 1).map((tab) => tab.key)
 
-			const next = keys.join('|')
+			/* 签名要连标签全集一起比：可见段没变、但后面又开了新页时，
+			   隐藏段变了，也要把新的隐藏项交给菜单 */
+			const next =
+				keys.join('|') + '@' + tabs.map((tab) => `${tab.key}:${tab.label}`).join('|')
 			if (next === signature.current) return
 			signature.current = next
 			setOverflow({

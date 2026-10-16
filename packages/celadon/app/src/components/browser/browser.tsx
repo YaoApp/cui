@@ -1,5 +1,5 @@
 import './browser.less'
-import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { Menu as BaseMenu } from '@base-ui/react/menu'
 import { Button } from '@/components/base/button'
 import { Icon } from '@/components/base/icon'
@@ -8,6 +8,7 @@ import { Tooltip } from '@/components/base/tooltip'
 import { useTranslation } from '@/platform/i18n'
 import type { BrowserSplit } from '@/stores/layout/columns'
 import { BrowserTabs } from './parts/tabs'
+import { useTabOverflow } from './hooks/use-tab-overflow'
 import type { BrowserTab } from './types'
 import { useSplitResize } from './hooks/use-split-resize'
 import { useColumnResize } from './hooks/use-column-resize'
@@ -106,16 +107,10 @@ export function Browser({
   const tooNarrowToSplit = (width ?? limits.defaultWidth) < limits.sideMin * 2
   /* 下拉菜单的开合：下拉键与在顶栏空白处点右键都开它 */
   const [menuOpen, setMenuOpen] = useState(false)
-  /* 标签条放不下的那些页由它报上来，进菜单上段；按 key 序列去重，避免每帧重渲染 */
-  const [hiddenTabs, setHiddenTabs] = useState<BrowserTab[]>([])
-  const hiddenSignature = useRef('')
-  const handleOverflowChange = useCallback((hidden: BrowserTab[]) => {
-    const signature = hidden.map((tab) => tab.key).join('|')
-    if (signature === hiddenSignature.current) return
-    hiddenSignature.current = signature
-    setHiddenTabs(hidden)
-  }, [])
   const blocked = splitBlocked || tooNarrowToSplit
+  /* 标签条的溢出量在这里算：算出来的可见段交给标签条渲染，放不下的那些进菜单上段。
+     放在这一层是因为菜单也在这一层，不必再从下面把结果报上来 */
+  const { containerRef: tabsContainerRef, overflow } = useTabOverflow(tabs, activeKey)
   return (
     <aside
       className="browser"
@@ -163,11 +158,12 @@ export function Browser({
         <BrowserTabs
           tabs={tabs}
           activeKey={activeKey}
+          containerRef={tabsContainerRef}
+          visibleKeys={overflow.visibleKeys}
           onActivate={onActivate}
           onClose={onClose}
           onNew={onNew}
           onReorder={onReorder}
-          onOverflowChange={handleOverflowChange}
         />
         {/* 下拉：菜单上段是放不下的标签，下段是操作项；顶栏空白处点右键也开它 */}
         <BaseMenu.Root open={menuOpen} onOpenChange={setMenuOpen}>
@@ -182,7 +178,7 @@ export function Browser({
             <BaseMenu.Positioner side="bottom" align="end" sideOffset={4}>
               <BaseMenu.Popup className="browser__menu" aria-label={t('shell.browser.action.more')}>
                 {/* 上段：放不下的标签，点选即激活；当前页落在这段里时标出当前态 */}
-                {hiddenTabs.map((tab) => (
+                {overflow.hiddenTabs.map((tab) => (
                   <BaseMenu.Item
                     key={tab.key}
                     className="browser__menu-item"
@@ -193,7 +189,7 @@ export function Browser({
                     <span className="browser__menu-label">{tab.label}</span>
                   </BaseMenu.Item>
                 ))}
-                {hiddenTabs.length > 0 ? (
+                {overflow.hiddenTabs.length > 0 ? (
                   <span
                     className="browser__menu-separator"
                     role="separator"
