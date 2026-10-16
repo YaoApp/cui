@@ -62,7 +62,13 @@ export function useTabDrag(options: {
 	stateRef.current = state
 	const suppress = useRef(false)
 	/* 挂在 window 上的收尾处理器存一份，收尾与卸载都按同一引用摘掉 */
-	const windowUp = useRef<{ up: () => void; cancel: () => void } | null>(null)
+	/* 收尾处理器都按同一引用挂上：Escape 在越过阈值之前就要能取消，
+	   所以不能等 `state` 有了才挂键盘监听 */
+	const windowUp = useRef<{
+		up: () => void
+		cancel: () => void
+		key: (event: KeyboardEvent) => void
+	} | null>(null)
 
 	const visibleItems = () =>
 		Array.from(rowRef.current?.querySelectorAll<HTMLElement>('.browser__tab:not([data-hidden])') ?? []).filter(
@@ -124,13 +130,14 @@ export function useTabDrag(options: {
 		return at < 0 ? keys.length : at + 1
 	}
 
-	/* 收尾时把挂在 window 上的两个处理器按同一引用摘掉：松手只等到 pointerup，
+	/* 收尾时把挂在 window 上的处理器按同一引用摘掉：松手只等到 pointerup，
 	   pointercancel 那一个会一直留着，下一次指针取消时误触发旧的收尾 */
 	const clearWindowHandlers = () => {
 		const handlers = windowUp.current
 		if (!handlers) return
 		window.removeEventListener('pointerup', handlers.up)
 		window.removeEventListener('pointercancel', handlers.cancel)
+		window.removeEventListener('keydown', handlers.key)
 		windowUp.current = null
 	}
 
@@ -146,8 +153,10 @@ export function useTabDrag(options: {
 
 	/* 提交换序时不能立刻清位移：那样会先按旧次序画一帧（各块回到原位），
 	   等新次序渲染出来再各就各位，看上去所有标签一起闪一下。
-	   留到新次序已经进 DOM、下一次布局提交之前再清，清完才绘制，中间没有可见的一帧。 */
+	   留到新次序已经进 DOM、下一次布局提交之前再清，清完才绘制，中间没有可见的一帧。
+	   拖动进行中不清：装配层每次渲染都会换掉 `tabs` 的引用，别把跟手与让位位移清掉。 */
 	useLayoutEffect(() => {
+		if (gesture.current) return
 		clearOffsets()
 	}, [options.tabs])
 
@@ -156,8 +165,12 @@ export function useTabDrag(options: {
 		if (!current) return
 		/* 落点要在清掉 gesture 之前换算 */
 		const to = toArrayIndex(stateRef.current?.index ?? 0)
-		/* 取消是回到原位，立刻清；提交换序留给上面那个布局时机 */
-		if (!commit) clearOffsets()
+		const settled = stateRef.current
+		const from = options.tabs.findIndex((tab) => tab.key === current.key)
+		/* 只有确实会写回新次序时才把位移留给上面那个布局时机。落点等于原位、没有换序回调、
+		   或还没越过阈值时，那次布局提交不会来，位移与层级会一直留在元素上，立刻清掉。 */
+		const willReorder = commit && settled !== null && Boolean(onReorder) && to !== from
+		if (!willReorder) clearOffsets()
 		try {
 			current.block.releasePointerCapture(current.pointerId)
 		} catch {
@@ -167,9 +180,8 @@ export function useTabDrag(options: {
 		window.removeEventListener('selectstart', blockSelect)
 		clearWindowHandlers()
 		gesture.current = null
-		const settled = stateRef.current
 		setState(null)
-		if (commit && settled) onReorder?.(settled.key, to)
+		if (willReorder && settled) onReorder?.(settled.key, to)
 	}
 
 	/* 卸载时把挂在 body 与 window 上的副作用交还，避免中途离开留下锁与监听 */
@@ -181,15 +193,6 @@ export function useTabDrag(options: {
 		},
 		[]
 	)
-	useEffect(() => {
-		if (!state) return
-		const onKeyDown = (event: KeyboardEvent) => {
-			/* 取消：不提交，回到原位 */
-			if (event.key === 'Escape') stop(false)
-		}
-		window.addEventListener('keydown', onKeyDown)
-		return () => window.removeEventListener('keydown', onKeyDown)
-	}, [state])
 
 	const onPointerDown = (event: PointerEvent<HTMLElement>) => {
 		if (event.button !== 0) return
@@ -226,9 +229,17 @@ export function useTabDrag(options: {
 		document.body.style.userSelect = 'none'
 		window.getSelection()?.removeAllRanges()
 		window.addEventListener('selectstart', blockSelect)
-		windowUp.current = { up: () => stop(true), cancel: () => stop(false) }
+		windowUp.current = {
+			up: () => stop(true),
+			cancel: () => stop(false),
+			key: (event: KeyboardEvent) => {
+				/* 取消：不提交，回到原位。设置在按下时挂上，越阈值之前按 Escape 也管用 */
+				if (event.key === 'Escape') stop(false)
+			}
+		}
 		window.addEventListener('pointerup', windowUp.current.up, { once: true })
 		window.addEventListener('pointercancel', windowUp.current.cancel, { once: true })
+		window.addEventListener('keydown', windowUp.current.key)
 		/* 捕获推迟到越过阈值之后再做：按下就捕获会把随后的 click 重定向到整块上，
 		   子元素上的激活处理就收不到了（点标签因此失效） */
 	}

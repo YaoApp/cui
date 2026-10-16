@@ -181,6 +181,16 @@ test('keeps the strip when a tab already at the front is dropped at the front', 
 	await page.mouse.down()
 	await page.mouse.move(home.x - 60, home.y + home.height / 2, { steps: 8 })
 	await page.mouse.up()
+	/* 落点等于原位：store 不写状态，那个「留到新次序进 DOM 再清」的时机也不会来，
+	   位移与层级必须当场归零，否则被拖那一块会一直停在偏移位置上 */
+	expect(
+		await page.evaluate(
+			() =>
+				[...document.querySelectorAll('.browser__tab')].filter(
+					(element) => (element as HTMLElement).style.transform !== '' || (element as HTMLElement).style.zIndex !== ''
+				).length
+		)
+	).toBe(0)
 
 	await page.reload()
 	await expect.poll(() => labels(page)).toEqual(before)
@@ -191,8 +201,38 @@ test('keeps the strip when a tab already at the front is dropped at the front', 
 	])
 })
 
-test('does not flash the strip back to the old order while the drop lands', async ({ page }) => {
+test('Escape cancels before the drop index changes', async ({ page }) => {
 	await page.setViewportSize({ width: 1600, height: 900 })
+	await markSignedIn(page)
+	await page.goto('/app/inbox')
+	await openTab(page, 'a.com')
+	await openTab(page, 'b.com')
+	const before = await labels(page)
+
+	/* 越过 4 像素阈值但指针还没挪过任何中点：落点下标仍是原位，只有 Escape 能取消 */
+	const from = await boxOf(page, 'b.com')
+	await page.mouse.move(from.x + 10, from.y + from.height / 2)
+	await page.mouse.down()
+	await page.mouse.move(from.x + 40, from.y + from.height / 2, { steps: 5 })
+	await expect(page.locator('.browser__tabs-indicator')).toHaveCount(1)
+	await page.keyboard.press('Escape')
+	await expect(page.locator('.browser__tabs-indicator')).toHaveCount(0)
+	await page.mouse.up()
+
+	expect(await labels(page)).toEqual(before)
+	expect(
+		await page.evaluate(
+			() =>
+				[...document.querySelectorAll('.browser__tab')].filter(
+					(element) =>
+						(element as HTMLElement).style.transform !== '' ||
+						(element as HTMLElement).style.zIndex !== ''
+				).length
+		)
+	).toBe(0)
+})
+
+test('does not flash the strip back to the old order while the drop lands', async ({ page }) => {	await page.setViewportSize({ width: 1600, height: 900 })
 	await markSignedIn(page)
 	await page.goto('/app/inbox')
 	await openTab(page, 'a.com')
@@ -215,7 +255,14 @@ test('does not flash the strip back to the old order while the drop lands', asyn
 				samples.push({
 					order: tabs.map((element) => element.dataset.tabKey).join(','),
 					cleared: tabs.every((element) => element.style.transform === ''),
-					minOpacity: Math.min(...tabs.map((element) => Number(getComputedStyle(element).opacity)))
+					/* 进场的淡入在内层 `.browser__tab-main` 上，量它才看得出有没有重放 */
+					minOpacity: Math.min(
+						...tabs.map((element) =>
+							Number(
+								getComputedStyle(element.querySelector('.browser__tab-main') ?? element).opacity
+							)
+						)
+					)
 				})
 			}
 			if (samples.length < 120) requestAnimationFrame(tick)
