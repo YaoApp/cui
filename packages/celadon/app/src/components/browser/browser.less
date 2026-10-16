@@ -207,6 +207,27 @@
 	background: var(--background-hover);
 }
 
+/* 当前页落在溢出段里：这一项标出当前态（菜单是白底，用通用选中档） */
+.browser__menu-item[data-active] {
+	background: var(--background-selected);
+	color: var(--text-primary);
+}
+
+.browser__menu-label {
+	flex: 1;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+/* 菜单两段之间的分隔线：只留一条线，不加小标题 */
+.browser__menu-separator {
+	flex: none;
+	block-size: var(--border-width);
+	margin-block: var(--spacing-4);
+	background: var(--border-subtle);
+}
+
 .browser__divider {
 	flex: none;
 	position: relative;
@@ -297,15 +318,16 @@
 
 /* 标签与 ＋ 号抬到拖动层之上，点击照旧 */
 .browser__tabs,
-.browser__new,
-.browser__move {
+.browser__new {
 	position: relative;
 	z-index: 1;
 }
 
+/* 标签区裁切：只渲染放得下的标签，新建键在预算里被预留，因此不会被裁掉 */
 .browser__tabs {
 	flex: 1;
 	min-inline-size: 0;
+	overflow: hidden;
 }
 
 .browser__tabs-row {
@@ -313,6 +335,13 @@
 	align-items: center;
 	gap: var(--spacing-4);
 	white-space: nowrap;
+}
+
+/* 放不下的标签：仍然渲染（宽度量得到），但不占排布、不进无障碍树，也不接指针 */
+.browser__tab[data-hidden] {
+	position: absolute;
+	visibility: hidden;
+	pointer-events: none;
 }
 
 /* 标签是一整块：图标 · 标题（省略号）· 关闭键都在同一块底里，块自己给悬停与当前态。

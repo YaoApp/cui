@@ -1,5 +1,5 @@
 import './browser.less'
-import { useEffect, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { Menu as BaseMenu } from '@base-ui/react/menu'
 import { Button } from '@/components/base/button'
 import { Icon } from '@/components/base/icon'
@@ -103,6 +103,15 @@ export function Browser({
   const tooNarrowToSplit = (width ?? limits.defaultWidth) < limits.sideMin * 2
   /* 下拉菜单的开合：下拉键与在顶栏空白处点右键都开它 */
   const [menuOpen, setMenuOpen] = useState(false)
+  /* 标签条放不下的那些页由它报上来，进菜单上段；按 key 序列去重，避免每帧重渲染 */
+  const [hiddenTabs, setHiddenTabs] = useState<BrowserTab[]>([])
+  const hiddenSignature = useRef('')
+  const handleOverflowChange = useCallback((hidden: BrowserTab[]) => {
+    const signature = hidden.map((tab) => tab.key).join('|')
+    if (signature === hiddenSignature.current) return
+    hiddenSignature.current = signature
+    setHiddenTabs(hidden)
+  }, [])
   const blocked = splitBlocked || tooNarrowToSplit
   return (
     <aside
@@ -148,16 +157,15 @@ export function Browser({
           setMenuOpen(true)
         }}
       >
-        <ScrollArea className="browser__tabs" size="small">
-          <BrowserTabs
-            tabs={tabs}
-            activeKey={activeKey}
-            onActivate={onActivate}
-            onClose={onClose}
-            onNew={onNew}
-          />
-        </ScrollArea>
-        {/* 下拉：菜单上段放溢出的标签（第 14 条），下段是操作项；顶栏空白处点右键也开它 */}
+        <BrowserTabs
+          tabs={tabs}
+          activeKey={activeKey}
+          onActivate={onActivate}
+          onClose={onClose}
+          onNew={onNew}
+          onOverflowChange={handleOverflowChange}
+        />
+        {/* 下拉：菜单上段是放不下的标签，下段是操作项；顶栏空白处点右键也开它 */}
         <BaseMenu.Root open={menuOpen} onOpenChange={setMenuOpen}>
           <BaseMenu.Trigger
             className="browser__more"
@@ -169,6 +177,25 @@ export function Browser({
           <BaseMenu.Portal>
             <BaseMenu.Positioner side="bottom" align="end" sideOffset={4}>
               <BaseMenu.Popup className="browser__menu" aria-label={t('shell.browser.action.more')}>
+                {/* 上段：放不下的标签，点选即激活；当前页落在这段里时标出当前态 */}
+                {hiddenTabs.map((tab) => (
+                  <BaseMenu.Item
+                    key={tab.key}
+                    className="browser__menu-item"
+                    data-active={tab.key === activeKey || undefined}
+                    onClick={() => onActivate(tab.key)}
+                  >
+                    <Icon name={tab.icon ?? (tab.closable ? 'i-globe' : 'i-home')} size={16} />
+                    <span className="browser__menu-label">{tab.label}</span>
+                  </BaseMenu.Item>
+                ))}
+                {hiddenTabs.length > 0 ? (
+                  <span
+                    className="browser__menu-separator"
+                    role="separator"
+                    aria-orientation="horizontal"
+                  />
+                ) : null}
                 <BaseMenu.Item className="browser__menu-item" onClick={onMove}>
                   <Icon name="i-swap" size={16} />
                   <span>{t('shell.browser.action.move')}</span>
