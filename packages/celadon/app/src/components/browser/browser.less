@@ -331,10 +331,30 @@
 }
 
 .browser__tabs-row {
+	position: relative;
 	display: flex;
 	align-items: center;
 	gap: var(--spacing-4);
 	white-space: nowrap;
+}
+
+/* 拖动换序期间：本行不做任何过渡，被拖的那一块用 transform 跟手（由钩子写在元素上） */
+.browser__tabs-row[data-dragging] .browser__tab {
+	animation: none;
+	transition: none;
+	user-select: none;
+}
+
+/* 插入指示线：落点处一条 2 像素竖线，高度取标签块的高 */
+.browser__tabs-indicator {
+	position: absolute;
+	inset-block: 50%;
+	inline-size: 2px;
+	block-size: var(--spacing-24);
+	transform: translateY(-50%);
+	border-radius: var(--radius-full, 999px);
+	background: var(--text-primary);
+	pointer-events: none;
 }
 
 /* 放不下的标签：仍然渲染（宽度量得到），但不占排布、不进无障碍树，也不接指针 */

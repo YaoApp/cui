@@ -68,6 +68,7 @@ export function BrowserTabItem({ tab, active, hidden = false, onActivate, onClos
 			data-active={active || undefined}
 			data-closable={tab.closable || undefined}
 			data-hidden={hidden || undefined}
+			data-tab-key={tab.key}
 			onAuxClick={(event) => {
 				// 中键关闭（首页不可关）
 				if (event.button === 1 && tab.closable) {

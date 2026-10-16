@@ -35,6 +35,8 @@ export type BrowserProps = {
   onClose: (key: string) => void
   /** 新建：开一个空页并停到它（空页里再开东西就在这一页里换内容） */
   onNew: () => void
+  /** 拖动换序提交：索引按移除该项之后的数组算 */
+  onReorder?: (key: string, index: number) => void
   onMove: () => void
   onCollapse: () => void
   /** 第一个面板的当前页：由装配层按标签的内容决定 */
@@ -69,6 +71,7 @@ export function Browser({
   onActivate,
   onClose,
   onNew,
+  onReorder,
   onMove,
   onCollapse,
   children,
@@ -163,6 +166,7 @@ export function Browser({
           onActivate={onActivate}
           onClose={onClose}
           onNew={onNew}
+          onReorder={onReorder}
           onOverflowChange={handleOverflowChange}
         />
         {/* 下拉：菜单上段是放不下的标签，下段是操作项；顶栏空白处点右键也开它 */}
