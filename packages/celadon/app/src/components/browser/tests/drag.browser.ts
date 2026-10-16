@@ -96,3 +96,36 @@ test('a press on the close key does not start a drag', async ({ page }) => {
 	/* 拖动没开始，b.com 仍在原位；这一次按下也没有关掉它，因为指针移出了关闭键 */
 	expect(await labels(page)).toEqual(['首页', 'a.com', 'b.com'])
 })
+
+test('shows the new order while dragging and locks text selection', async ({ page }) => {
+	await page.setViewportSize({ width: 1600, height: 900 })
+	await markSignedIn(page)
+	await page.goto('/app/inbox')
+	await openTab(page, 'a.com')
+	await openTab(page, 'b.com')
+
+	const home = await boxOf(page, '首页')
+	const from = await boxOf(page, 'b.com')
+	await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2)
+	await page.mouse.down()
+	await page.mouse.move(home.x + 4, from.y + from.height / 2, { steps: 8 })
+
+	/* 拖动中：首页让位右移，换位后的次序先摆出来；文本选择被锁住 */
+	await expect.poll(async () => (await boxOf(page, '首页')).x).toBeGreaterThan(home.x + 20)
+	const locked = await page.evaluate(() => {
+		const row = document.querySelector('.browser__tabs-row')!
+		return { row: getComputedStyle(row).userSelect, body: document.body.style.userSelect }
+	})
+	expect(locked.row).toBe('none')
+	expect(locked.body).toBe('none')
+
+	/* 松手：顺序落在新位置上，让位留下的位移全部撤掉 */
+	await page.mouse.up()
+	await expect.poll(() => labels(page)).toEqual(['b.com', '首页', 'a.com'])
+	const cleared = await page.evaluate(() =>
+		Array.from(document.querySelectorAll('.browser__tab')).every(
+			(element) => (element as HTMLElement).style.transform === ''
+		)
+	)
+	expect(cleared).toBe(true)
+})

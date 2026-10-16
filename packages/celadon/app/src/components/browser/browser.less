@@ -338,11 +338,15 @@
 	white-space: nowrap;
 }
 
-/* 拖动换序期间：本行不做任何过渡，被拖的那一块用 transform 跟手（由钩子写在元素上） */
+/* 拖动换序期间：本行与栏内都不做过渡、也锁住文本选择；被拖的那一块跟手，其余标签让位
+   （位移由钩子写在元素上，这里只管行为与选择） */
+.browser__tabs-row[data-dragging] {
+	user-select: none;
+}
+
 .browser__tabs-row[data-dragging] .browser__tab {
 	animation: none;
 	transition: none;
-	user-select: none;
 }
 
 /* 插入指示线：落点处一条 2 像素竖线，高度取标签块的高 */
