@@ -207,6 +207,20 @@
 	background: var(--background-hover);
 }
 
+/* 按可用性置灰的项：文字退到禁用档，也不给悬停底，指针保持默认 */
+.browser__menu-item[data-disabled],
+.browser__menu-item[aria-disabled='true'] {
+	color: var(--text-disabled);
+	cursor: default;
+}
+
+.browser__menu-item[data-disabled]:hover,
+.browser__menu-item[aria-disabled='true']:hover,
+.browser__menu-item[data-disabled][data-highlighted],
+.browser__menu-item[aria-disabled='true'][data-highlighted] {
+	background: transparent;
+}
+
 .browser__menu-label {
 	flex: 1;
 	overflow: hidden;

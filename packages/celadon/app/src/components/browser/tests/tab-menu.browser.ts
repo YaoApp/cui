@@ -30,6 +30,28 @@ async function openMenuOn(page: Page, label: string) {
 	await expect(page.locator('.browser__menu:visible')).toHaveCount(1)
 }
 
+test('greys the close items on the home tab and ignores the click', async ({ page }) => {
+	await page.setViewportSize({ width: 1600, height: 900 })
+	await markSignedIn(page)
+	await page.goto('/app/inbox')
+
+	await openMenuOn(page, '首页')
+	/* 首页不可关、也没有别的可关页：三项都禁用，并且真的点不动 */
+	for (const name of ['关闭这个标签', '关闭其他标签', '关闭全部标签']) {
+		await expect(page.getByRole('menuitem', { name })).toHaveAttribute('aria-disabled', 'true')
+	}
+	await page.getByRole('menuitem', { name: '关闭全部标签' }).click({ force: true })
+	expect(await labels(page)).toEqual(['首页'])
+
+	/* 置灰要真的画出来：禁用项的文字色与可用项不同 */
+	const colorOf = (name: string) =>
+		page.getByRole('menuitem', { name }).evaluate((element) => getComputedStyle(element).color)
+	expect(await colorOf('关闭全部标签')).not.toBe(await colorOf('刷新这个标签'))
+	await expect(
+		page.locator('.browser__tabs .browser__tab[data-active] .browser__tab-label')
+	).toHaveText('首页')
+})
+
 test('lists the tab actions and greys the ones that cannot run', async ({ page }) => {
 	await page.setViewportSize({ width: 1600, height: 900 })
 	await markSignedIn(page)
