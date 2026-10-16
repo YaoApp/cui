@@ -81,6 +81,7 @@ export function AppLayout() {
 	const mirror = browserSide === 'left'
 	const secondaryHidden = browserCollapsed || narrowForSecondary
 	const browserHidden = !mirror && secondaryHidden
+	const contentHidden = mirror && secondaryHidden
 	const navCollapsed = collapsed || narrow
 	const setBrowserSide = useColumnsStore((state) => state.setBrowserSide)
 	const navWidth = useColumnsStore((state) => state.navWidth)
@@ -234,6 +235,7 @@ export function AppLayout() {
 				navCollapsed={navCollapsed}
 				lead={contentLead}
 				trail={contentTrail}
+				hidden={contentHidden}
 			>
 				<Outlet />
 			</Content>
@@ -243,6 +245,8 @@ export function AppLayout() {
 				side={browserSide}
 				collapsed={browserHidden}
 				primary={mirror}
+				/* 镜像态里本栏在窗口最左，导航区收起且平台有原生交通灯时，顶栏左端让出交通灯 */
+				barInset={mirror && navCollapsed && chrome.controls === 'native'}
 				navKey={
 					mirror
 						? {

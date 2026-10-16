@@ -123,3 +123,56 @@ test('narrow window takes away the secondary: content in mirror, browser in norm
 	expect(normal.browser).toBe(0)
 	expect(normal.content).toBeGreaterThan(300)
 })
+
+test('keeps the column order while the secondary collapses in mirror mode', async ({ page }) => {
+	await page.setViewportSize({ width: 1200, height: 800 })
+	await markSignedIn(page)
+	await page.goto('/app/inbox')
+	await swapSide(page)
+
+	/* 收起过程逐帧采样：内容区始终在主栏右侧（次序中途不能翻转），宽度单调收窄。
+	   点击放在页面里做，否则往返一趟会错过前几帧 */
+	const frames = await page.evaluate(
+		() =>
+			new Promise<{ width: number; rightOfMain: boolean }[]>((done) => {
+				const out: { width: number; rightOfMain: boolean }[] = []
+				document.querySelector<HTMLElement>('.content__head-key--browser')!.click()
+				const tick = () => {
+					const content = document.querySelector('.layout > .content')!.getBoundingClientRect()
+					const main = document.querySelector('.layout > .browser')!.getBoundingClientRect()
+					out.push({ width: Math.round(content.width), rightOfMain: content.left >= main.right - 1 })
+					if (out.length < 13) requestAnimationFrame(tick)
+					else done(out)
+				}
+				requestAnimationFrame(tick)
+			})
+	)
+	expect(frames.every((frame) => frame.rightOfMain)).toBe(true)
+	const seen = [...new Set(frames.map((frame) => frame.width).filter((width) => width > 0))]
+	expect(seen.length).toBeGreaterThanOrEqual(3)
+	expect(seen[0]).toBeGreaterThan(seen[seen.length - 1] + 150)
+})
+
+test('exclusive fills the window when the mirrored secondary is collapsed', async ({ page }) => {
+	await page.setViewportSize({ width: 1500, height: 900 })
+	await markSignedIn(page)
+	await page.goto('/app/inbox')
+	await swapSide(page)
+	await page.locator('.content__head-key--browser').click()
+	await expect(page.locator('.layout')).toHaveAttribute('data-browser', 'collapsed')
+	await page.locator('.browser__maximize').click()
+	await expect(page.locator('.layout')).toHaveAttribute('data-exclusive', 'true')
+
+	const sizes = await page.evaluate(() => ({
+		window: Math.round(document.querySelector('.layout')!.getBoundingClientRect().width),
+		main: Math.round(document.querySelector('.layout > .browser')!.getBoundingClientRect().width)
+	}))
+	/* 独占会让导航区与内容区收到零，那两条带过渡，等它走完再比 */
+	await expect
+		.poll(() =>
+			page.evaluate(() =>
+				Math.round(document.querySelector('.layout > .browser')!.getBoundingClientRect().width)
+			)
+		)
+		.toBe(sizes.window)
+})

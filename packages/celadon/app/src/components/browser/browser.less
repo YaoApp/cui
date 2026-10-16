@@ -313,6 +313,9 @@
 	gap: var(--spacing-4);
 	/* 与内容列头同一档内距；键是 small 档 24 高，40 高的栏里上下正好各留 8 */
 	padding: var(--spacing-8);
+	/* 本栏在左且导航区收起、平台有原生交通灯时，左端让出交通灯留白：
+	   顶栏左端此时就是窗口左缘，与内容列头在正常态下承担的是同一件事 */
+	padding-inline-start: calc(var(--spacing-8) + var(--bar-inset, 0px));
 	/* 顶栏不加下边线：与窗口顶带连成一片，标签块自己承担分档 */
 	/* 顶带：拖窗口与双击最大化落在这条带子里，因此不参与文本选择，指针保持箭头 */
 	cursor: default;
@@ -336,7 +339,8 @@
 	pointer-events: none;
 }
 
-.browser__slot-key {
+.browser__slot-key,
+.browser__slot-key-wrap {
 	display: flex;
 	align-items: center;
 	justify-content: center;

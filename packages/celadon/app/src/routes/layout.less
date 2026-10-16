@@ -10,7 +10,7 @@
   overflow: hidden;
 }
 
-/* 三栏的顺序由 order 定：导航列永远第一，内容区与标签浏览器按 data-browser 互换。
+/* 三栏的顺序由 order 定：导航列永远第一，内容区与标签浏览器按 data-browser-side 互换。
    不用 row-reverse：那会把导航列一起镜像到右边。 */
 .layout > .nav {
   order: 1;
@@ -57,22 +57,29 @@
   overflow: hidden;
 }
 
-/* 主栏的目标取「整行减去导航区最小宽与把手」，贴近真正可用的一格：取 100% 会向整行要空间，
-   过渡才走到一半就被收缩夹住，可见的那一段不到一条完整时长。导航区已经收起时把那一段也去掉。
-   本栏原来那条「最多到 100% 减导航最小与内容最小」的上限同时放开，否则它停在半路。 */
+/* 主栏的目标取「整行减去导航区最小宽」：取 100% 会向整行要空间，过渡才走到一半就被收缩夹住，
+   可见的那一段不到一条完整时长；再减把手则会在导航区恰为最小宽时留下一条 8 像素的残边。
+   导航区已经收起时没有这一段可减。本栏原来那条「最多到 100% 减导航最小与内容最小」的上限同时放开，
+   否则它停在半路。 */
 .layout[data-mirror][data-browser='collapsed'] > .browser {
   flex: 0 1 auto;
-  inline-size: calc(100% - var(--nav-min) - var(--side-resize-handle));
+  inline-size: calc(100% - var(--nav-min));
   max-inline-size: none;
 }
 
-/* 导航区已经收起时，可用的一格就是整行：再减把手会剩一条 8 像素的内容区窄边 */
+/* 导航区已经收起时，可用的一格就是整行 */
 .layout[data-mirror][data-browser='collapsed'][data-width='zero'] > .browser {
   inline-size: 100%;
 }
 
-/* 主栏铺满时外壳跟着铺满，并且不带走自己的过渡：宽度每帧按当前列宽算，才跟得上列的变化 */
-.layout[data-mirror][data-browser='collapsed'] .browser__shell {
+/* 面板独占时本栏铺满整扇窗口，镜像态与收掉次栏都不改这一条 */
+.layout[data-exclusive][data-mirror][data-browser='collapsed'] > .browser {
+  inline-size: 100%;
+}
+
+/* 镜像态里外壳始终按本栏当前宽度画：主栏在收放全程都在变宽，外壳若留着自己的过渡会追不上，
+   若只在收起态改成 100% 又会在展开那一帧因为过渡属性刚换回来而跳一下 */
+.layout[data-mirror] .browser__shell {
   inline-size: 100%;
   transition: none;
 }

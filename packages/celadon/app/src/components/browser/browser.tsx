@@ -1,5 +1,5 @@
 import './browser.less'
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useState, type CSSProperties, type ReactNode } from 'react'
 import { Menu as BaseMenu } from '@base-ui/react/menu'
 import { Button } from '@/components/base/button'
 import { Icon } from '@/components/base/icon'
@@ -57,6 +57,8 @@ export type BrowserProps = {
   primary?: boolean
   /** 顶栏前段：导航找回键，放在标签条之前，只在主栏传 */
   navKey?: BarKey
+  /** 本栏在左且导航区收起、平台有原生交通灯：顶栏左端让出交通灯留白（macOS 壳） */
+  barInset?: boolean
   /** 顶栏后段：次栏的找回键，占用收起键原来的位置；`collapsed` 决定文案取展开还是收起 */
   secondaryKey?: { collapsed: boolean; blocked?: boolean; onClick: () => void }
   /** 第一个面板的当前页：由装配层按标签的内容决定 */
@@ -99,6 +101,7 @@ export function Browser({
   onCollapse,
   primary = false,
   navKey,
+  barInset = false,
   secondaryKey,
   children,
   secondary = null,
@@ -180,6 +183,7 @@ export function Browser({
       {/* 顶栏：空白处点右键开同一个下拉菜单（标签上的右键留给标签自己的菜单，第 13 条） */}
       <div
         className="browser__bar"
+        style={barInset ? ({ "--bar-inset": "var(--traffic-lights-width)" } as CSSProperties) : undefined}
         onContextMenu={(event) => {
           event.preventDefault()
           setMenuOpen(true)
@@ -198,17 +202,27 @@ export function Browser({
                 }
                 side="bottom"
               >
-                <Button
-                  className="browser__nav"
-                  iconOnly
-                  variant="plain"
-                  size="small"
-                  disabled={navKey.blocked}
-                  aria-label={t('shell.navigation.action.expand')}
-                  onClick={navKey.onClick}
+                {/* 提示挂在外层 span 上：禁用态的按钮收不到指针事件，气泡否则不会出现 */}
+                <span
+                  className="browser__slot-key-wrap"
+                  title={navKey.blocked ? t('shell.navigation.action.blocked') : undefined}
                 >
-                  <Icon name="i-panel-left" size={16} />
-                </Button>
+                  <Button
+                    className="browser__nav"
+                    iconOnly
+                    variant="plain"
+                    size="small"
+                    disabled={navKey.blocked}
+                    aria-label={
+                      navKey.blocked
+                        ? t('shell.navigation.action.blocked')
+                        : t('shell.navigation.action.expand')
+                    }
+                    onClick={navKey.onClick}
+                  >
+                    <Icon name="i-panel-left" size={16} />
+                  </Button>
+                </span>
               </Tooltip>
             </span>
           </span>
@@ -400,18 +414,30 @@ export function Browser({
                 }
                 side="bottom"
               >
-                <Button
-                  className="browser__secondary-key"
-                  iconOnly
-                  variant="plain"
-                  size="small"
-                  disabled={secondaryKey.blocked}
-                  aria-label={t('shell.browser.action.expand')}
-                  aria-expanded={!secondaryKey.collapsed}
-                  onClick={secondaryKey.onClick}
+                {/* 提示挂在外层 span 上，与内容列头同一套；禁用时无障碍名也换成原因 */}
+                <span
+                  className="browser__slot-key-wrap"
+                  title={secondaryKey.blocked ? t('shell.browser.action.blocked') : undefined}
                 >
-                  <Icon name="i-panel-right" size={16} />
-                </Button>
+                  <Button
+                    className="browser__secondary-key"
+                    iconOnly
+                    variant="plain"
+                    size="small"
+                    disabled={secondaryKey.blocked}
+                    aria-label={
+                      secondaryKey.blocked
+                        ? t('shell.browser.action.blocked')
+                        : secondaryKey.collapsed
+                          ? t('shell.browser.action.expand')
+                          : t('shell.browser.action.collapse')
+                    }
+                    aria-expanded={!secondaryKey.collapsed}
+                    onClick={secondaryKey.onClick}
+                  >
+                    <Icon name="i-panel-right" size={16} />
+                  </Button>
+                </span>
               </Tooltip>
             </span>
           </span>
