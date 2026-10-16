@@ -190,7 +190,12 @@ export function Browser({
             <Icon name="i-down" size={16} />
           </BaseMenu.Trigger>
           <BaseMenu.Portal>
-            <BaseMenu.Positioner side="bottom" align="end" sideOffset={4}>
+            <BaseMenu.Positioner
+              className="browser__menu-layer"
+              side="bottom"
+              align="end"
+              sideOffset={4}
+            >
               <BaseMenu.Popup className="browser__menu" aria-label={t('shell.browser.action.more')}>
                 {/* 上段：放不下的标签，点选即激活。当前页不会落在这里：可见段放不下它时，
                     它替掉可见段末尾那一项留在条上 */}
@@ -242,6 +247,7 @@ export function Browser({
         <BaseMenu.Root open={tabMenu !== null} onOpenChange={(next) => !next && setTabMenu(null)}>
           <BaseMenu.Portal>
             <BaseMenu.Positioner
+              className="browser__menu-layer"
               side="bottom"
               align="start"
               sideOffset={4}
