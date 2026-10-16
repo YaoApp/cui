@@ -4,6 +4,80 @@ import { columns, markSignedIn, metrics } from './layout.helpers'
 /* 三栏骨架这一层：列在不在、宽度按不按 F6、导航列的收起与折起、
    本栏收放与列头找回键、换边、Web 端不出现窗口键、最小窗口、让位顺序。 */
 
+test('eases the navigation row background on hover', async ({ page }) => {
+	await markSignedIn(page)
+	await page.goto('/app/inbox')
+	const row = page.locator('.nav__link').nth(1)
+	const timing = await row.evaluate((el) => {
+		const style = getComputedStyle(el)
+		return {
+			property: style.transitionProperty,
+			duration: style.transitionDuration,
+			easing: style.transitionTimingFunction
+		}
+	})
+	/* F4 的 hover 场景：120 毫秒、标准缓动，只过渡底色与文字色 */
+	expect(timing.property).toContain('background-color')
+	expect(timing.property).toContain('color')
+	expect(timing.duration).toContain('0.12s')
+	expect(timing.easing).toContain('cubic-bezier(0.4, 0, 0.2, 1)')
+
+	await row.hover()
+	await expect(row).toHaveCSS('background-color', 'rgb(237, 237, 240)')
+})
+
+test('drops the head key on the first frame of the panel slide', async ({ page }) => {
+	await markSignedIn(page)
+	await page.goto('/app/inbox')
+
+	/* 两个方向都量：本栏（列头右端的键）与导航列（列头左端的键）。
+	   规则是同一条：点开面板的那一帧起，列头就不再留第二颗键，滑动中只剩面板自己那一颗 */
+	const sample = (keySelector: string, slotSelector: string, columnSelector: string) =>
+		page.evaluate(
+			async ({ keySelector: key, slotSelector: slot, columnSelector: column }) => {
+				const target = document.querySelector(slot)!
+				const rows: Array<[number, number]> = []
+				const tick = () => {
+					const width = Math.round(document.querySelector(column)!.getBoundingClientRect().width)
+					rows.push([width, Math.round(target.getBoundingClientRect().width)])
+					if (rows.length < 40) requestAnimationFrame(tick)
+				}
+				requestAnimationFrame(tick)
+				await new Promise((resolve) => setTimeout(resolve, 80))
+				;(document.querySelector(key) as HTMLElement).click()
+				await new Promise((resolve) => setTimeout(resolve, 600))
+				return rows
+			},
+			{ keySelector, slotSelector, columnSelector }
+		)
+
+	await page.locator('.browser__close').click()
+	await expect(columns(page).browser).toHaveCSS('inline-size', '0px')
+	const browserRows = await sample(
+		'.content__head-key--browser',
+		'.content__head-slot--browser',
+		'.browser'
+	)
+	const browserMoving = browserRows.filter(([width]) => width > 0)
+	expect(browserMoving.length).toBeGreaterThan(0)
+	/* 本栏一开始变宽，列头的槽就已经是零宽（那一颗键整颗不画） */
+	expect(browserMoving.every(([, slot]) => slot === 0)).toBe(true)
+
+	/* 导航列：先收起（列头左端出现展开键），再点开 */
+	await page.mouse.move(140, 20)
+	await page.locator('.nav__header .nav__toggle').click()
+	await expect.poll(async () => (await columns(page).nav.boundingBox())!.width).toBeLessThan(1)
+	const navRows = await sample(
+		'.content__head-slot:not(.content__head-slot--browser) .content__head-key',
+		'.content__head-slot:not(.content__head-slot--browser)',
+		'.nav'
+	)
+	const navMoving = navRows.filter(([width]) => width > 0)
+	expect(navMoving.length).toBeGreaterThan(0)
+	expect(navMoving.every(([, slot]) => slot === 0)).toBe(true)
+})
+
+
 test('lands on the inbox with the three columns in place', async ({ page }) => {
 	await markSignedIn(page)
 	await page.goto('/app/')

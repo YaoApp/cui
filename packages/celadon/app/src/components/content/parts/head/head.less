@@ -43,6 +43,9 @@
 .content__head-slot[data-hidden='true'] {
 	inline-size: 0;
 	pointer-events: none;
+	/* 收起方向立即生效：点开对应面板的那一帧起，列头不再留第二颗键，
+	   滑动过程中界面上只有面板自己那一颗（显示方向仍走上面的宽度过渡，标题平滑平移） */
+	transition: none;
 }
 
 .content__head-slot--browser {

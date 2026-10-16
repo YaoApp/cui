@@ -275,6 +275,10 @@
 	border-radius: var(--radius-small);
 	font-size: var(--font-size-body);
 	text-decoration: none;
+	/* 悬停与当前项换底取 F4 的 hover 场景：--duration-fast 加标准缓动，只列具体属性 */
+	transition:
+		background-color var(--duration-fast) var(--easing-standard),
+		color var(--duration-fast) var(--easing-standard);
 }
 
 /* 条目与弹出菜单项：悬停给一层浅底（导航列专用档，通用档在白底上才够） */
