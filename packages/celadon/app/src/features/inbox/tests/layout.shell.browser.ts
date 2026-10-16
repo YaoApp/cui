@@ -26,55 +26,53 @@ test('eases the navigation row background on hover', async ({ page }) => {
 	await expect(row).toHaveCSS('background-color', 'rgb(237, 237, 240)')
 })
 
-test('drops the head key on the first frame of the panel slide', async ({ page }) => {
+test('keeps the head key away while a panel slides and fades it back after closing', async ({ page }) => {
 	await markSignedIn(page)
 	await page.goto('/app/inbox')
+	const browser = columns(page).browser
+	const wrap = page.locator('.content__head-slot--browser .content__head-key-wrap')
 
-	/* 两个方向都量：本栏（列头右端的键）与导航列（列头左端的键）。
-	   规则是同一条：点开面板的那一帧起，列头就不再留第二颗键，滑动中只剩面板自己那一颗 */
-	const sample = (keySelector: string, slotSelector: string, columnSelector: string) =>
-		page.evaluate(
-			async ({ keySelector: key, slotSelector: slot, columnSelector: column }) => {
-				const target = document.querySelector(slot)!
-				const rows: Array<[number, number]> = []
-				const tick = () => {
-					const width = Math.round(document.querySelector(column)!.getBoundingClientRect().width)
-					rows.push([width, Math.round(target.getBoundingClientRect().width)])
-					if (rows.length < 40) requestAnimationFrame(tick)
-				}
-				requestAnimationFrame(tick)
-				await new Promise((resolve) => setTimeout(resolve, 80))
-				;(document.querySelector(key) as HTMLElement).click()
-				await new Promise((resolve) => setTimeout(resolve, 600))
-				return rows
-			},
-			{ keySelector, slotSelector, columnSelector }
-		)
-
+	/* 两个方向的缓动不同：隐藏（点开面板）120ms 淡出，无延迟；显示（面板合上）用带 320ms 延迟的关键帧 */
 	await page.locator('.browser__close').click()
-	await expect(columns(page).browser).toHaveCSS('inline-size', '0px')
-	const browserRows = await sample(
-		'.content__head-key--browser',
-		'.content__head-slot--browser',
-		'.browser'
-	)
-	const browserMoving = browserRows.filter(([width]) => width > 0)
-	expect(browserMoving.length).toBeGreaterThan(0)
-	/* 本栏一开始变宽，列头的槽就已经是零宽（那一颗键整颗不画） */
-	expect(browserMoving.every(([, slot]) => slot === 0)).toBe(true)
+	await expect(browser).toHaveCSS('inline-size', '0px')
+	await page.waitForTimeout(300)
+	await expect(wrap).toHaveCSS('opacity', '1')
+	const shown = await wrap.evaluate((el) => {
+		const style = getComputedStyle(el)
+		return { name: style.animationName, duration: style.animationDuration, delay: style.animationDelay }
+	})
+	expect(shown.name).toBe('celadon-head-key-in')
+	expect(shown.duration).toContain('0.12s')
+	expect(shown.delay).toContain('0.32s')
 
-	/* 导航列：先收起（列头左端出现展开键），再点开 */
-	await page.mouse.move(140, 20)
-	await page.locator('.nav__header .nav__toggle').click()
-	await expect.poll(async () => (await columns(page).nav.boundingBox())!.width).toBeLessThan(1)
-	const navRows = await sample(
-		'.content__head-slot:not(.content__head-slot--browser) .content__head-key',
-		'.content__head-slot:not(.content__head-slot--browser)',
-		'.nav'
-	)
-	const navMoving = navRows.filter(([width]) => width > 0)
-	expect(navMoving.length).toBeGreaterThan(0)
-	expect(navMoving.every(([, slot]) => slot === 0)).toBe(true)
+	/* 点开：面板起来之后列头那颗键已经不画，隐藏方向是 120ms 的过渡 */
+	await page.locator('.content__head-key--browser').click()
+	await expect.poll(async () => Math.round((await browser.boundingBox())!.width)).toBeGreaterThan(380)
+	await expect(wrap).toHaveCSS('opacity', '0')
+	const hidden = await wrap.evaluate((el) => getComputedStyle(el).transitionDuration)
+	expect(hidden).toContain('0.12s')
+
+	/* 收起：面板滑动全程键不画，收完之后才淡入 */
+	const rows = await page.evaluate(async () => {
+		const target = document.querySelector('.content__head-slot--browser .content__head-key-wrap')!
+		const out: Array<[number, number]> = []
+		const tick = () => {
+			out.push([
+				Math.round(document.querySelector('.browser')!.getBoundingClientRect().width),
+				Number(getComputedStyle(target).opacity)
+			])
+			if (out.length < 60) requestAnimationFrame(tick)
+		}
+		requestAnimationFrame(tick)
+		await new Promise((resolve) => setTimeout(resolve, 80))
+		;(document.querySelector('.browser__close') as HTMLElement).click()
+		await new Promise((resolve) => setTimeout(resolve, 900))
+		return out
+	})
+	const moving = rows.filter(([width]) => width > 20)
+	expect(moving.length).toBeGreaterThan(3)
+	expect(moving.every(([, opacity]) => opacity === 0)).toBe(true)
+	expect(rows[rows.length - 1][1]).toBe(1)
 })
 
 

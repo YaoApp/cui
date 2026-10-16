@@ -23,11 +23,38 @@
 	justify-content: center;
 }
 
-/* 键的外层：提示挂在它身上，禁用态的按钮收不到指针事件时气泡仍能出现 */
+/* 键的外层：提示挂在它身上，禁用态的按钮收不到指针事件时气泡仍能出现。
+   显隐按 F4 走缓动，两个方向不同：隐藏（点开面板）立即淡出，滑动过程中就只剩面板自己那一颗；
+   显示（面板合上）用带延迟的关键帧，等收合动画走完再多一档才淡入 */
 .content__head-key-wrap {
 	display: flex;
 	align-items: center;
 	justify-content: center;
+}
+
+.content__head-slot[data-hidden='true'] .content__head-key-wrap {
+	opacity: 0;
+	visibility: hidden;
+	transition:
+		opacity var(--duration-fast) var(--easing-standard),
+		visibility 0s linear var(--duration-fast);
+}
+
+/* 面板合上、这一颗该回来时：先等 --duration-base 加 --duration-fast，再淡入；
+   延迟期间由 both 保持零透明，面板收合全程界面上不出现第二颗键 */
+.content__head-slot:not([data-hidden='true']) .content__head-key-wrap {
+	animation: celadon-head-key-in var(--duration-fast) var(--easing-standard)
+		calc(var(--duration-base) + var(--duration-fast)) both;
+}
+
+@keyframes celadon-head-key-in {
+	from {
+		opacity: 0;
+	}
+
+	to {
+		opacity: 1;
+	}
 }
 
 /* 操作键的槽位：展示时占 32，不展示时收成 0，与列宽同一条时长过渡，标题因此平滑平移 */
@@ -43,17 +70,14 @@
 .content__head-slot[data-hidden='true'] {
 	inline-size: 0;
 	pointer-events: none;
-	/* 收起方向立即生效：点开对应面板的那一帧起，列头不再留第二颗键，
-	   滑动过程中界面上只有面板自己那一颗（显示方向仍走上面的宽度过渡，标题平滑平移） */
-	transition: none;
 }
 
 .content__head-slot--browser {
 	margin-inline-start: auto;
 }
 
-/* 本栏打开时这一颗整颗不画：零宽的槽不裁子元素，按钮会从槽里露出来 */
-.content__head-slot--browser[data-hidden='true'] {
+/* 本栏打开时这一颗整颗不画：零宽的槽不裁子元素，按钮会从槽里露出来（由上面那条 visibility 收住） */
+.content__head-slot--browser[data-hidden='true'] .content__head-key-wrap {
 	display: none;
 }
 
