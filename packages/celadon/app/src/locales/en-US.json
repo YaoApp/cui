@@ -105,6 +105,8 @@
   "shell.browser.address.label": "External address",
   "shell.browser.address.open": "Open",
   "shell.browser.address.placeholder": "Type an address and press Enter",
+  "shell.browser.address.empty": "Enter an address",
+  "shell.browser.address.invalid": "That does not look like an address, try example.com",
   "shell.browser.recent": "Opened on this side",
   "shell.browser.recent.empty": "Nothing opened yet",
   "shell.browser.web.hint": "External pages are placeholders for now",

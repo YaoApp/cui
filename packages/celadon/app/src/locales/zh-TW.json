@@ -105,6 +105,8 @@
   "shell.browser.address.label": "外部網址",
   "shell.browser.address.open": "開啟",
   "shell.browser.address.placeholder": "輸入網址，按 Enter 開啟",
+  "shell.browser.address.empty": "請輸入網址",
+  "shell.browser.address.invalid": "這看起來不是網址，試試 example.com",
   "shell.browser.recent": "這一側開啟過的內容",
   "shell.browser.recent.empty": "還沒開啟過內容",
   "shell.browser.web.hint": "外部網址先用佔位，之後接真實內容",

@@ -105,6 +105,8 @@
   "shell.browser.address.label": "外部アドレス",
   "shell.browser.address.open": "開く",
   "shell.browser.address.placeholder": "アドレスを入力して Enter",
+  "shell.browser.address.empty": "アドレスを入力してください",
+  "shell.browser.address.invalid": "アドレスではないようです。example.com のように入力してください",
   "shell.browser.recent": "この側で開いたもの",
   "shell.browser.recent.empty": "まだ何も開いていません",
   "shell.browser.web.hint": "外部アドレスのページは当面プレースホルダーです",

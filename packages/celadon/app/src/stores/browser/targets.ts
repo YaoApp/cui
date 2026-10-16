@@ -56,3 +56,32 @@ export function targetLabel(target: TabTarget): string {
 			return ''
 	}
 }
+
+/** 目标的稳定标识：「打开过的东西」用它当条目的键，同一个目标只留一条 */
+export function targetKey(target: TabTarget): string {
+	switch (target.kind) {
+		case 'external':
+			return `external:${target.url}`
+		case 'internal':
+			return `internal:${target.path}`
+		case 'shortcut':
+			return `shortcut:${target.name}:${target.param ?? ''}`
+		default:
+			return target.kind
+	}
+}
+
+/** 输入能不能当成地址：已知名字、`/` 开头的内部路由、带点的域名与 localhost 都算，
+    其余（没有点、带空格、只有协议头）不算。空串不算地址，由调用方单独判空。 */
+export function isAddressLike(input: string): boolean {
+	const value = input.trim()
+	if (!value) return false
+	if (/\s/.test(value)) return false
+	if (value.startsWith('/')) return true
+	const [head] = value.split(':')
+	if (SHORTCUTS[head.trim().toLowerCase()] !== undefined) return true
+	const host = value.replace(/^[a-z][a-z0-9+.-]*:\/\//i, '').split(/[/?#]/)[0]
+	const bare = host.includes('@') ? host.slice(host.indexOf('@') + 1) : host
+	const name = bare.split(':')[0]
+	return name === 'localhost' || name.includes('.')
+}

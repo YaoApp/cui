@@ -13,7 +13,7 @@ import type { I18nKey } from '@/platform/i18n/i18n-types'
 import type { IconId } from '@/platform/icons'
 import { useTranslation } from '@/platform/i18n'
 import { HOME_TAB, tabKey, useTabsStore, type TabEntry } from '@/stores/browser/tabs'
-import { parseTarget, targetLabel } from '@/stores/browser/targets'
+import { isAddressLike, parseTarget, targetLabel } from '@/stores/browser/targets'
 import { useColumnsStore } from '@/stores/layout/columns'
 
 /* 一级导航的六项：**路由信息的投影**，写在装配层（`architecture/07-routing.md`）。
@@ -89,6 +89,8 @@ export function AppLayout() {
 	const moveTab = useTabsStore((state) => state.move)
 	const closeOthersTabs = useTabsStore((state) => state.closeOthers)
 	const closeAllTabs = useTabsStore((state) => state.closeAll)
+	const recentTabs = useTabsStore((state) => state.recent)
+	const openTab = useTabsStore((state) => state.open)
 	const activateTab = useTabsStore((state) => state.activate)
 
 	const mark = (item: NavItem): NavItem => ({
@@ -124,10 +126,12 @@ export function AppLayout() {
 	   标签条上的点击落在**聚焦的那个面板**：面板 0 写全局当前页，面板 1 写它自己这一页 */
 	const secondaryTab = byKey(secondaryKey) ?? tabs.find((tab) => tabKey(tab) !== activeKey) ?? HOME_TAB
 
-	/* 新标签页上的「打开过的东西」：除首页与空页以外的页，名字按当前标签名给 */
-	const recent = tabs
-		.filter((tab) => tab.target.kind !== 'home' && tab.target.kind !== 'blank')
-		.map((tab) => ({ key: tabKey(tab), label: nameOf(tab) }))
+	/* 新标签页上的「打开过的东西」：store 按使用顺序记着，关掉页也不消失；点一条复用同一页打开 */
+	const recent = recentTabs.map((entry) => ({ key: entry.key, label: entry.label }))
+	const openRecent = (key: string) => {
+		const entry = recentTabs.find((item) => item.key === key)
+		if (entry) openTab(entry.target)
+	}
 
 	/* 一页里的地址入口提交了：解析成目标后落在这**本页**里，首页也一样。
 	   想回到新标签页就把它关掉，或者关掉所有页让首页重新出现。
@@ -138,9 +142,21 @@ export function AppLayout() {
 		navigateTab(tabKey(tab), target)
 	}
 
+	/* 地址入口的校验：判据在目标模块里，空串与不像地址的各给一种错误态 */
+	const validateAddress = (input: string): 'empty' | 'invalid' | null => {
+		if (!input) return 'empty'
+		return isAddressLike(input) ? null : 'invalid'
+	}
+
 	/* 一页的内容：两个面板共用同一个派发组件，分屏时各自渲染自己那一页 */
 	const renderTab = (tab: TabEntry) => (
-		<TabPage tab={tab} recent={recent} onOpen={(input) => openIn(tab, input)} />
+		<TabPage
+			tab={tab}
+			recent={recent}
+			onOpen={(input) => openIn(tab, input)}
+			onOpenRecent={openRecent}
+			validateAddress={validateAddress}
+		/>
 	)
 
 	return (

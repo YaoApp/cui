@@ -105,6 +105,8 @@
   "shell.browser.address.label": "外部地址",
   "shell.browser.address.open": "打开",
   "shell.browser.address.placeholder": "输入地址，回车打开",
+  "shell.browser.address.empty": "请输入地址",
+  "shell.browser.address.invalid": "这看起来不是一个地址，试试 example.com",
   "shell.browser.recent": "这一侧打开过的东西",
   "shell.browser.recent.empty": "还没有打开过东西",
   "shell.browser.web.hint": "外部地址的页先占位，稍后接真实内容",

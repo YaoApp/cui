@@ -200,6 +200,8 @@ export type I18nKey =
   | 'shell.browser.action.expand'
   | 'shell.browser.action.more'
   | 'shell.browser.action.move'
+  | 'shell.browser.address.empty'
+  | 'shell.browser.address.invalid'
   | 'shell.browser.address.label'
   | 'shell.browser.address.open'
   | 'shell.browser.address.placeholder'
@@ -449,6 +451,8 @@ declare module 'i18next' {
         'shell.browser.action.expand': string
         'shell.browser.action.more': string
         'shell.browser.action.move': string
+        'shell.browser.address.empty': string
+        'shell.browser.address.invalid': string
         'shell.browser.address.label': string
         'shell.browser.address.open': string
         'shell.browser.address.placeholder': string
