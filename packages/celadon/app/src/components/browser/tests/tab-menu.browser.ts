@@ -26,6 +26,8 @@ async function openMenuOn(page: Page, label: string) {
 		.first()
 		.click({ button: 'right' })
 	await expect(page.getByRole('menuitem', { name: '关闭这个标签' })).toBeVisible()
+	/* 只开标签这一个菜单：顶栏那条「空白处右键开菜单」不该跟着弹出来 */
+	await expect(page.locator('.browser__menu:visible')).toHaveCount(1)
 }
 
 test('lists the tab actions and greys the ones that cannot run', async ({ page }) => {

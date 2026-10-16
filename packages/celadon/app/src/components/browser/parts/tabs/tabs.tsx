@@ -115,6 +115,8 @@ export function BrowserTabs({
 						.tabKey
 					if (!key || !onTabContextMenu) return
 					event.preventDefault()
+					/* 顶栏那条「空白处右键开菜单」挂在更外层：这里要停住，否则两个菜单一起弹 */
+					event.stopPropagation()
 					onTabContextMenu(key, { x: event.clientX, y: event.clientY })
 				}}
 			>
