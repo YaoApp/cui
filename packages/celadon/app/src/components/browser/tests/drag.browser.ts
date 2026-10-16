@@ -129,3 +129,64 @@ test('shows the new order while dragging and locks text selection', async ({ pag
 	)
 	expect(cleared).toBe(true)
 })
+
+test('lands the drop by the whole list when the strip holds a swapped segment', async ({ page }) => {
+	await page.setViewportSize({ width: 1600, height: 900 })
+	await markSignedIn(page)
+	await page.goto('/app/inbox')
+	/* 三个中长标题：栏宽 400 下条上放得下首页与当前页两项，其余进菜单 */
+	for (const address of ['alpha.example.com/one', 'beta.example.com/two', 'gamma.example.com/three']) {
+		await openTab(page, address)
+	}
+	await page.waitForTimeout(400)
+
+	const before = await labels(page)
+	expect(before).toHaveLength(2)
+	expect(before[0]).toBe('首页')
+
+	/* 把首页拖到当前页之后：落点按整个数组算，首页应落到列表最末，而不是插到第二位 */
+	const home = await boxOf(page, '首页')
+	const active = await boxOf(page, before[1])
+	await page.mouse.move(home.x + home.width / 2, home.y + home.height / 2)
+	await page.mouse.down()
+	await page.mouse.move(active.x + active.width + 30, home.y + home.height / 2, { steps: 10 })
+	await page.mouse.up()
+
+	/* 刷新后按整个数组重建：条上是列表前两项加上当前页那一项，菜单里依次是 beta 与首页 */
+	await page.reload()
+	await expect
+		.poll(() => labels(page))
+		.toEqual(['alpha.example.com/one', 'gamma.example.com/three'])
+	await page.locator('.browser__more').click()
+	expect(await page.locator('.browser__menu-item .browser__menu-label').allInnerTexts()).toEqual([
+		'beta.example.com/two',
+		'首页'
+	])
+})
+
+test('keeps the strip when a tab already at the front is dropped at the front', async ({ page }) => {
+	await page.setViewportSize({ width: 1600, height: 900 })
+	await markSignedIn(page)
+	await page.goto('/app/inbox')
+	for (const address of ['alpha.example.com/one', 'beta.example.com/two', 'gamma.example.com/three']) {
+		await openTab(page, address)
+	}
+	await page.waitForTimeout(400)
+
+	/* 条上是「首页 + 当前页」：把首页拖到最前面那一档等于原地不动，不该被推到隐藏项后面去 */
+	const before = await labels(page)
+	expect(before[0]).toBe('首页')
+	const home = await boxOf(page, '首页')
+	await page.mouse.move(home.x + home.width / 2, home.y + home.height / 2)
+	await page.mouse.down()
+	await page.mouse.move(home.x - 60, home.y + home.height / 2, { steps: 8 })
+	await page.mouse.up()
+
+	await page.reload()
+	await expect.poll(() => labels(page)).toEqual(before)
+	await page.locator('.browser__more').click()
+	expect(await page.locator('.browser__menu-item .browser__menu-label').allInnerTexts()).toEqual([
+		'alpha.example.com/one',
+		'beta.example.com/two'
+	])
+})

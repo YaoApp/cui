@@ -160,6 +160,11 @@ describe('标签集', () => {
 		expect(order()).toEqual([HOME_TAB.key, third, second])
 		useTabsStore.getState().move('missing', 0)
 		expect(order()).toEqual([HOME_TAB.key, third, second])
+		/* 非有限数不动作：拿它去夹取会静默变成 0 或数组长度，等于把这一页挪到最前或最末 */
+		useTabsStore.getState().move(second, Number.NaN)
+		expect(order()).toEqual([HOME_TAB.key, third, second])
+		useTabsStore.getState().move(third, Number.POSITIVE_INFINITY)
+		expect(order()).toEqual([HOME_TAB.key, third, second])
 		/* 目标位置与现位置相同：不写状态，顺序不变 */
 		useTabsStore.getState().move(third, 1)
 		expect(order()).toEqual([HOME_TAB.key, third, second])

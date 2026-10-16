@@ -53,6 +53,8 @@ export function useTabDrag(options: {
 	const stateRef = useRef<DragState | null>(null)
 	stateRef.current = state
 	const suppress = useRef(false)
+	/* 挂在 window 上的收尾处理器存一份，收尾与卸载都按同一引用摘掉 */
+	const windowUp = useRef<{ up: () => void; cancel: () => void } | null>(null)
 
 	const visibleItems = () =>
 		Array.from(rowRef.current?.querySelectorAll<HTMLElement>('.browser__tab:not([data-hidden])') ?? []).filter(
@@ -90,9 +92,45 @@ export function useTabDrag(options: {
 		}
 	}
 
+	/** 可见段里的落点下标换算成整个数组里的落点下标。
+	    拖动只在可见段里算，`move` 却按整个数组算，可见段不是数组前缀时（当前页被换到条上就是这种）
+	    两者之间差着隐藏项，不换算就会落到错的位置。锚点取可见段里第 index 项之前的那一项，
+	    并在「去掉被拖项之后」的数组里定位，与 `move` 先删后插的口径一致。
+
+	    落到可见段最前面那一档时不能再往隐藏项后面跑：被拖项本来就在可见段首位时（例如条上是
+	    「首页 + 当前页」而拖的是首页），它已经在锚点之前，这一档等于原地不动，取两处里靠前的那一个。 */
+	const toArrayIndex = (index: number) => {
+		const current = gesture.current
+		if (!current) return index
+		const rests = current.slots
+			.filter((_, position) => position !== current.draggedIndex)
+			.map((slot) => slot.element.dataset.tabKey ?? '')
+		const keys = options.tabs.filter((tab) => tab.key !== current.key).map((tab) => tab.key)
+		if (index <= 0) {
+			const at = rests.length > 0 ? keys.indexOf(rests[0]) : -1
+			const before = at < 0 ? 0 : at
+			const from = options.tabs.findIndex((tab) => tab.key === current.key)
+			return Math.min(before, from < 0 ? before : from)
+		}
+		const at = keys.indexOf(rests[index - 1])
+		return at < 0 ? keys.length : at + 1
+	}
+
+	/* 收尾时把挂在 window 上的两个处理器按同一引用摘掉：松手只等到 pointerup，
+	   pointercancel 那一个会一直留着，下一次指针取消时误触发旧的收尾 */
+	const clearWindowHandlers = () => {
+		const handlers = windowUp.current
+		if (!handlers) return
+		window.removeEventListener('pointerup', handlers.up)
+		window.removeEventListener('pointercancel', handlers.cancel)
+		windowUp.current = null
+	}
+
 	const stop = (commit: boolean) => {
 		const current = gesture.current
 		if (!current) return
+		/* 落点要在清掉 gesture 之前换算 */
+		const to = toArrayIndex(stateRef.current?.index ?? 0)
 		current.block.style.transform = ''
 		current.block.style.zIndex = ''
 		for (const slot of current.slots) slot.element.style.transform = ''
@@ -103,12 +141,22 @@ export function useTabDrag(options: {
 		}
 		document.body.style.userSelect = ''
 		window.removeEventListener('selectstart', blockSelect)
+		clearWindowHandlers()
 		gesture.current = null
 		const settled = stateRef.current
 		setState(null)
-		if (commit && settled) onReorder?.(settled.key, settled.index)
+		if (commit && settled) onReorder?.(settled.key, to)
 	}
 
+	/* 卸载时把挂在 body 与 window 上的副作用交还，避免中途离开留下锁与监听 */
+	useEffect(
+		() => () => {
+			document.body.style.userSelect = ''
+			window.removeEventListener('selectstart', blockSelect)
+			clearWindowHandlers()
+		},
+		[]
+	)
 	useEffect(() => {
 		if (!state) return
 		const onKeyDown = (event: KeyboardEvent) => {
@@ -121,6 +169,8 @@ export function useTabDrag(options: {
 
 	const onPointerDown = (event: PointerEvent<HTMLElement>) => {
 		if (event.button !== 0) return
+		/* 上一次拖动若没等到那次 click（例如指针移出后松手），别让它吞掉这一次点击 */
+		suppress.current = false
 		const target = event.target as HTMLElement
 		/* 落在关闭键上的按下不进入拖动 */
 		if (target.closest('.browser__tab-close')) return
@@ -152,8 +202,9 @@ export function useTabDrag(options: {
 		document.body.style.userSelect = 'none'
 		window.getSelection()?.removeAllRanges()
 		window.addEventListener('selectstart', blockSelect)
-		window.addEventListener('pointerup', onWindowUp, { once: true })
-		window.addEventListener('pointercancel', onWindowUp, { once: true })
+		windowUp.current = { up: () => stop(true), cancel: () => stop(false) }
+		window.addEventListener('pointerup', windowUp.current.up, { once: true })
+		window.addEventListener('pointercancel', windowUp.current.cancel, { once: true })
 		/* 捕获推迟到越过阈值之后再做：按下就捕获会把随后的 click 重定向到整块上，
 		   子元素上的激活处理就收不到了（点标签因此失效） */
 	}
@@ -186,7 +237,6 @@ export function useTabDrag(options: {
 
 	const onPointerUp = () => stop(true)
 	const onPointerCancel = () => stop(false)
-	const onWindowUp = () => stop(true)
 
 	const onClickCapture = (event: MouseEvent<HTMLElement>) => {
 		if (!suppress.current) return

@@ -24,7 +24,7 @@ export const isHome = (tab: TabEntry): boolean => tab.target.kind === 'home'
 type OpenMeta = { title?: string; icon?: IconId }
 
 type TabsState = {
-	/** 打开的页，首页恒在第一位 */
+	/** 打开的页；首页也是普通一页，次序可自由调整，只在列表中一个都不剩时重新出现 */
 	tabs: TabEntry[]
 	activeKey: string
 	/** 开一页：同一目标已在则切到它；不在则追加并停到它 */
@@ -117,6 +117,8 @@ export const useTabsStore = create<TabsState>()(
 					const { tabs } = get()
 					const from = tabs.findIndex((tab) => tab.key === key)
 					if (from < 0) return
+					/* 落点必须是有限数：拿它去夹取会静默变成 0，等于把这一页挪到最前 */
+					if (!Number.isFinite(index)) return
 					const rest = tabs.filter((tab) => tab.key !== key)
 					const to = Math.max(0, Math.min(rest.length, Math.trunc(index)))
 					if (to === from) return

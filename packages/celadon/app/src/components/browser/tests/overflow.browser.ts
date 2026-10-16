@@ -83,11 +83,16 @@ test('keeps the current page on the strip when it would not fit', async ({ page 
 	await expect(active).not.toHaveAttribute('data-hidden', 'true')
 	await expect(active.getByRole('tab')).toHaveAttribute('aria-selected', 'true')
 
+	/* 可见段是「从头放下的一段」，当前页替掉末尾那一项：除最后一项外，可见的就是列表的前面几项 */
+	const all = ['首页', ...ADDRESSES]
+	const visible = await visibleTabs(page).locator('.browser__tab-label').allInnerTexts()
+	expect(visible.slice(0, -1)).toEqual(all.slice(0, visible.length - 1))
+	expect(visible[visible.length - 1]).toBe(all[all.length - 1])
+
 	/* 放不下的那些在菜单里，条上与菜单加起来正好是全部四页 */
-	const visibleCount = await visibleTabs(page).count()
 	await browser.locator('.browser__more').click()
 	const hiddenLabels = await page.locator('.browser__menu-item .browser__menu-label').allInnerTexts()
-	expect(hiddenLabels).toHaveLength(4 - visibleCount)
+	expect(hiddenLabels).toHaveLength(4 - visible.length)
 	expect(hiddenLabels.length).toBeGreaterThan(0)
 })
 

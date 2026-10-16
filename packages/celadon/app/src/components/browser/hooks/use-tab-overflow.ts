@@ -18,8 +18,9 @@ export type TabOverflowResult = {
    脱离排布（见 item 与样式），宽度仍量得到，所以不必另做一份测量用的副本。
    预算里先扣掉行内的新建键与它前面那一档间距，新建键因此永远留得住。
 
-   可见的是从头开始能放下的那一段；一个都放不下时至少留一项，并优先留当前页。
-   当前页落在后面时它进菜单，菜单里会标出当前态。 */
+   可见的是从头开始能放下的那一段。当前页一定留在条上：它放不进这一段时，替掉这一段末尾那一项，
+   被替下来的那一项进菜单，可见段与数组次序之间因此有一次隐性的次序调整。
+   一个都放不下时只留当前页，没有当前页则留第一项。 */
 export function useTabOverflow(tabs: BrowserTab[], activeKey: string): TabOverflowResult {
 	const containerRef = useRef<HTMLDivElement>(null)
 	const [overflow, setOverflow] = useState<TabOverflow>({

@@ -54,9 +54,9 @@ export type BrowserProps = {
   onExclusive?: () => void
 }
 
-/* 标签浏览器：顶部标签条（首页固定第一个、新建吸附右端），下面当前页或两个面板。
-   标签是全局一套，与会话弱关联（`design/main-shell.md` §五）；标签数据与页内容都由装配层给，
-   组件不认识业务（`architecture/03-boundaries.md` §2 的层间方向）。 */
+/* 标签浏览器：顶部标签条（新建吸附右端，放不下的进下拉菜单上段，标签可拖动换序），
+   下面当前页或两个面板。标签是全局一套，与会话弱关联（`design/main-shell.md` §五）；
+   标签数据与页内容都由装配层给，组件不认识业务（`architecture/03-boundaries.md` §2 的层间方向）。 */
 export function Browser({
   tabs,
   activeKey,
@@ -177,12 +177,12 @@ export function Browser({
           <BaseMenu.Portal>
             <BaseMenu.Positioner side="bottom" align="end" sideOffset={4}>
               <BaseMenu.Popup className="browser__menu" aria-label={t('shell.browser.action.more')}>
-                {/* 上段：放不下的标签，点选即激活；当前页落在这段里时标出当前态 */}
+                {/* 上段：放不下的标签，点选即激活。当前页不会落在这里：可见段放不下它时，
+                    它替掉可见段末尾那一项留在条上 */}
                 {overflow.hiddenTabs.map((tab) => (
                   <BaseMenu.Item
                     key={tab.key}
                     className="browser__menu-item"
-                    data-active={tab.key === activeKey || undefined}
                     onClick={() => onActivate(tab.key)}
                   >
                     <Icon name={tab.icon ?? (tab.closable ? 'i-globe' : 'i-home')} size={16} />
