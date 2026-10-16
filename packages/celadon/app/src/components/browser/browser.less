@@ -533,8 +533,10 @@
 	transform: scale(1.2);
 }
 
+/* 悬停、或键盘焦点落到标签主体上时露出关闭键。这里用兄弟选择器而不是 `:has()`：
+   `:has()` 在指针状态变化时要向上重算，WebKit 上会带出额外的重栅格化（见本文件悬停两档底的注释） */
 .browser__tab:hover .browser__tab-close,
-.browser__tab:has(:focus-visible) .browser__tab-close {
+.browser__tab-main:focus-visible ~ .browser__tab-close {
 	visibility: visible;
 }
 

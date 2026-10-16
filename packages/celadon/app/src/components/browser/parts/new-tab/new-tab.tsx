@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useId, useState, type FormEvent } from 'react'
 import { Button } from '@/components/base/button'
 import { Input } from '@/components/base/input'
 import { useTranslation } from '@/platform/i18n'
@@ -23,6 +23,8 @@ export type NewTabProps = {
    两者的差别只在装配层怎么处理它的提交（首页另开一页，空页在本页里换内容）。 */
 export function NewTab({ recent, onOpen, onOpenRecent, validate }: NewTabProps) {
 	const { t } = useTranslation()
+	/* 分屏时同页会同时渲染两个新标签页，地址入口的 id 要各份不同：用 React 的实例 id，不写死 */
+	const addressId = useId()
 	const [address, setAddress] = useState('')
 	const [error, setError] = useState<'empty' | 'invalid' | null>(null)
 
@@ -49,7 +51,7 @@ export function NewTab({ recent, onOpen, onOpenRecent, validate }: NewTabProps) 
 		<div className="browser__new-tab">
 			<form className="browser__address" onSubmit={submit} noValidate>
 				<Input
-					id="browser-address"
+					id={addressId}
 					label={t('shell.browser.address.label')}
 					value={address}
 					onChange={(event) => {

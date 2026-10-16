@@ -209,3 +209,53 @@ test('expands the mirrored secondary continuously and drops it from the a11y tre
 	expect(seen.length).toBeGreaterThanOrEqual(4)
 	expect(seen[0]).toBeGreaterThan(seen[seen.length - 1] + 300)
 })
+
+test('fills the shell when the mirrored secondary is collapsed while split', async ({ page }) => {
+	await page.setViewportSize({ width: 1600, height: 900 })
+	await markSignedIn(page)
+	await page.goto('/app/inbox')
+	await swapSide(page)
+
+	/* 分栏要求本栏够宽：先拖分界线把这一栏拉宽 */
+	const edge = await page.locator('.browser__edge').boundingBox()
+	const before = await page.evaluate(() => Math.round(document.querySelector('.layout > .browser')!.getBoundingClientRect().width))
+	await page.mouse.move(edge!.x + edge!.width / 2, edge!.y + edge!.height / 2)
+	await page.mouse.down()
+	await page.mouse.move(edge!.x + edge!.width / 2 + (650 - before), edge!.y + edge!.height / 2, { steps: 8 })
+	await page.mouse.up()
+
+	await page.locator('.browser__more').click()
+	await page.getByRole('menuitem', { name: '左右分栏' }).click()
+	await expect(page.locator('.browser[data-split="columns"]')).toHaveCount(1)
+
+	await page.locator('.content__head-key--browser').click()
+	await expect(page.locator('.layout')).toHaveAttribute('data-browser', 'collapsed')
+	/* 分屏时外壳不得停在定宽档：外壳与顶栏都要跟着本栏铺满 */
+	await expect
+		.poll(() =>
+			page.evaluate(() => Math.round(document.querySelector('.browser__shell')!.getBoundingClientRect().width))
+		)
+		.toBeGreaterThan(1200)
+	const bar = await page.evaluate(() => ({
+		shell: Math.round(document.querySelector('.browser__shell')!.getBoundingClientRect().width),
+		bar: Math.round(document.querySelector('.browser__bar')!.getBoundingClientRect().width)
+	}))
+	expect(bar.bar).toBe(bar.shell)
+})
+
+test('names the reason on the disabled keys in mirror mode', async ({ page }) => {
+	/* 900 宽：导航区被视口收起，镜像态前段那颗导航找回键可见但按不动 */
+	await page.setViewportSize({ width: 900, height: 900 })
+	await markSignedIn(page)
+	await page.goto('/app/inbox')
+	await swapSide(page)
+
+	const navKey = page.locator('.browser__nav')
+	await expect(navKey).toBeVisible()
+	await expect(navKey).toBeDisabled()
+	await expect(navKey).toHaveAttribute('aria-label', '窗口太窄，导航暂不能展开')
+	await expect(page.locator('.browser__slot--nav .browser__slot-key-wrap')).toHaveAttribute(
+		'title',
+		'窗口太窄，导航暂不能展开'
+	)
+})

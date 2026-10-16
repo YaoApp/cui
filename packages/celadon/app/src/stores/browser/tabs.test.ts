@@ -241,4 +241,24 @@ describe('标签集', () => {
 		expect(useTabsStore.getState().recent).toHaveLength(8)
 		expect(useTabsStore.getState().recent[0].label).toBe('site-9.com')
 	})
+
+	it('在页里换到已经在别的页上的目标：收掉这一页并切过去，不并列第二页', () => {
+		const state = useTabsStore.getState()
+		state.open(external('a.com'))
+		const first = useTabsStore.getState().activeKey
+		state.openBlank()
+		const blank = useTabsStore.getState().activeKey
+		expect(blank).not.toBe(first)
+
+		useTabsStore.getState().navigate(blank, external('a.com'))
+		const after = useTabsStore.getState()
+		expect(after.tabs.map(tabKey)).toEqual([HOME_TAB.key, first])
+		expect(after.activeKey).toBe(first)
+
+		/* 目标不在别处时照旧就地换内容 */
+		state.openBlank()
+		const again = useTabsStore.getState().activeKey
+		useTabsStore.getState().navigate(again, external('b.com'))
+		expect(at(again)?.target).toEqual({ kind: 'external', url: 'b.com' })
+	})
 })
