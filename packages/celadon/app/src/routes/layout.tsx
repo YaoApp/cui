@@ -337,7 +337,10 @@ export function AppLayout() {
 				split={browserSplit}
 				splitBlocked={splitBlocked}
 				splitRatio={splitRatio}
-				onSplitRatio={setSplitRatio}
+				/* 比例记的是主栏那一份。左右分栏时新栏在左、主栏在右：指针往右拖是主栏变窄，
+				   而分隔条按「第一面板（主栏）跟着指针变大」算，所以这里要取反；上下分栏主栏在上，
+				   指针往下拖主栏变高，方向本来就是对的，不取反 */
+				onSplitRatio={(next) => setSplitRatio(browserSplit === 'columns' ? 1 - next : next)}
 				width={browserWidthShown}
 				onWidth={setBrowserWidth}
 				onSplit={(next) => {
