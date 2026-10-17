@@ -1,6 +1,6 @@
 import { useTranslation } from '@/platform/i18n'
 import { serviceBase, serviceInfo } from '@/platform/service'
-import { findServer } from './server-history'
+import { findServer } from '../server-history'
 
 /** 地址去掉协议与尾斜杠，只用于显示。 */
 function bare(url: string): string {

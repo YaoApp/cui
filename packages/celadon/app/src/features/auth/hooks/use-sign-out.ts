@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router'
 import { useRequest } from '@/data'
 import { logoutQuery } from '@/data/user'
-import { clearLocalSession } from './sign-out'
+import { clearLocalSession } from '../sign-out'
 import { useAuthMode, withMode } from './use-auth-mode'
 
 /**

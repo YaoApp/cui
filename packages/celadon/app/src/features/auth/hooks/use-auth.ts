@@ -1,5 +1,5 @@
-import { useAuthStore } from './auth.store'
-import { useAuthConfig } from './components/auth-provider'
+import { useAuthStore } from '../auth.store'
+import { useAuthConfig } from '../components/auth-provider'
 
 /**
  * 登录域的共享状态入口：私有状态从 store 取，服务端数据从提升共享的提供者取。

@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { rememberLanding, validLanding } from './landing-record'
+import { rememberLanding, validLanding } from '../landing-record'
 
 /**
  * **记一次落点**：产品外壳在每次导航后把当前地址记下来（含查询串），入口判定在

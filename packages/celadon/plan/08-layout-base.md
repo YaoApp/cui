@@ -96,7 +96,7 @@ app/src/
 
 | # | 事 | 落点 | 算做完的样子 |
 | --- | --- | --- | --- |
-| 13 | 默认去向由欢迎页改为收件箱 | `app/src/features/auth/entry.ts` · `app/src/features/auth/use-complete-sign-in.ts` | 登录成功、以及有标记但没有落点时，都落到 `/app/inbox`；`/welcome` 仍可直接打开；`plan/06-login.md` 与测试需求同步 |
+| 13 | 默认去向由欢迎页改为收件箱 | `app/src/features/auth/entry.ts` · `app/src/features/auth/hooks/use-complete-sign-in.ts` | 登录成功、以及有标记但没有落点时，都落到 `/app/inbox`；`/welcome` 仍可直接打开；`plan/06-login.md` 与测试需求同步 |
 
 ## 4. 占位与不做
 

@@ -8,7 +8,7 @@ export type PlaceholderPageProps = {
 }
 
 /* 占位页：骨架阶段每一页只画页名与一句说明，业务内容随后接真接口。
-   它不认识业务，页名由调用方给（见 plan/08-layout-base.md §4）。 */
+   它不认识业务，页名由调用方给。 */
 export function PlaceholderPage({ titleKey }: PlaceholderPageProps) {
   const { t } = useTranslation()
   return (

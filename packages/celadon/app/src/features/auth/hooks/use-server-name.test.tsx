@@ -2,7 +2,7 @@
    一条记录都没有就退回地址本身，不拿服务信息里的产品名充数。 */
 import { render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { rememberServer } from './server-history'
+import { rememberServer } from '../server-history'
 import { useServerName } from './use-server-name'
 
 const BASE = 'https://service.example.com'

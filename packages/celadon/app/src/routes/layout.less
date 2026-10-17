@@ -101,7 +101,7 @@
 
 /* 换边后紧挨导航的那一栏是标签浏览器：圆角只有一处，在本栏左上角（与正常态内容区同一位置）。
    裁掉溢出的子元素，顶栏自己的方形底才盖不住它 */
-.layout[data-os='windows'][data-mirror] > .browser {
+.layout[data-client='desktop'][data-os='windows'][data-mirror] > .browser {
   border-start-start-radius: var(--radius-large);
   overflow: hidden;
 }

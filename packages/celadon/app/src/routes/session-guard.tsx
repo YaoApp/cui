@@ -5,7 +5,7 @@ import { onUnauthorized } from '@/platform/transport/unauthorized'
 import { withNext } from '@/features/auth/next'
 import { signedIn } from '@/features/auth/session-marker'
 import { clearLocalSession } from '@/features/auth/sign-out'
-import { useAuthMode, withMode } from '@/features/auth/use-auth-mode'
+import { useAuthMode, withMode } from '@/features/auth/hooks/use-auth-mode'
 
 /**
  * **会话失效守卫**：订出口发来的 401 事件，清掉这次会话在本机留下的东西，把人送回登录页，

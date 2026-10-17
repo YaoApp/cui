@@ -87,6 +87,7 @@ const I18N_BUILD_TRIGGER = /^scripts\/build-(i18n|locales)\.mjs$/
  */
 export const CHECKER_RULES = [
   { script: 'check-css-conventions.mjs', scope: 'files', when: hasCssSources, pick: cssFiles },
+  { script: 'check-css-vars.mjs', scope: 'whole', when: hasCssSources },
   { script: 'check-tokens.mjs', scope: 'files', when: hasTokenSources, pick: tokenFiles },
   { script: 'check-app-layout.mjs', scope: 'files', when: hasCode, pick: codeFiles },
   { script: 'check-base-components.mjs', scope: 'files', when: hasCode, pick: codeFiles },
