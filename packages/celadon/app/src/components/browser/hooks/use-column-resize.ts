@@ -85,14 +85,16 @@ export function useColumnResize(
     const node = nodeRef.current
     const bounds = measure()
     setLimits(bounds)
-    paint(node, width === null ? null : clamp(width, bounds))
+    /* 传进来的宽度已由装配层按窗口可用宽度收（默认档也收）：这里不再二次夹取，
+       否则窗口刚跨过自动收起阈值时，行内宽度会停在上一次夹取的结果，与 prop 不一致 */
+    paint(node, width)
   }, [width, measure, paint])
 
   useEffect(() => {
     const onResize = () => {
       const bounds = measure()
       setLimits(bounds)
-      paint(nodeRef.current, width === null ? null : clamp(width, bounds))
+      paint(nodeRef.current, width)
     }
     window.addEventListener('resize', onResize)
     return () => window.removeEventListener('resize', onResize)

@@ -30,6 +30,18 @@ const MAIN_ITEMS: NavItem[] = [
 /** 底部一行的两个快捷图标：与主导航里的工作空间、电脑是同一份内容、同一套图标。 */
 const SHORTCUTS: NavItem[] = MAIN_ITEMS.filter((item) => item.key === 'workspace' || item.key === 'computer')
 
+/* 标签浏览器的默认栏宽取 token --side-width-reading，与组件自己的默认值同一口径；
+   写死数字会让 token 改了不生效。首次读取后缓存，样式表不变就不必反复算。 */
+let sideWidthReadingCache: number | null = null
+function sideWidthReading(): number {
+	if (sideWidthReadingCache !== null) return sideWidthReadingCache
+	const value = Number.parseFloat(
+		getComputedStyle(document.documentElement).getPropertyValue('--side-width-reading')
+	)
+	sideWidthReadingCache = Number.isFinite(value) ? value : 400
+	return sideWidthReadingCache
+}
+
 /* 三栏外壳：导航栏 | 内容区 | 标签浏览器。三栏的布局事实与标签集都在 `stores/`，
    这一层是唯一读它们的地方 —— 组件只收 props（见 architecture/03-boundaries.md §2）。 */
 export function AppLayout() {
@@ -41,9 +53,9 @@ export function AppLayout() {
 	const collapsed = useColumnsStore((state) => state.navCollapsed)
 	const chrome = useWindowChrome()
 	/* 视口不够宽时按收起呈现，与手动点收起走同一个状态、同一套样式：
-     区别只在来源，视口驱动的这一档不写偏好。阈值取 token --nav-auto-collapse（972：导航区最小 + 内容区最小 + 侧栏最小 + 把手），
+     区别只在来源，视口驱动的这一档不写偏好。阈值取 token --nav-auto-collapse（988：导航列默认宽 280 + 内容区最小 + 侧栏最小 + 把手），
      即前两栏已经各自压到最小之后才轮到导航区收起（design/foundations.md F6）。 */
-	const narrow = useMediaQuery('(width <= 971px)')
+	const narrow = useMediaQuery('(width <= 987px)')
 	/* 存下来的栏宽是偏好值：窗口放不下时按可用宽度收。否则列会被 max-inline-size 夹住，
 	   而栏内的定尺壳仍按存值画，左半边就被裁掉（把窗口拖窄之后，先前拖过的宽值还留着，就会这样）。 */
 	const [viewportWidth, setViewportWidth] = useState(() => window.innerWidth)
@@ -97,7 +109,7 @@ export function AppLayout() {
 	   默认档（没拖过）同样按它收：否则窄窗口下默认 400 也放不下，栏内的定尺壳会溢出到列外。
 	   列与栏内的壳用同一个数，不会一个被夹住、一个照旧。 */
 	const sideRoom = Math.max(300, viewportWidth - (navCollapsed ? 0 : (navWidth ?? 280)) - 400 - 8)
-	const browserWidthShown = Math.min(browserWidth ?? 400, sideRoom)
+	const browserWidthShown = Math.min(browserWidth ?? sideWidthReading(), sideRoom)
 	const setNavWidth = useColumnsStore((state) => state.setNavWidth)
 
 	const account = useAuthStore((state) => state.user)

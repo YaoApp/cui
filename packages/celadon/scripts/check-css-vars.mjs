@@ -46,8 +46,16 @@ for (const file of sources) {
 
 const problems = [];
 let used = 0;
+let raw = 0;
 for (const file of files) {
-	const text = readFileSync(file, 'utf8');
+	/* 注释里的 var() 不是真使用：先去注释再扫，否则一条示例就会被当成漏声明误报 */
+	const text = readFileSync(file, 'utf8')
+		.replace(/\/\*[\s\S]*?\*\//g, '')
+		.replace(/\/\/.*$/gm, '');
+	for (const match of text.matchAll(/var\(\s*--[a-z0-9-]+/gi)) {
+		raw += 1;
+		void match;
+	}
 	for (const match of text.matchAll(/var\(\s*(--[a-z0-9-]+)\s*([,)])/gi)) {
 		used += 1;
 		const [, name, next] = match;
@@ -56,6 +64,11 @@ for (const file of files) {
 		const line = text.slice(0, match.index).split('\n').length;
 		problems.push(`${relative(PACKAGE, file)}:${line} 使用了未声明的 ${name}，又没给兜底值`);
 	}
+}
+
+/* 未闭合的 var( 会整条漏过配对正则：数量对不上就报出来，不静默放过 */
+if (raw !== used) {
+	problems.push(`有 ${raw - used} 处 var( 没有配对（未写完或跨行），检查器不做猜测`);
 }
 
 if (problems.length) {
