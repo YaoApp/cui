@@ -620,8 +620,7 @@
 /* 第二栏的标签条在顶栏里另起一段（左右分栏）：宽度按同一份比例给，
    与下方的新栏对齐。顶栏本身不画竖线，整条栏位只有一条线，就是页面的分隔条
    （从顶栏下缘起、贯穿两块页面），拖动时也始终只有这一条。
-   顶栏行内有 8px 间距，这一段用负外边距把起点拉回最左，宽度再扣掉同样的 8px，
-   右缘才落在新栏的右缘上。 */
+   两段都留出与主栏一致的前内距，第一颗标签的左缘因此不贴边。 */
 .browser__bar-secondary {
 	flex: none;
 	min-inline-size: 0;
@@ -629,7 +628,12 @@
 	display: flex;
 	align-items: center;
 	margin-inline-start: calc(-1 * var(--spacing-8));
-	padding-inline-end: var(--spacing-8);
+	padding-inline: var(--spacing-8);
+}
+
+/* 分栏时主栏那一段也补上同样的前内距：两段的第一颗标签与各自栏的左缘距离一致 */
+.browser[data-split='columns'] .browser__bar > .browser__tabs {
+	padding-inline-start: var(--spacing-8);
 }
 
 .browser__bar-secondary > .browser__tabs {
