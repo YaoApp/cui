@@ -41,8 +41,8 @@ for (const file of sources) {
 	for (const match of text.matchAll(/(--[a-z0-9-]+)\s*:/gi)) declared.add(match[1]);
 }
 
-/* 白名单：这些名字由运行时以内联样式写入（React 的 style），样式表里只按兜底值用 */
-const RUNTIME = new Set(['--bar-inset', '--head-inset', '--content-width']);
+/* 不设白名单：运行时以内联样式写入的那些名字，在样式表里本来就带兜底值，靠兜底那一支跳过；
+   给它们开例外只会掩盖「用了却没声明也没兜底」的真问题。 */
 
 const problems = [];
 let used = 0;
@@ -52,7 +52,7 @@ for (const file of files) {
 		used += 1;
 		const [, name, next] = match;
 		if (next === ',') continue;
-		if (declared.has(name) || RUNTIME.has(name)) continue;
+		if (declared.has(name)) continue;
 		const line = text.slice(0, match.index).split('\n').length;
 		problems.push(`${relative(PACKAGE, file)}:${line} 使用了未声明的 ${name}，又没给兜底值`);
 	}
