@@ -10,6 +10,8 @@ export type SecondaryPaneProps = {
 	/** 这一栏自己的标签与活动页 */
 	tabs: BrowserTab[]
 	activeKey: string
+	/** 本组标识前缀：标签 id 与面板 id 由它派生，与主栏不撞 */
+	idPrefix: string
 	onActivate: (key: string) => void
 	onClose: (key: string) => void
 	onNew: () => void
@@ -31,6 +33,7 @@ export type SecondaryPaneProps = {
 export function SecondaryPane({
 	tabs,
 	activeKey,
+	idPrefix,
 	onActivate,
 	onClose,
 	onNew,
@@ -57,6 +60,7 @@ export function SecondaryPane({
 				<div className="browser__pane-strip">
 					<BrowserTabs
 						group="secondary"
+						idPrefix={idPrefix}
 						tabs={tabs}
 						activeKey={activeKey}
 						containerRef={containerRef}
@@ -70,7 +74,15 @@ export function SecondaryPane({
 					<TabOverflowMenu hiddenTabs={overflow.hiddenTabs} actions={actions} label={activeKey} />
 				</div>
 			) : null}
-			<ScrollArea className="browser__page" size="medium" persistent>
+			<ScrollArea
+				className="browser__page"
+				size="medium"
+				persistent
+				/* 新栏这一块也是被控面板：id 用新栏前缀，标签的 aria-controls 指到这里 */
+				id={`${idPrefix}-panel`}
+				role="tabpanel"
+				aria-labelledby={`${idPrefix}-tab-${activeKey}`}
+			>
 				{children}
 			</ScrollArea>
 			{contextTab ? (

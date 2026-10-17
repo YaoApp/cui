@@ -376,14 +376,21 @@
 	z-index: 1;
 }
 
-/* 标签区裁切：只渲染放得下的标签，新建键在预算里被预留，因此不会被裁掉 */
+/* 标签区裁切：只渲染放得下的标签，新建键在预算里被预留，因此不会被裁掉。
+   容器本身排成一行，里面依次是标签行与新建键；新建键在 `tablist` 之外，
+   读屏不会把它当成标签，溢出预算按容器宽度减掉它的宽度来算 */
 .browser__tabs {
 	flex: 1;
 	min-inline-size: 0;
+	display: flex;
+	align-items: center;
+	gap: var(--spacing-4);
 	overflow: hidden;
 }
 
 .browser__tabs-row {
+	flex: 1;
+	min-inline-size: 0;
 	position: relative;
 	display: flex;
 	align-items: center;
@@ -433,6 +440,9 @@
    内容整体居中，块的左右边距因此严格相等 */
 .browser__tab {
 	display: flex;
+	/* 宽度由内容与上下限决定，不参与收缩：标签行是裁切容器里的弹性项，
+	   若允许收缩，放不下的那几页会先把看得见的挤窄，溢出量跟着算错 */
+	flex: none;
 	align-items: center;
 	gap: var(--spacing-4);
 	min-inline-size: var(--spacing-48);

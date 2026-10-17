@@ -12,6 +12,10 @@ export type BrowserTabItemProps = {
 	hidden?: boolean
 	/** 键盘落点：roving tabindex，当前落点为 0，其余为 -1 */
 	tabIndex?: number
+	/** 标签自身的 id：与所在组的 `idPrefix` 拼出，供面板的 `aria-labelledby` 引用 */
+	id?: string
+	/** 这一组的面板 id：每个标签都指向同组那一块面板 */
+	panelId?: string
 	onActivate: (key: string) => void
 	onClose: (key: string) => void
 }
@@ -32,6 +36,8 @@ export function BrowserTabItem({
 	active,
 	hidden = false,
 	tabIndex = -1,
+	id,
+	panelId,
 	onActivate,
 	onClose
 }: BrowserTabItemProps) {
@@ -72,8 +78,10 @@ export function BrowserTabItem({
 		<span
 			className="browser__tab-main"
 			role="tab"
+			id={id}
 			tabIndex={tabIndex}
 			aria-selected={active}
+			aria-controls={panelId}
 			onClick={() => onActivate(tab.key)}
 		>
 			<Icon name={tab.icon ?? (tab.closable ? 'i-globe' : 'i-home')} size={14} />

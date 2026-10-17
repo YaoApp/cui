@@ -17,6 +17,10 @@ import { useColumnResize } from './hooks/use-column-resize'
 
 export type { BrowserTab } from './types'
 
+/** 两组标签与各自面板的 id 前缀：两组并存时 id 不撞，标签的 `aria-controls` 找得到自己那一块面板 */
+const PRIMARY_GROUP_ID = 'browser-primary'
+const SECONDARY_GROUP_ID = 'browser-secondary'
+
 /** 主栏顶栏两侧的键：装配层给状态与动作，图形与文案由这一层按本栏来画（后两栏换边后本栏是主栏时才用） */
 export type BarKey = {
 	visible: boolean
@@ -293,6 +297,7 @@ export function Browser({
           >
             <BrowserTabs
               group="secondary"
+              idPrefix={SECONDARY_GROUP_ID}
               tabs={secondaryTabs}
               activeKey={secondaryActiveKey}
               containerRef={secondaryTabsRef}
@@ -336,6 +341,7 @@ export function Browser({
         ) : null}
         <BrowserTabs
           group="primary"
+          idPrefix={PRIMARY_GROUP_ID}
           tabs={tabs}
           activeKey={activeKey}
           containerRef={tabsContainerRef}
@@ -574,7 +580,17 @@ export function Browser({
                 : { inlineSize: `${splitRatio * 100}%` }
           }
         >
-          <ScrollArea className="browser__page" size="medium" persistent>{children}</ScrollArea>
+          <ScrollArea
+            className="browser__page"
+            size="medium"
+            persistent
+            /* 主栏这一块是被控面板：id 与组前缀一致，标签的 aria-controls 指到这里 */
+            id={`${PRIMARY_GROUP_ID}-panel`}
+            role="tabpanel"
+            aria-labelledby={`${PRIMARY_GROUP_ID}-tab-${activeKey}`}
+          >
+            {children}
+          </ScrollArea>
         </div>
         {split === 'none' ? null : (
           <>
@@ -582,6 +598,11 @@ export function Browser({
               className="browser__divider"
               role="separator"
               aria-orientation={split === 'columns' ? 'vertical' : 'horizontal'}
+              /* 分隔条是可控的：读屏要能读出当前比例与可调范围（与钩子里的 0.2 到 0.8 同口径） */
+              aria-label={t('shell.browser.split.divider')}
+              aria-valuemin={20}
+              aria-valuemax={80}
+              aria-valuenow={Math.round(splitRatio * 100)}
               tabIndex={0}
               data-no-drag
               data-highlighted={splitResize.highlighted || undefined}
@@ -601,6 +622,7 @@ export function Browser({
               onClose={onSecondaryClose}
               onNew={onSecondaryNew}
               onReorder={onSecondaryReorder}
+              idPrefix={SECONDARY_GROUP_ID}
               menuActions={{
                 onRefresh: onSecondaryRefresh,
                 onCloseOthers: onSecondaryCloseOthers,

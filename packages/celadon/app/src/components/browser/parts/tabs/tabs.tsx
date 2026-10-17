@@ -10,6 +10,8 @@ import { BrowserTabItem } from '../item'
 export type BrowserTabsProps = {
 	/** 这一条属于哪一组：落到 data-group，供用例与读屏在两组并存时限定定位 */
 	group?: 'primary' | 'secondary'
+	/** 本组标识前缀：标签 id 与面板 id 都由它派生，两组因此不会撞 id */
+	idPrefix: string
 	tabs: BrowserTab[]
 	activeKey: string
 	/** 裁切容器：溢出测量挂在这一层，由装配层创建并传下来 */
@@ -28,9 +30,11 @@ export type BrowserTabsProps = {
 /* 标签条：一行标签项加末尾的新建键，外面套一层裁切容器。
    放不下的标签由 data-hidden 收成不可见并脱离排布（仍然渲染，宽度量得到），
    它们由装配层放进下拉菜单；新建键在预算里被预留，因此永远留得住。
+   新建键放在 `tablist` 之外：它不是一个标签，留在里面读屏会把它念成标签。
    拖动换序在行上接指针事件，落点由插入指示线表达（见 hooks/use-tab-drag）。 */
 export function BrowserTabs({
 	group,
+	idPrefix,
 	tabs,
 	activeKey,
 	containerRef,
@@ -119,7 +123,12 @@ export function BrowserTabs({
 			<div
 				className="browser__tabs-row"
 				role="tablist"
-				aria-label={t('shell.browser.label')}
+				/* 两组并存时读屏靠这条名字区分：主栏与分出来的那一栏各念各的 */
+				aria-label={
+					group === 'secondary'
+						? t('shell.browser.group.secondary')
+						: t('shell.browser.group.primary')
+				}
 				ref={rowRef}
 				data-dragging={drag.dragging || undefined}
 				onPointerDown={drag.onPointerDown}
@@ -145,23 +154,12 @@ export function BrowserTabs({
 						active={tab.key === activeKey}
 						hidden={!visibleKeys.includes(tab.key)}
 						tabIndex={tab.key === focusKey ? 0 : -1}
+						id={`${idPrefix}-tab-${tab.key}`}
+						panelId={`${idPrefix}-panel`}
 						onActivate={onActivate}
 						onClose={onClose}
 					/>
 				))}
-				{/* 新建键恒在，紧跟最后一个可见标签：它在预算里被预留，因此不会被裁掉 */}
-				<Tooltip label={t('shell.browser.tab.new')} side="bottom">
-					<Button
-						className="browser__new"
-						iconOnly
-						variant="plain"
-						size="small"
-						aria-label={t('shell.browser.tab.new')}
-						onClick={onNew}
-					>
-						<Icon name="i-plus" size={16} />
-					</Button>
-				</Tooltip>
 				{/* 插入指示线：拖动期间才在，位置由落点下标算出 */}
 				{drag.indicator !== null ? (
 					<span
@@ -171,6 +169,20 @@ export function BrowserTabs({
 					/>
 				) : null}
 			</div>
+			{/* 新建键恒在，紧跟最后一个可见标签：它在预算里被预留，因此不会被裁掉。
+			    它放在 `tablist` 之外：新建不是标签，留在里面读屏会把它念成一个标签 */}
+			<Tooltip label={t('shell.browser.tab.new')} side="bottom">
+				<Button
+					className="browser__new"
+					iconOnly
+					variant="plain"
+					size="small"
+					aria-label={t('shell.browser.tab.new')}
+					onClick={onNew}
+				>
+					<Icon name="i-plus" size={16} />
+				</Button>
+			</Tooltip>
 		</div>
 	)
 }
