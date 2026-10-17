@@ -120,8 +120,9 @@ test('narrow window takes away the secondary: content in mirror, browser in norm
 	await page.setViewportSize({ width: 680, height: 900 })
 	await page.waitForTimeout(500)
 	await expect(page.locator('.layout')).toHaveAttribute('data-browser', 'collapsed')
+	/* 同样是过渡：属性翻转后宽度还要走完才归零，等落定再比 */
+	await expect.poll(async () => (await widths(page)).browser).toBeLessThan(1)
 	const normal = await widths(page)
-	expect(normal.browser).toBe(0)
 	expect(normal.content).toBeGreaterThan(300)
 })
 
