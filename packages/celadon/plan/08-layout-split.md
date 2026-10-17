@@ -124,7 +124,7 @@
 - 两根判定（左右看宽、上下看高）都按实际尺寸；两颗键各自的 `disabled` 独立，已开分栏时另一个方向不满足就不允许切换；置灰原因区分「窗口太窄」与「窗口太矮」，前者用 `shell.browser.split.blocked`，后者用 `shell.browser.split.tooShallow`，四语齐。
 - 新增 `--pane-min-height` token 后必须跑 `node scripts/build-css.mjs` 并提交两份 `tokens.css`，否则 `check-generated` 会红；新 `.less` 要过 `check-css-vars` 与 `check-tokens`。
 - 文档同步六处：`design/main-shell.md`（标签按栏各成一套、分栏两栏归属）、`design/foundations.md`（分屏的两个方向门槛与 `--pane-min-height`）、`plan/08-layout-implemented.md`（分栏一节重写）、`plan/README.md`（索引状态）、`architecture/07-routing.md` 与 `architecture/15-platform.md`（若涉及侧栏描述）。前四处已同步，后两处没有涉及分栏的表述。
-- 新建键移出 `tablist` 之后，标签行在裁切容器里是弹性项，可用宽度少了新建键那一格与其间距；标签同时改为不参与收缩（`flex: none`），可见段只由宽度预算决定。因此同样的栏宽下条上能放下的页数可能比以前少一页，`drag.browser.ts` 里依赖挤压后宽度的断言已按新口径改写。
+- 新建键移出 `tablist` 之后，裁切容器本身排成一行：标签行按内容取宽（`flex: none`），新建键紧跟最后一颗标签，间距与行内一致；放不下的内容由容器裁切。标签同时改为不参与收缩（`flex: none`），可见段只由宽度预算决定，不再随挤压来回震荡。可用宽度少了新建键那一格与其间距，因此同样的栏宽下条上能放下的页数可能比以前少一页，`drag.browser.ts` 里依赖挤压后宽度的断言已按新口径改写。
 
 ## 3. 用例矩阵
 
