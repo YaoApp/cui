@@ -4,7 +4,7 @@
  * 外加一个留给后续逻辑的 `ready`（将来判「这个人该不该先去别处」用，现在恒真）。 */
 
 import type { AuthMode } from './components/auth-layout'
-import { withMode } from './use-auth-mode'
+import { withMode } from './hooks/use-auth-mode'
 
 export type EntrySignals = {
   /** 桌面且宿主还没给服务地址：先去选服务器页。Web 恒为 `false`。 */

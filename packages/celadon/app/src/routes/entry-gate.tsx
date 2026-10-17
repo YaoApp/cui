@@ -3,7 +3,7 @@ import { needsServerChoice } from '@/platform/service'
 import { resolveEntry } from '@/features/auth/entry'
 import { readLanding } from '@/features/auth/landing-record'
 import { signedIn } from '@/features/auth/session-marker'
-import { useAuthMode } from '@/features/auth/use-auth-mode'
+import { useAuthMode } from '@/features/auth/hooks/use-auth-mode'
 
 /**
  * 入口判定：根地址（与未知路径）按 `plan/06-login.md` §5 的表决定去哪。

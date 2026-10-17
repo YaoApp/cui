@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 vi.mock('@/platform/service', () => ({ serviceBase: vi.fn(() => '') }))
 
-import { readLanding } from './landing-record'
+import { readLanding } from '../landing-record'
 import { useLandingRecord } from './use-landing-record'
 
 function Probe({ pathname, search }: { pathname: string; search: string }) {

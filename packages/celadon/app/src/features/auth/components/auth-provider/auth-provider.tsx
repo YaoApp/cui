@@ -11,7 +11,7 @@ export type AuthProviderProps = { children: ReactNode }
  *
  * 取数走数据层钩子（`architecture/05-data-and-api.md`），这里只把结果**提升共享**给登录与注册两个页面，
  * 不做缓存也不做状态管理。域自己的状态在 `features/auth/auth.store.ts`，
- * 成功之后的收尾（验签、采纳会话、跳转）在 `features/auth/use-complete-sign-in.ts`。
+ * 成功之后的收尾（验签、采纳会话、跳转）在 `features/auth/hooks/use-complete-sign-in.ts`。
  *
  * **订阅当前语言**：入口配置是**按语言**给的（同一份接口，不同语言返回不同的验证码形态与占位文字），
  * 因此读接口的 key 里带语言段。key 在渲染时算出来，所以这里必须真的订阅语言 ——

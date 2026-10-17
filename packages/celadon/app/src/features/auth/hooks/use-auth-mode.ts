@@ -1,6 +1,6 @@
 import { useLocation } from 'react-router'
 import { client } from '@/platform/client'
-import type { AuthMode } from './components/auth-layout'
+import type { AuthMode } from '../components/auth-layout'
 
 export type { AuthMode }
 
