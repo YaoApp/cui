@@ -617,15 +617,19 @@
 /* 让位顺序的最后一步（design/foundations.md F6）：内容区与标签浏览器都到了最小宽、导航区也收起之后，
    仍然放不下时标签浏览器整条收成零宽，规则在 routes/layout.less 里（用零宽而不是 display: none，动效才量得到前后状态）。 */
 
-/* 第二栏的标签条在顶栏里另起一段（左右分栏）：长度按同一份比例算，
-   与页面分隔条对齐；中缝一条竖分隔线把它和主栏那一段分开 */
+/* 第二栏的标签条在顶栏里另起一段（左右分栏）：宽度按同一份比例给，
+   与下方的新栏对齐。顶栏本身不画竖线，整条栏位只有一条线，就是页面的分隔条
+   （从顶栏下缘起、贯穿两块页面），拖动时也始终只有这一条。
+   顶栏行内有 8px 间距，这一段用负外边距把起点拉回最左，宽度再扣掉同样的 8px，
+   右缘才落在新栏的右缘上。 */
 .browser__bar-secondary {
-	flex: 1 1 0;
+	flex: none;
 	min-inline-size: 0;
+	box-sizing: border-box;
 	display: flex;
 	align-items: center;
+	margin-inline-start: calc(-1 * var(--spacing-8));
 	padding-inline-end: var(--spacing-8);
-	border-inline-end: var(--border-width) solid var(--border-subtle);
 }
 
 .browser__bar-secondary > .browser__tabs {

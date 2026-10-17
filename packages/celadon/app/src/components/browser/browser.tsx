@@ -248,7 +248,12 @@ export function Browser({
         ) : null}
         {/* 左右分栏：新栏的标签条进顶栏左段，与主栏同一条基线；上下分栏时它在自己那一块顶部 */}
         {split === 'columns' ? (
-          <div className="browser__bar-secondary" data-group="secondary">
+          <div
+            className="browser__bar-secondary"
+            data-group="secondary"
+            /* 与下方新栏同宽：样式里用负外边距把起点拉回最左，这里的比例直接用新栏那一份 */
+            style={{ inlineSize: `${(1 - splitRatio) * 100}%` }}
+          >
             <BrowserTabs
               group="secondary"
               tabs={secondaryTabs}
