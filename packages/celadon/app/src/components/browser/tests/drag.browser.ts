@@ -158,7 +158,10 @@ test('lands the drop by the whole list when the strip holds a swapped segment', 
 		.poll(() => labels(page))
 		.toEqual(['alpha.example.com/one', 'gamma.example.com/three'])
 	await page.locator('.browser__more').click()
-	expect(await page.locator('.browser__menu-item .browser__menu-label').allInnerTexts()).toEqual([
+	/* 菜单是弹层，挂载比点击晚一拍：先等条数到位再读文字，否则读到空数组（CI 机器慢时必现） */
+	const menuLabels = page.locator('.browser__menu-item .browser__menu-label')
+	await expect(menuLabels).toHaveCount(2)
+	expect(await menuLabels.allInnerTexts()).toEqual([
 		'beta.example.com/two',
 		'首页'
 	])
@@ -195,7 +198,10 @@ test('keeps the strip when a tab already at the front is dropped at the front', 
 	await page.reload()
 	await expect.poll(() => labels(page)).toEqual(before)
 	await page.locator('.browser__more').click()
-	expect(await page.locator('.browser__menu-item .browser__menu-label').allInnerTexts()).toEqual([
+	/* 同上：弹层挂载比点击晚一拍，先等条数到位 */
+	const menuLabels = page.locator('.browser__menu-item .browser__menu-label')
+	await expect(menuLabels).toHaveCount(2)
+	expect(await menuLabels.allInnerTexts()).toEqual([
 		'alpha.example.com/one',
 		'beta.example.com/two'
 	])
