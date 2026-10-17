@@ -12,6 +12,7 @@
 | --- | --- |
 | `content.tsx` | `Content` 组件与 `ContentProps`。包一层滚动容器。 |
 | `content.less` | 中栏的最小宽、底色、内距与说明文字样式。 |
+| `parts/head/` | `ContentHead`：列头，标题与两端槽位的键。 |
 | `parts/placeholder/` | `PlaceholderPage`：页名加一句说明的占位页。 |
 | `index.ts` | 对外出口，即 `Content`、`PlaceholderPage` 与各自的类型。 |
 
@@ -22,6 +23,11 @@
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | `children` | `ReactNode` | 无 | 页面内容，通常是路由的出口。 |
+| `title` | `string` | 无 | 列头标题；不传就不画列头。 |
+| `navCollapsed` | `boolean` | `false` | 导航列是否收起：收起才接管交通灯留白。 |
+| `lead` | `HeadKey` | 无 | 列头左端槽位的键；不传则留空。 |
+| `trail` | `HeadKey` | 无 | 列头右端槽位的键；不传则留空。 |
+| `hidden` | `boolean` | `false` | 本栏收掉了（换边后次栏是内容区）：内容不再可达，也从无障碍树里摘掉。 |
 
 `PlaceholderPage`：
 

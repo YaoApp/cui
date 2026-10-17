@@ -20,6 +20,9 @@
 | --- | --- | --- | --- |
 | `children` | `ReactNode` | 无 | 可滚动的内容。 |
 | `className` | `string` | 无 | 追加到根元素，用于给调用方自己的布局。 |
+| `id` | `string` | 无 | 根元素的 id。标签浏览器给页面面板一个 id，标签的 `aria-controls` 指向它。 |
+| `role` | `string` | 无 | 根元素的角色。标签浏览器传 `tabpanel`。 |
+| `aria-labelledby` | `string` | 无 | 指向当前标签，面板因此按它正在显示的那一页被读出来。 |
 
 ## 使用方式
 
