@@ -1,7 +1,8 @@
-import type { CSSProperties, ReactNode } from 'react'
+import { useState, type CSSProperties, type ReactNode } from 'react'
 import { ScrollArea } from '@/components/base/scroll-area'
 import { useTabOverflow } from '../../hooks/use-tab-overflow'
 import { BrowserTabs } from '../tabs'
+import { TabContextMenu, TabOverflowMenu, type TabMenuActions } from '../tab-menu'
 import type { BrowserTab } from '../../types'
 import './secondary-pane.less'
 
@@ -13,6 +14,8 @@ export type SecondaryPaneProps = {
 	onClose: (key: string) => void
 	onNew: () => void
 	onReorder: (key: string, index: number) => void
+	/** 本栏标签的刷新、关闭其它、关闭全部，只作用于本栏 */
+	menuActions: Omit<TabMenuActions, 'onActivate' | 'onClose'>
 	/** 指针在本栏按下：把焦点栏切到这一栏 */
 	onFocus: () => void
 	focused: boolean
@@ -23,8 +26,8 @@ export type SecondaryPaneProps = {
 	children: ReactNode
 }
 
-/** 第二栏的页面区域。左右分栏时它只有页面，标签条在顶栏左段；
-    上下分栏时它自己画标签条（与主栏同一条组件，只属于本栏）。 */
+/** 第二栏的页面区域。左右分栏时它只有页面、标签条在顶栏左段（菜单也在那里）；
+    上下分栏时它自己画标签条与两套菜单，只服务本栏这一组标签。 */
 export function SecondaryPane({
 	tabs,
 	activeKey,
@@ -32,6 +35,7 @@ export function SecondaryPane({
 	onClose,
 	onNew,
 	onReorder,
+	menuActions,
 	onFocus,
 	focused,
 	showStrip,
@@ -39,6 +43,9 @@ export function SecondaryPane({
 	children
 }: SecondaryPaneProps) {
 	const { containerRef, overflow } = useTabOverflow(tabs, activeKey)
+	const [tabMenu, setTabMenu] = useState<{ key: string; point: { x: number; y: number } } | null>(null)
+	const actions: TabMenuActions = { onActivate, onClose, ...menuActions }
+	const contextTab = tabMenu ? (tabs.find((tab) => tab.key === tabMenu.key) ?? null) : null
 	return (
 		<div
 			className="browser__pane browser__pane--secondary"
@@ -58,12 +65,24 @@ export function SecondaryPane({
 						onClose={onClose}
 						onNew={onNew}
 						onReorder={onReorder}
+						onTabContextMenu={(key, point) => setTabMenu({ key, point })}
 					/>
+					<TabOverflowMenu hiddenTabs={overflow.hiddenTabs} actions={actions} label={activeKey} />
 				</div>
 			) : null}
 			<ScrollArea className="browser__page" size="medium" persistent>
 				{children}
 			</ScrollArea>
+			{contextTab ? (
+				<TabContextMenu
+					tab={contextTab}
+					point={tabMenu?.point ?? null}
+					actions={actions}
+					onOpenChange={(open) => {
+						if (!open) setTabMenu(null)
+					}}
+				/>
+			) : null}
 		</div>
 	)
 }

@@ -163,6 +163,8 @@ export function AppLayout() {
 	const activateSecondary = useSecondaryTabsStore((state) => state.activate)
 	const moveSecondary = useSecondaryTabsStore((state) => state.move)
 	const openSecondaryBlank = useSecondaryTabsStore((state) => state.openBlank)
+	const closeOthersSecondary = useSecondaryTabsStore((state) => state.closeOthers)
+	const closeAllSecondary = useSecondaryTabsStore((state) => state.closeAll)
 	const seedSecondary = useSecondaryTabsStore((state) => state.seed)
 	const clearSecondary = useSecondaryTabsStore((state) => state.clear)
 	const secondaryActive = secondaryTabs.find((tab) => tabKey(tab) === secondaryActiveKey) ?? secondaryTabs[0] ?? HOME_TAB
@@ -401,6 +403,13 @@ export function AppLayout() {
 				}}
 				onSecondaryNew={() => openSecondaryBlank()}
 				onSecondaryReorder={moveSecondary}
+				/* 新栏菜单里的三项只作用于新栏这一组；关空之后由订阅统一关分栏 */
+				onSecondaryRefresh={(key) => {
+					const tab = secondaryTabs.find((item) => tabKey(item) === key)
+					if (tab) navigateSecondary(key, tab.target)
+				}}
+				onSecondaryCloseOthers={(key) => closeOthersSecondary(key)}
+				onSecondaryCloseAll={() => closeAllSecondary()}
 				onSecondaryFocus={() => setFocusedPane(1)}
 				focusedPane={focusedPane}
 				onFocusPane={setFocusedPane}

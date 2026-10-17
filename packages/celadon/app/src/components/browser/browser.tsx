@@ -9,6 +9,7 @@ import { useTranslation } from '@/platform/i18n'
 import type { BrowserSplit } from '@/stores/layout/columns'
 import { BrowserTabs } from './parts/tabs'
 import { SecondaryPane } from './parts/secondary-pane'
+import { TabContextMenu, TabOverflowMenu } from './parts/tab-menu'
 import { useTabOverflow } from './hooks/use-tab-overflow'
 import type { BrowserTab } from './types'
 import { useSplitResize } from './hooks/use-split-resize'
@@ -73,6 +74,10 @@ export type BrowserProps = {
   onSecondaryClose?: (key: string) => void
   onSecondaryNew?: () => void
   onSecondaryReorder?: (key: string, index: number) => void
+  /** 新栏标签的刷新、关闭其它、关闭全部：只作用于新栏这一组 */
+  onSecondaryRefresh?: (key: string) => void
+  onSecondaryCloseOthers?: (key: string) => void
+  onSecondaryCloseAll?: () => void
   /** 指针在第二个面板按下：把焦点栏切过去 */
   onSecondaryFocus?: () => void
   /** 聚焦哪个面板（0 是第一个）：标签条的点击落在聚焦的那个面板上 */
@@ -119,6 +124,9 @@ export function Browser({
   onSecondaryClose = () => {},
   onSecondaryNew = () => {},
   onSecondaryReorder = () => {},
+  onSecondaryRefresh,
+  onSecondaryCloseOthers,
+  onSecondaryCloseAll,
   onSecondaryFocus = () => {},
   focusedPane = 0,
   onFocusPane = () => {},
@@ -154,6 +162,13 @@ export function Browser({
   /* 标签自己的右键菜单：记下点的是哪一页与指针位置，菜单按指针位置定位 */
   const [tabMenu, setTabMenu] = useState<{ key: string; point: { x: number; y: number } } | null>(null)
   const contextTab = tabMenu ? (tabs.find((tab) => tab.key === tabMenu.key) ?? null) : null
+  /* 新栏标签的右键菜单：左右分栏时新栏的标签条在顶栏，菜单也挂在这一层 */
+  const [secondaryTabMenu, setSecondaryTabMenu] = useState<{ key: string; point: { x: number; y: number } } | null>(
+    null
+  )
+  const secondaryContextTab = secondaryTabMenu
+    ? (secondaryTabs.find((tab) => tab.key === secondaryTabMenu.key) ?? null)
+    : null
   const closableCount = tabs.filter((tab) => tab.closable).length
   const otherClosableCount = tabs.filter((tab) => tab.closable && tab.key !== tabMenu?.key).length
   const blocked = splitBlocked || tooNarrowToSplit
@@ -266,7 +281,37 @@ export function Browser({
               onClose={onSecondaryClose}
               onNew={onSecondaryNew}
               onReorder={onSecondaryReorder}
+              onTabContextMenu={(key, point) => setSecondaryTabMenu({ key, point })}
             />
+            {/* 新栏自己的溢出键：放不下的页与关闭项都在它自己的菜单里 */}
+            <TabOverflowMenu
+              hiddenTabs={secondaryOverflow.hiddenTabs}
+              actions={{
+                onActivate: onSecondaryActivate,
+                onClose: onSecondaryClose,
+                onRefresh: onSecondaryRefresh,
+                onCloseOthers: onSecondaryCloseOthers,
+                onCloseAll: onSecondaryCloseAll
+              }}
+              label={t('shell.browser.label')}
+            />
+            {/* 新栏标签的右键菜单：与溢出菜单同一组动作，只作用于新栏 */}
+            {secondaryContextTab ? (
+              <TabContextMenu
+                tab={secondaryContextTab}
+                point={secondaryTabMenu?.point ?? null}
+                actions={{
+                  onActivate: onSecondaryActivate,
+                  onClose: onSecondaryClose,
+                  onRefresh: onSecondaryRefresh,
+                  onCloseOthers: onSecondaryCloseOthers,
+                  onCloseAll: onSecondaryCloseAll
+                }}
+                onOpenChange={(open) => {
+                  if (!open) setSecondaryTabMenu(null)
+                }}
+              />
+            ) : null}
           </div>
         ) : null}
         <BrowserTabs
@@ -533,6 +578,11 @@ export function Browser({
               onClose={onSecondaryClose}
               onNew={onSecondaryNew}
               onReorder={onSecondaryReorder}
+              menuActions={{
+                onRefresh: onSecondaryRefresh,
+                onCloseOthers: onSecondaryCloseOthers,
+                onCloseAll: onSecondaryCloseAll
+              }}
               onFocus={onSecondaryFocus}
               focused={focusedPane === 1}
               /* 上下分栏时新栏自己画标签条；左右分栏时标签条在顶栏左段 */

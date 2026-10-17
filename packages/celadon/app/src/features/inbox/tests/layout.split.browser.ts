@@ -246,7 +246,8 @@ test('keeps the split and the boundary working after the browser moves to the le
 	await page.mouse.up()
 	await openTabMenu(page, browser)
 	await page.getByRole('menuitem', { name: '左右分栏' }).click()
-	await browser.getByRole('button', { name: '更多' }).click()
+	/* 分栏后新栏也有自己的「更多」，这里点主栏顶栏那一个 */
+	await browser.locator('.browser__bar > .browser__more').click()
 	await page.getByRole('menuitem', { name: '换到另一侧' }).click()
 
 	await expect(browser).toHaveAttribute('data-side', 'left')
@@ -489,4 +490,37 @@ test('keeps the drag in step after the double click resets the ratio', async ({ 
 	const back = await widths()
 	expect(back[0]).toBe(second[0])
 	expect(back[1]).toBe(second[1])
+})
+
+test('opens the tab menu and the overflow menu on the second pane', async ({ page }) => {
+	await page.setViewportSize({ width: 1600, height: 900 })
+	await markSignedIn(page)
+	await page.goto('/app/inbox')
+	const browser = columns(page).browser
+	await widenBrowser(page)
+	await openTabMenu(page, browser)
+	await page.getByRole('menuitem', { name: '左右分栏' }).click()
+	const strip = browser.locator('.browser__bar-secondary')
+	const pane = browser.locator('.browser__pane--secondary')
+
+	// 新栏开一页外部地址
+	await strip.getByRole('button', { name: '新建标签' }).click()
+	await pane.getByLabel('外部地址').fill('menu.example.com')
+	await pane.getByLabel('外部地址').press('Enter')
+	await expect(strip.getByRole('tab', { name: 'menu.example.com' })).toHaveCount(1)
+
+	// 右键新栏的标签：弹出的是新栏自己的菜单，四项都在
+	await strip.getByRole('tab', { name: 'menu.example.com' }).click({ button: 'right' })
+	const menu = page.locator('.browser__menu')
+	await expect(menu).toHaveCount(1)
+	await expect(menu.getByText('刷新')).toHaveCount(1)
+	await expect(menu.getByText('关闭这个标签')).toHaveCount(1)
+	await expect(menu.getByText('关闭其他标签')).toHaveCount(1)
+	await expect(menu.getByText('关闭全部标签')).toHaveCount(1)
+	await page.keyboard.press('Escape')
+	await expect(page.locator('.browser__menu')).toHaveCount(0)
+
+	// 溢出键也在新栏这一段里，并且有自己的菜单
+	await strip.locator('.browser__more').click()
+	await expect(page.locator('.browser__menu').getByText('关闭全部标签')).toHaveCount(1)
 })

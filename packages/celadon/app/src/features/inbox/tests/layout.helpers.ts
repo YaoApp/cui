@@ -3,9 +3,10 @@ import { expect, type Locator, type Page } from '@playwright/test'
 /* 三栏布局的浏览器用例共用这几件：跑真开发服务上的真应用，
    本机登录标记按存储的真实格式预置，因此不用走登录一线。 */
 
-/* 分栏与换边都收进顶栏的下拉菜单：先开菜单，再点菜单项 */
+/* 分栏与换边都收进顶栏的下拉菜单：先开菜单，再点菜单项。
+   分栏后新栏也有自己的下拉键，这里限定主栏那一个（它在顶栏里，不在新栏那一段） */
 export async function openTabMenu(page: Page, browser: Locator) {
-	await browser.locator('.browser__more').click()
+	await browser.locator('.browser__bar > .browser__more').click()
 	await expect(page.getByRole('menuitem').first()).toBeVisible()
 }
 
