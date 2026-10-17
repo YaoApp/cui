@@ -418,28 +418,30 @@ test('keeps the boundary compliant inside the client and intentionally light on 
     await expect(field).not.toBeFocused()
   }
 
-  await page.goto('/app/login')
+  await page.goto('/app/login', { waitUntil: 'domcontentloaded' })
   await settle()
   /* 描边有过渡：填完值立刻量会读到聚焦色与静止色之间的中间值（实测撞见过 3.378，落在两档之间）。
-     先轮询到它落进静止档的范围，再取一次读数用于断言。 */
-  await expect.poll(async () => (await measure()).ratio).toBeLessThan(3)
+     先轮询到它落进静止档的范围，再取一次读数用于断言。并行跑时后端与渲染都慢，给足超时 */
+  await expect.poll(async () => (await measure()).ratio, { timeout: 20_000 }).toBeLessThan(3)
   const standalone = await measure()
   expect(standalone.focused).toBe(false)
   expect(standalone.ratio).toBeLessThan(3)
 
-  await page.goto('/app/login?from=connect')
+  await page.goto('/app/login?from=connect', { waitUntil: 'domcontentloaded' })
   await settle()
-  await expect.poll(async () => (await measure()).ratio).toBeGreaterThanOrEqual(3)
+  await expect.poll(async () => (await measure()).ratio, { timeout: 20_000 }).toBeGreaterThanOrEqual(3)
   const inClient = await measure()
   expect(inClient.ratio).toBeGreaterThanOrEqual(3)
 
   /* 切主题：先确认真的切过去了，再量第二套 */
   await page.emulateMedia({ colorScheme: 'dark' })
-  await page.reload()
+  await page.reload({ waitUntil: 'domcontentloaded' })
   await settle()
-  const theme = await page.evaluate(() => document.documentElement.dataset.theme)
-  expect(theme).toBe('dark')
-  await expect.poll(async () => (await measure()).ratio).toBeGreaterThanOrEqual(3)
+  /* 主题切换与字体都有一拍延迟：轮询到落定，别拿切换中的读数 */
+  await expect
+    .poll(async () => page.evaluate(() => document.documentElement.dataset.theme), { timeout: 20_000 })
+    .toBe('dark')
+  await expect.poll(async () => (await measure()).ratio, { timeout: 20_000 }).toBeGreaterThanOrEqual(3)
   const inClientDark = await measure()
   expect(inClientDark.ratio).toBeGreaterThanOrEqual(3)
   await shot(page, 'dark-in-client')
@@ -869,8 +871,9 @@ test('walks a third-party sign-in through the callback page when the instance de
 
   /* 换到会话后落在收件箱；欢迎页仍可直接打开，用户信息在那里展示 */
   await expect(page).toHaveURL(/\/app\/inbox$/, { timeout: 15_000 })
-  await page.goto('/app/welcome')
-  await expect(page.getByText('用户标识')).toBeVisible()
+  /* 整页跳转等 load 在后端慢或并行时会超时；改成等文档就绪，页面元素各自再等 */
+  await page.goto('/app/welcome', { waitUntil: 'domcontentloaded' })
+  await expect(page.getByText('用户标识')).toBeVisible({ timeout: 15_000 })
   const values = (await page.locator('.welcome__value').allTextContents()).map((text) => text.trim()).filter(Boolean)
   expect(values.length).toBeGreaterThan(0)
   await shot(page, 'welcome')
