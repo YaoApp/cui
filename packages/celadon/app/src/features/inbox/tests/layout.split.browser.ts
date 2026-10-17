@@ -70,7 +70,8 @@ test('drags the divider and resets it by double click', async ({ page }) => {
 	await page.mouse.move(box.x + box.width * 0.25, handle.y + handle.height / 2, { steps: 6 })
 	await page.mouse.up()
 	const dragged = await widths()
-	expect(dragged[0]).toBeLessThan(dragged[1])
+	/* 分隔条拖到整条宽度的 25%：新栏在左因此变窄，主栏（DOM 里的第一个面板）在右变宽 */
+	expect(dragged[1]).toBeLessThan(dragged[0])
 
 	// 双击回平分
 	await divider.dblclick()
