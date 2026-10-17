@@ -13,6 +13,7 @@ import type { I18nKey } from '@/platform/i18n/i18n-types'
 import type { IconId } from '@/platform/icons'
 import { useTranslation } from '@/platform/i18n'
 import { HOME_TAB, tabKey, useTabsStore, type TabEntry } from '@/stores/browser/tabs'
+import { useSecondaryTabsStore } from '@/stores/browser/secondary'
 import { isAddressLike, parseTarget, targetLabel } from '@/stores/browser/targets'
 import { useColumnsStore } from '@/stores/layout/columns'
 
@@ -76,9 +77,8 @@ export function AppLayout() {
 	const setSplitRatio = useColumnsStore((state) => state.setSplitRatio)
 	const browserWidth = useColumnsStore((state) => state.browserWidth)
 	const setBrowserWidth = useColumnsStore((state) => state.setBrowserWidth)
-	/* 聚焦哪个面板（0 是第一个）与第二个面板绑哪一页；后者为空时按上面的默认取 */
+	/* 聚焦哪个面板（0 是第一个）；第二栏的页由它自己那一组标签决定，不再另存一个 key */
 	const [focusedPane, setFocusedPane] = useState(0)
-	const [secondaryKey, setSecondaryKey] = useState('')
 	/* 面板独占整扇窗口：这一档把导航区与内容区让出去（见 design/main-shell.md §七） */
 	const [exclusive, setExclusive] = useState(false)
 	/* 独占档里 `Esc` 退出，回到原来的三栏（见 design/main-shell.md §七） */
@@ -144,7 +144,6 @@ export function AppLayout() {
 		if (tab.target.kind === 'blank') return 'i-plus'
 		return tab.icon
 	}
-	const byKey = (key: string): TabEntry | undefined => tabs.find((tab) => tabKey(tab) === key)
 	const view: BrowserTab[] = tabs.map((tab) => ({
 		key: tabKey(tab),
 		label: nameOf(tab),
@@ -153,9 +152,50 @@ export function AppLayout() {
 		icon: iconOf(tab)
 	}))
 	const active = tabs.find((tab) => tabKey(tab) === activeKey) ?? HOME_TAB
-	/* 第二个面板绑自己那一页：默认取第一个不是当前页的标签，没有别的页时停在首页。
-	   标签条上的点击落在**聚焦的那个面板**：面板 0 写全局当前页，面板 1 写它自己这一页 */
-	const secondaryTab = byKey(secondaryKey) ?? tabs.find((tab) => tabKey(tab) !== activeKey) ?? HOME_TAB
+	/* 第二栏自己的一组标签：与主栏完全独立，各有活动页与「打开过」。
+	   分栏未开时它为空；开分栏时放一张首页进来，关到一个不剩时由这里的回调关掉分栏 */
+	const secondaryTabs = useSecondaryTabsStore((state) => state.tabs)
+	const secondaryActiveKey = useSecondaryTabsStore((state) => state.activeKey)
+	const secondaryRecent = useSecondaryTabsStore((state) => state.recent)
+	const openSecondary = useSecondaryTabsStore((state) => state.open)
+	const navigateSecondary = useSecondaryTabsStore((state) => state.navigate)
+	const closeSecondary = useSecondaryTabsStore((state) => state.close)
+	const activateSecondary = useSecondaryTabsStore((state) => state.activate)
+	const moveSecondary = useSecondaryTabsStore((state) => state.move)
+	const openSecondaryBlank = useSecondaryTabsStore((state) => state.openBlank)
+	const seedSecondary = useSecondaryTabsStore((state) => state.seed)
+	const clearSecondary = useSecondaryTabsStore((state) => state.clear)
+	/* 主动关分栏时把第二栏一页并进主栏：走主栏的打开入口，同目标复用、key 由主栏分配器给 */
+	const openSecondaryIntoPrimary = (tab: TabEntry) => openTab(tab.target, { title: tab.title, icon: tab.icon })
+	/* 刷新恢复：分栏开着而第二栏为空（例如它在关空的那一刻被刷新打断），补一张首页，避免空面板 */
+	useEffect(() => {
+		if (browserSplit !== 'none' && secondaryTabs.length === 0) seedSecondary()
+	}, [browserSplit, secondaryTabs.length, seedSecondary])
+	const secondaryActive = secondaryTabs.find((tab) => tabKey(tab) === secondaryActiveKey) ?? secondaryTabs[0] ?? HOME_TAB
+	const secondaryView: BrowserTab[] = secondaryTabs.map((tab) => ({
+		key: tabKey(tab),
+		label: nameOf(tab),
+		closable: true,
+		icon: iconOf(tab)
+	}))
+	const renderSecondaryTab = (tab: TabEntry) => (
+		<TabPage
+			key={tab.key}
+			tab={tab}
+			recent={secondaryRecent.map((entry) => ({ key: entry.key, label: entry.label }))}
+			/* 第二栏里的地址入口落在这**本栏这一页**里，不新开页、也不落到主栏 */
+			onOpen={(input) => {
+				const target = parseTarget(input)
+				if (target.kind === 'blank') return
+				navigateSecondary(tabKey(tab), target)
+			}}
+			onOpenRecent={(key) => {
+				const entry = secondaryRecent.find((item) => item.key === key)
+				if (entry) openSecondary(entry.target)
+			}}
+			validateAddress={validateAddress}
+		/>
+	)
 
 	/* 新标签页上的「打开过的东西」：store 按使用顺序记着，关掉页也不消失；点一条复用同一页打开 */
 	const recent = recentTabs.map((entry) => ({ key: entry.key, label: entry.label }))
@@ -297,14 +337,22 @@ export function AppLayout() {
 				width={browserWidthShown}
 				onWidth={setBrowserWidth}
 				onSplit={(next) => {
-					/* 每次从单面板进分屏都从平分开始：上次拖过的比例会让点下去那一下跳 */
-					if (next !== 'none') setSplitRatio(0.5)
+					if (next === 'none') {
+						/* 主动关分栏：第二栏的标签依序并入主栏并经主栏的入口去重，活动页成为主栏活动页 */
+						secondaryTabs.forEach((tab) => openSecondaryIntoPrimary(tab))
+						clearSecondary()
+						setFocusedPane(0)
+					} else {
+						/* 每次从单面板进分屏都从平分开始；第二栏为空时放一张首页，保证它有内容 */
+						setSplitRatio(0.5)
+						seedSecondary()
+					}
 					setBrowserSplit(next)
 				}}
 				onActivate={(key) => {
-					/* 标签条的点击落在聚焦的那个面板：第二个面板聚焦时只换它自己那一页 */
+					/* 标签条的点击落在聚焦的那个面板：第二个面板聚焦时只换它自己那一组 */
 					if (focusedPane === 1 && browserSplit !== 'none') {
-						setSecondaryKey(key)
+						activateSecondary(key)
 						return
 					}
 					activateTab(key)
@@ -326,8 +374,21 @@ export function AppLayout() {
 					setExclusive(false)
 					toggleBrowser()
 				}}
-				secondary={renderTab(secondaryTab)}
-				secondaryLabel={nameOf(secondaryTab)}
+				secondary={renderSecondaryTab(secondaryActive)}
+				secondaryTabs={secondaryView}
+				secondaryActiveKey={secondaryActiveKey}
+				onSecondaryActivate={activateSecondary}
+				onSecondaryClose={(key) => {
+					closeSecondary(key)
+					/* 关到一个不剩：关掉分栏回到单面板，主栏不动，也不往主栏搬标签 */
+					if (secondaryTabs.length <= 1) {
+						setFocusedPane(0)
+						setBrowserSplit('none')
+					}
+				}}
+				onSecondaryNew={() => openSecondaryBlank()}
+				onSecondaryReorder={moveSecondary}
+				onSecondaryFocus={() => setFocusedPane(1)}
 				focusedPane={focusedPane}
 				onFocusPane={setFocusedPane}
 				exclusive={exclusive}

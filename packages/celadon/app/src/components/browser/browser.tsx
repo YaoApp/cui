@@ -8,6 +8,7 @@ import { Tooltip } from '@/components/base/tooltip'
 import { useTranslation } from '@/platform/i18n'
 import type { BrowserSplit } from '@/stores/layout/columns'
 import { BrowserTabs } from './parts/tabs'
+import { SecondaryPane } from './parts/secondary-pane'
 import { useTabOverflow } from './hooks/use-tab-overflow'
 import type { BrowserTab } from './types'
 import { useSplitResize } from './hooks/use-split-resize'
@@ -65,8 +66,15 @@ export type BrowserProps = {
   children: ReactNode
   /** 第二个面板的当前页；只有分屏时才渲染 */
   secondary?: ReactNode
-  /** 第二个面板那一页的名字，画在它自己的小条上 */
-  secondaryLabel?: string
+  /** 第二个面板自己的一组标签与活动页：每组独立，互不引用 */
+  secondaryTabs?: BrowserTab[]
+  secondaryActiveKey?: string
+  onSecondaryActivate?: (key: string) => void
+  onSecondaryClose?: (key: string) => void
+  onSecondaryNew?: () => void
+  onSecondaryReorder?: (key: string, index: number) => void
+  /** 指针在第二个面板按下：把焦点栏切过去 */
+  onSecondaryFocus?: () => void
   /** 聚焦哪个面板（0 是第一个）：标签条的点击落在聚焦的那个面板上 */
   focusedPane?: number
   onFocusPane?: (pane: number) => void
@@ -105,7 +113,13 @@ export function Browser({
   secondaryKey,
   children,
   secondary = null,
-  secondaryLabel = '',
+  secondaryTabs = [],
+  secondaryActiveKey = '',
+  onSecondaryActivate = () => {},
+  onSecondaryClose = () => {},
+  onSecondaryNew = () => {},
+  onSecondaryReorder = () => {},
+  onSecondaryFocus = () => {},
   focusedPane = 0,
   onFocusPane = () => {},
   exclusive = false,
@@ -483,11 +497,24 @@ export function Browser({
             >
               <span className="browser__grip" aria-hidden="true" />
             </div>
-            <div className="browser__pane" data-focused={focusedPane === 1 || undefined} onPointerDown={() => onFocusPane(1)}>
-              {/* 第二个面板自己的小条：写出它绑的是哪一页，与第一个面板的内容区分开 */}
-              <div className="browser__pane-head">{secondaryLabel}</div>
-              <ScrollArea className="browser__page" size="medium" persistent>{secondary}</ScrollArea>
-            </div>
+            <SecondaryPane
+              tabs={secondaryTabs}
+              activeKey={secondaryActiveKey}
+              onActivate={onSecondaryActivate}
+              onClose={onSecondaryClose}
+              onNew={onSecondaryNew}
+              onReorder={onSecondaryReorder}
+              onFocus={onSecondaryFocus}
+              focused={focusedPane === 1}
+              /* 比例记的是主栏那一份，第二栏取补出来的那一份；左右分栏给宽度，上下分栏给高度 */
+              size={
+                split === 'rows'
+                  ? { blockSize: `${(1 - splitRatio) * 100}%` }
+                  : { inlineSize: `${(1 - splitRatio) * 100}%` }
+              }
+            >
+              {secondary}
+            </SecondaryPane>
           </>
         )}
       </div>

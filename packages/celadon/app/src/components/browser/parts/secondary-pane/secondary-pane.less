@@ -1,0 +1,25 @@
+/* 第二栏（分栏时切出来的那一栏）：标签条在栏顶，紧贴分隔条那一侧；页面照常滚动。
+   栏宽由分隔条的比例决定（见 browser.less 的排布规则），本文件只管栏内的结构。 */
+
+.browser__pane--secondary {
+	display: flex;
+	flex-direction: column;
+	min-block-size: 0;
+	background: var(--background-surface);
+}
+
+/* 标签条那一行：与顶栏的标签条同一套组件，这里只给它高度、内距与下缘分隔线 */
+.browser__pane-strip {
+	display: flex;
+	align-items: center;
+	flex: none;
+	min-inline-size: 0;
+	block-size: var(--row-height);
+	padding-inline: var(--spacing-4);
+	border-block-end: var(--border-width) solid var(--border-subtle);
+}
+
+.browser__pane-strip > .browser__tabs {
+	flex: 1;
+	min-inline-size: 0;
+}
