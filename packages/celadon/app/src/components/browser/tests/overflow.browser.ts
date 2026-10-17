@@ -89,9 +89,12 @@ test('keeps the current page on the strip when it would not fit', async ({ page 
 	expect(visible.slice(0, -1)).toEqual(all.slice(0, visible.length - 1))
 	expect(visible[visible.length - 1]).toBe(all[all.length - 1])
 
-	/* 放不下的那些在菜单里，条上与菜单加起来正好是全部四页 */
+	/* 放不下的那些在菜单里，条上与菜单加起来正好是全部四页。
+	   菜单是弹层，挂载比点击晚一拍：先等条数到位再读文字，否则读到空数组（机器慢时必现） */
 	await browser.locator('.browser__more').click()
-	const hiddenLabels = await page.locator('.browser__menu-item .browser__menu-label').allInnerTexts()
+	const menuLabels = page.locator('.browser__menu-item .browser__menu-label')
+	await expect(menuLabels).toHaveCount(4 - visible.length)
+	const hiddenLabels = await menuLabels.allInnerTexts()
 	expect(hiddenLabels).toHaveLength(4 - visible.length)
 	expect(hiddenLabels.length).toBeGreaterThan(0)
 })
