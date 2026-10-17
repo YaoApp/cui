@@ -413,3 +413,68 @@ test('restores both tab groups after a reload and never leaves an empty pane', a
 	/* 主栏的标签条在顶栏右段，两栏各自恢复，新栏不是空的 */
 	await expect(browser.locator('.browser__tabs-row').last().getByRole('tab', { name: '首页' })).toHaveCount(1)
 })
+
+test('paints both panes with the same background', async ({ page }) => {
+	await page.setViewportSize({ width: 1600, height: 900 })
+	await markSignedIn(page)
+	await page.goto('/app/inbox')
+	const browser = columns(page).browser
+	await widenBrowser(page)
+	await openTabMenu(page, browser)
+	await page.getByRole('menuitem', { name: '左右分栏' }).click()
+	await expect(browser.locator('.browser__pane')).toHaveCount(2)
+
+	/* 两栏的页面底必须同色：新栏单独写底色会让一栏白、一栏灰 */
+	const paints = await browser.locator('.browser__pane').evaluateAll((els) =>
+		els.map((el) => {
+			let node: HTMLElement | null = el as HTMLElement
+			while (node) {
+				const colour = getComputedStyle(node).backgroundColor
+				if (colour && colour !== 'rgba(0, 0, 0, 0)') return colour
+				node = node.parentElement
+			}
+			return 'none'
+		})
+	)
+	expect(paints[0]).toBe(paints[1])
+})
+
+test('keeps the drag in step after the double click resets the ratio', async ({ page }) => {
+	await page.setViewportSize({ width: 1600, height: 900 })
+	await markSignedIn(page)
+	await page.goto('/app/inbox')
+	const browser = columns(page).browser
+	await widenBrowser(page)
+	await openTabMenu(page, browser)
+	await page.getByRole('menuitem', { name: '左右分栏' }).click()
+	const divider = browser.locator('.browser__divider')
+	const widths = async () =>
+		browser
+			.locator('.browser__pane')
+			.evaluateAll((els) => els.map((el) => Math.round(el.getBoundingClientRect().width)))
+
+	const drag = async (delta: number) => {
+		const handle = (await divider.boundingBox())!
+		await page.mouse.move(handle.x + handle.width / 2, handle.y + 200)
+		await page.mouse.down()
+		await page.mouse.move(handle.x + handle.width / 2 + delta, handle.y + 200, { steps: 6 })
+		await page.mouse.up()
+		await page.waitForTimeout(300)
+	}
+
+	await drag(60)
+	const first = await widths()
+	// 新栏在左：往右拖它变宽（DOM 里第二个面板），主栏在右变窄
+	expect(first[1]).toBeGreaterThan(first[0])
+
+	await divider.dblclick()
+	await page.waitForTimeout(400)
+	const even = await widths()
+	expect(Math.abs(even[0] - even[1])).toBeLessThanOrEqual(8)
+
+	/* 复位之后再拖同样的距离，位移应与第一次一致，不能跳一大块 */
+	await drag(60)
+	const second = await widths()
+	expect(second[0]).toBe(first[0])
+	expect(second[1]).toBe(first[1])
+})

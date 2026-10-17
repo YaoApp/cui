@@ -5,7 +5,8 @@
 	display: flex;
 	flex-direction: column;
 	min-block-size: 0;
-	background: var(--background-surface);
+	/* 不单独写底色：与主栏一样透出本栏的底（--background-content）。
+	   写 --background-surface 会让两栏差一档，看起来一块白一块灰 */
 }
 
 /* 标签条那一行：与顶栏的标签条同一套组件，这里只给它高度、内距与下缘分隔线 */
