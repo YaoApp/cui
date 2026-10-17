@@ -147,7 +147,8 @@ app/src/
 - 单元用例与组件同目录：`nav.test.tsx` · `nav.client.test.tsx` · `hooks/use-nav-resize.test.tsx` · `content.test.tsx` · `browser.test.tsx`（均在 `app/src/components/` 内）。
 - 标签集与目标解析：`app/src/stores/browser/tabs.test.ts` 与 `targets.test.ts`；两组标签的纯函数在 `tab-group.test.ts`，第二组 store 在 `secondary.test.ts`。
 - 浏览器用例按层拆开：`app/src/features/inbox/tests/layout.shell.browser.ts`（三栏骨架 · 导航 · 本栏收放与列头 · 换边 · 让位）· `layout.split.browser.ts`（两组标签 · 方向门槛 · 分母线与拖动 · 关空退回单栏 · 新栏两套菜单）· `layout.exclusive.browser.ts`（上下分栏与独占）· `layout.motion.browser.ts`（动效），共用件在 `layout.helpers.ts`。
-- 组件自验：`app/src/components/browser/tests/tab.browser.ts`（标签与关闭键 · 截断提示）· `exclusive-width.browser.ts`（独占与导航收起同时成立时的栏宽）· `overflow.browser.ts`（溢出与菜单上段 · 当前页留在条上）· `drag.browser.ts`（拖动换序与让位预览 · 小位移按点击 · `Esc` 取消 · 关闭键上不起拖 · 拖动中锁选择）。
+- 组件自验：`app/src/components/browser/tests/tab.browser.ts`（标签与关闭键 · 截断提示）· `exclusive-width.browser.ts`（独占与导航收起同时成立时的栏宽）· `overflow.browser.ts`（溢出与菜单上段 · 当前页留在条上）· `drag.browser.ts`（拖动换序与让位预览 · 小位移按点击 · `Esc` 取消 · 关闭键上不起拖 · 拖动中锁选择）· `a11y.browser.ts`（标签与被控面板的 id 与 `aria-controls` · 两组的 `tablist` 名字与 id 不撞 · 分隔条的 `aria-valuenow` 与键盘调整）。
+- 无障碍接线：每组标签条有自己的 `idPrefix`，标签 id 与 `aria-controls` 由它派生，被控面板带 `role="tabpanel"` 与跟着活动页走的 `aria-labelledby`；新建键在 `tablist` 之外；分隔条是 `role="separator"` 且带 `aria-label`、`aria-valuemin`/`max`/`now`。
 
 ## 11. 不做
 

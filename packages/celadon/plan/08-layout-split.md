@@ -70,8 +70,8 @@
 - [x] **6. 焦点与落点**：已完成主路径。点新栏把焦点切到 1；新建、切换、关闭、拖动都只作用于本组（各条标签条自带动作）；新栏地址入口走本组 `navigate`；关空与合并后焦点回 0。可见焦点指示与非焦点栏降档底色还没做。
 - [x] **7. 关空即关分栏 / 主动合并**：已完成。关空判定改成**订阅式**：首帧（刷新恢复）分栏开着而新栏为空时补一张首页，之后新栏被任何路径关到一个不剩（单关、关闭其它、关闭全部、批量关闭）都关分栏并回单面板，两条规则在同一个 effect 里按首帧标志分开，不会互相打架；主动关分栏经主栏入口并入去重。新栏的标签条目前只接了单关与新建，`closeOthers`/`closeAll` 的菜单入口属第 3 条，接上后会自动走这条订阅，不需要再改。
 - [x] **8. 判定与门槛**：已完成。两个方向各按自己的条件判：左右看本栏实际宽度（`width`，已按 `sideRoom` 夹过）是否够两块并排再加 8 像素分隔条；上下看 `.browser__body` 的实际高度（`ResizeObserver` 实时量）是否够两倍 `--pane-min-height` 再加新栏标签条 40 像素。装配层原来那条按视口宽一刀切的 `splitBlocked` 只挡左右，不再误挡上下；已开着一个方向时，另一个方向按自己的条件判。置灰原因分两种并四语齐（栏宽不足、高度不足）。浏览器用例 `gates each split direction by its own room` 覆盖三种窗口。
-- [ ] **9. 无障碍**：两组标签条各自 `tablist` 与 `idPrefix`，标签 id、`aria-controls`、`aria-selected` 齐备；被控面板补 `role="tabpanel"` 与对应 id；`＋` 与 `⌄` 移出 `tablist` 并同步改 `useTabOverflow` 的预留计算；两组同名标签按 `data-group` 限定；分隔条补 `aria-valuemin`/`max`/`now`；「新栏」限定四语齐。
-- [ ] **10. 用例、迁移与文档**：**用例与文档已完成**：`layout.split.browser.ts` 17 条覆盖分组独立、方向门槛、关空即关分栏、主动合并、刷新恢复、两栏同底色、拖动与复位后再拖、新栏两套菜单；`secondary.test.ts` 补了三条真实水合的升级用例（活动页失效回落首项、活动页仍在则保留、记录里没有页时按空组处理）；旧值迁移按第 5 条的决定不做；文档已同步 `main-shell.md`、`foundations.md`、`08-layout-implemented.md`、`plan/README.md` 与本册。**未完成**：无障碍的 `idPrefix` 与 `aria-controls` 用例，随第 9 条一起做。
+- [x] **9. 无障碍**：已完成。两组各有 `idPrefix`（`browser-primary` / `browser-secondary`），标签带 `id` 与 `aria-controls`，被控面板带 `role="tabpanel"`、`id` 与跟着活动页走的 `aria-labelledby`；两条 `tablist` 的名字分别是「主栏标签」与「新栏标签」（四语齐），两组并存时读屏能分清；新建键移出 `tablist`、与标签行同属裁切容器，`useTabOverflow` 的预留量改为从容器里取新建键；`⌄` 本来就在标签行之外；分隔条补了 `aria-label` 与 `aria-valuemin`/`max`/`now`（与钩子里 0.2 到 0.8 同口径）。标签不再参与收缩（`flex: none`），可见段因此只由宽度预算决定，不再随挤压来回震荡。新增 `components/browser/tests/a11y.browser.ts` 三条用例。
+- [x] **10. 用例、迁移与文档**：已完成。`layout.split.browser.ts` 17 条覆盖分组独立、方向门槛、关空即关分栏、主动合并、刷新恢复、两栏同底色、拖动与复位后再拖、新栏两套菜单；`a11y.browser.ts` 3 条覆盖标签与面板的接线、两组 id 不撞、分隔条的可读值与键盘调整；`secondary.test.ts` 补了三条真实水合的升级用例（活动页失效回落首项、活动页仍在则保留、记录里没有页时按空组处理）；旧值迁移按第 5 条的决定不做；文档已同步 `main-shell.md`、`foundations.md`、`08-layout-implemented.md`、`plan/README.md` 与本册。
 
 ## 1. 口径（实现依据）
 
@@ -123,7 +123,8 @@
 
 - 两根判定（左右看宽、上下看高）都按实际尺寸；两颗键各自的 `disabled` 独立，已开分栏时另一个方向不满足就不允许切换；置灰原因区分「窗口太窄」与「窗口太矮」，前者用 `shell.browser.split.blocked`，后者用 `shell.browser.split.tooShallow`，四语齐。
 - 新增 `--pane-min-height` token 后必须跑 `node scripts/build-css.mjs` 并提交两份 `tokens.css`，否则 `check-generated` 会红；新 `.less` 要过 `check-css-vars` 与 `check-tokens`。
-- 文档同步六处：`design/main-shell.md`（标签按栏各成一套、分栏两栏归属）、`design/foundations.md`（分屏的两个方向门槛与 `--pane-min-height`）、`plan/08-layout-implemented.md`（分栏一节重写）、`plan/README.md`（索引状态）、`architecture/07-routing.md` 与 `architecture/15-platform.md`（若涉及侧栏描述）。前四处已同步。
+- 文档同步六处：`design/main-shell.md`（标签按栏各成一套、分栏两栏归属）、`design/foundations.md`（分屏的两个方向门槛与 `--pane-min-height`）、`plan/08-layout-implemented.md`（分栏一节重写）、`plan/README.md`（索引状态）、`architecture/07-routing.md` 与 `architecture/15-platform.md`（若涉及侧栏描述）。前四处已同步，后两处没有涉及分栏的表述。
+- 新建键移出 `tablist` 之后，标签行在裁切容器里是弹性项，可用宽度少了新建键那一格与其间距；标签同时改为不参与收缩（`flex: none`），可见段只由宽度预算决定。因此同样的栏宽下条上能放下的页数可能比以前少一页，`drag.browser.ts` 里依赖挤压后宽度的断言已按新口径改写。
 
 ## 3. 用例矩阵
 
