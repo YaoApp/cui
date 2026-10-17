@@ -141,14 +141,17 @@ address.
 - Unit tests sit next to the component: `browser.test.tsx`. Tab sets, target parsing and the two groups live in
   `app/src/stores/browser/`: `tabs.test.ts`, `targets.test.ts`, `tab-group.test.ts` and `secondary.test.ts`.
 - Component browser tests: `tests/tab.browser.ts` (tab blocks and the close key),
-  `tests/exclusive-width.browser.ts` (column width when exclusive and navigation collapse hold at once),
-  `tests/overflow.browser.ts` (overflow and the top of the menu), `tests/drag.browser.ts` (reordering by drag)
-  and `tests/a11y.browser.ts` (tab to panel wiring, the two group ids, the divider values).
+  `tests/keyboard.browser.ts` (keyboard traversal and closing), `tests/overflow.browser.ts` (overflow and the top
+  of the menu), `tests/drag.browser.ts` (reordering by drag), `tests/tab-menu.browser.ts` (both menus),
+  `tests/recent-address.browser.ts` (the opened list and the address entry),
+  `tests/exclusive-width.browser.ts` (column width when exclusive and navigation collapse hold at once) and
+  `tests/a11y.browser.ts` (tab to panel wiring, the two group ids, the divider values).
 - Layout browser tests under `app/src/features/inbox/tests/`, split by layer: `layout.shell.browser.ts` (three
   columns, navigation, this column's fold and head, swapping, give-way), `layout.split.browser.ts` (two groups,
   direction gates, the divider and dragging, closing the split when the second group empties, both menus of the
   second pane), `layout.exclusive.browser.ts` (row split and exclusive), `layout.motion.browser.ts`
-  (animation); shared helpers live in `layout.helpers.ts`.
+  (animation), `layout.mirror.browser.ts` (mirrored geometry and keys after a swap); shared helpers live in
+  `layout.helpers.ts`.
 
 ## Known limits
 

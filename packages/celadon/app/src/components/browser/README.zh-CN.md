@@ -126,11 +126,13 @@
 
 - 单元用例与组件同目录：`browser.test.tsx`；标签集、目标解析与两组标签在 `app/src/stores/browser/` 的
   `tabs.test.ts` · `targets.test.ts` · `tab-group.test.ts` · `secondary.test.ts`。
-- 浏览器用例（组件自验）：`tests/tab.browser.ts`（标签块与关闭键）· `tests/exclusive-width.browser.ts`（独占与导航收起同时成立时的栏宽）·
-  `tests/overflow.browser.ts`（溢出与菜单上段）· `tests/drag.browser.ts`（拖动换序）· `tests/a11y.browser.ts`（标签与面板接线 · 两组 id · 分隔条读数）。
+- 浏览器用例（组件自验）：`tests/tab.browser.ts`（标签块与关闭键）· `tests/keyboard.browser.ts`（键盘遍历与关闭）·
+  `tests/overflow.browser.ts`（溢出与菜单上段）· `tests/drag.browser.ts`（拖动换序）· `tests/tab-menu.browser.ts`（两套菜单）·
+  `tests/recent-address.browser.ts`（打开过的东西与地址入口）· `tests/exclusive-width.browser.ts`（独占与导航收起同时成立时的栏宽）·
+  `tests/a11y.browser.ts`（标签与面板接线 · 两组 id · 分隔条读数）。
 - 浏览器用例（三栏与布局）：`app/src/features/inbox/tests/` 下按层拆开——`layout.shell.browser.ts`（三栏骨架 · 导航 · 本栏收放与列头 · 换边 · 让位）、
   `layout.split.browser.ts`（两组标签 · 方向门槛 · 分隔线与拖动 · 关空退回单栏 · 新栏两套菜单）、`layout.exclusive.browser.ts`（上下分屏与独占）、
-  `layout.motion.browser.ts`（动效）；共用件在 `layout.helpers.ts`。
+  `layout.motion.browser.ts`（动效）、`layout.mirror.browser.ts`（换边后的镜像几何与键位）；共用件在 `layout.helpers.ts`。
 
 ## 已知限制
 

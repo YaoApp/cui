@@ -38,9 +38,18 @@ it is marked `data-no-drag` so the top drag band does not take presses over it.
 
 ## Size and spacing
 
-Following measurements from the reference client: a 32 square hit area per key, 34 between centres, a 12
-square thin-line glyph, and 14 of space at the right edge of the close key. Maximise and restore use the same
-thin-line step; restore stacks a second box.
+A 32 square hit area per key, 8 between keys (40 between centres) and a 14 thin-line glyph; the space at the
+right edge comes from the title bar's own 8 of padding. Maximise and restore use the same thin-line step;
+restore stacks a second box.
+
+## States
+
+| State | How it shows |
+| --- | --- |
+| Default | Transparent background, text colour `--text-secondary`. |
+| Hover | Uses the `Button` plain step: background `--background-hover`, text lifted to `--text-primary`; the close key gets no special colour. |
+| Pressed | Only the F4 press scale, no colour change. |
+| Focus | Draws `--focus-ring`. |
 
 ## Accessibility
 
@@ -49,8 +58,8 @@ Every key has an `aria-label` (`shell.window.minimize`, `shell.window.maximize`,
 
 ## Verification
 
-`pnpm vitest run app/src/components/window-controls/window-controls.test.tsx`; the real check happens on
-Windows against the reference client.
+`pnpm vitest run app/src/components/window-controls/window-controls.test.tsx`; the real check happens in the
+Windows client, comparing the three keys' position and glyphs through window-level screenshots.
 
 ## Known limits
 

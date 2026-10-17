@@ -143,8 +143,9 @@ const items: NavItem[] = [
 - The fold animation uses Motion spring parameters (`stiffness 420`, `damping 38`, `mass 0.9`) and degrades to
   instant under the reduced-motion preference; those parameters are not bound to the duration steps in
   `design/foundations.md`, so changing the styles does not change them.
-- The draggable width range is `264` to `420`. A narrow viewport (at or below `1023`) collapses the column
-  automatically through the same state and the same styles; the overlay that would open it temporarily over
+- The draggable width range is `264` to `420`. Below a viewport width of `987`, the `--nav-auto-collapse`
+  step (`988`) collapses the column automatically through the same state and the same styles; the overlay
+  that would open it temporarily over
   the middle column is not implemented yet.
 - Secondary navigation is wired for the inbox only; other scenes follow their own features.
 - Unread counts come only through `badge`; real numbers are supplied by the assembly layer.
