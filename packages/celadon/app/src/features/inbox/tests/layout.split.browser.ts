@@ -477,4 +477,16 @@ test('keeps the drag in step after the double click resets the ratio', async ({ 
 	const second = await widths()
 	expect(second[0]).toBe(first[0])
 	expect(second[1]).toBe(first[1])
+
+	/* 连续再拖一次同样距离：位移必须与上一次相同，且方向跟着指针（新栏继续变宽、主栏继续变窄） */
+	await drag(60)
+	const third = await widths()
+	expect(third[1]).toBe(second[1] + 60)
+	expect(third[0]).toBe(second[0] - 60)
+
+	/* 反向拖同样的距离回到原位：方向也跟手，不跳 */
+	await drag(-60)
+	const back = await widths()
+	expect(back[0]).toBe(second[0])
+	expect(back[1]).toBe(second[1])
 })

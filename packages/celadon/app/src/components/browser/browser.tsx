@@ -129,7 +129,9 @@ export function Browser({
   const splitResize = useSplitResize(
     split === 'rows' ? 'rows' : 'columns',
     splitRatio,
-    onSplitRatio
+    onSplitRatio,
+    /* 左右分栏新栏在左、比例记主栏：指针往右是主栏变小，换算取反；上下分栏方向本来就对 */
+    split === 'columns'
   )
   const columnResize = useColumnResize(width, onWidth, side)
   /* 分屏能不能开，按**本栏实宽**判：宽度由分界线拖出来，窗口宽只是其中一半条件。
