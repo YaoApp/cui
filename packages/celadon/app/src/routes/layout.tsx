@@ -1,5 +1,5 @@
 import './layout.less'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router'
 import { Browser, TabPage, type BrowserTab } from '@/components/browser'
 import { Content, type HeadKey } from '@/components/content'
@@ -196,10 +196,26 @@ export function AppLayout() {
 		clearSecondary()
 		setFocusedPane(0)
 	}
-	/* 刷新恢复：分栏开着而新栏为空（例如它在关空那一刻被刷新打断），补一张首页，避免空面板 */
+	/* 分栏与新栏的空与非空只有两条规则，按「是不是首帧」分开：
+	   首帧（刷新恢复）分栏开着而新栏为空，补一张首页，避免空面板；
+	   之后新栏被任何路径关到一个不剩（单关、关闭其它、关闭全部、批量关闭），一律关分栏回到单面板。
+	   两条放在同一个 effect 里按顺序判定，避免「补首页」与「关分栏」互相打架。 */
+	const firstFrame = useRef(true)
 	useEffect(() => {
-		if (browserSplit !== 'none' && secondaryTabs.length === 0) seedSecondary()
-	}, [browserSplit, secondaryTabs.length, seedSecondary])
+		if (browserSplit === 'none') {
+			firstFrame.current = false
+			return
+		}
+		if (firstFrame.current) {
+			firstFrame.current = false
+			if (secondaryTabs.length === 0) seedSecondary()
+			return
+		}
+		if (secondaryTabs.length === 0) {
+			setFocusedPane(0)
+			setBrowserSplit('none')
+		}
+	}, [browserSplit, secondaryTabs.length, seedSecondary, setBrowserSplit, setFocusedPane])
 
 	/* 新标签页上的「打开过的东西」：store 按使用顺序记着，关掉页也不消失；点一条复用同一页打开 */
 	const recent = recentTabs.map((entry) => ({ key: entry.key, label: entry.label }))
