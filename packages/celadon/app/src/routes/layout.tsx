@@ -31,13 +31,12 @@ const MAIN_ITEMS: NavItem[] = [
 const SHORTCUTS: NavItem[] = MAIN_ITEMS.filter((item) => item.key === 'workspace' || item.key === 'computer')
 
 /* 标签浏览器的默认栏宽取 token --side-width-reading，与组件自己的默认值同一口径；
-   写死数字会让 token 改了不生效。首次读取后缓存，样式表不变就不必反复算。 */
+   写死数字会让 token 改了不生效。token 声明在主题作用域（`.celadon`，挂在 body 上）而不是根元素，
+   所以读 body；首次读取后缓存，样式表不变就不必反复算。 */
 let sideWidthReadingCache: number | null = null
 function sideWidthReading(): number {
 	if (sideWidthReadingCache !== null) return sideWidthReadingCache
-	const value = Number.parseFloat(
-		getComputedStyle(document.documentElement).getPropertyValue('--side-width-reading')
-	)
+	const value = Number.parseFloat(getComputedStyle(document.body).getPropertyValue('--side-width-reading'))
 	sideWidthReadingCache = Number.isFinite(value) ? value : 400
 	return sideWidthReadingCache
 }

@@ -204,7 +204,7 @@ test('disables the head key when the window cannot fit the browser column', asyn
 })
 
 test('disables the head key when the window forces the navigation column shut', async ({ page }) => {
-	/* 971 及以下由视口收起导航，列头那颗展开键此时按不动，置灰并给出原因 */
+	/* 987 及以下由视口收起导航，列头那颗展开键此时按不动，置灰并给出原因 */
 	await page.setViewportSize({ width: 900, height: 700 })
 	await markSignedIn(page)
 	await page.goto('/app/inbox')
@@ -277,13 +277,13 @@ test('yields in order: content first, then the browser, then the navigation colu
 
 	// 1000：内容区已到最小，标签浏览器还在缩，导航列还没收
 	await page.setViewportSize({ width: 1000, height: 700 })
-	/* 宽度有过渡：等到连续两次读数一致再断言。直接比 '400px' 会在首帧读到过渡中的值
-	   （那一下内容恰好 400、浏览器 326），落定后其实是 408 / 312，断言等于没验 */
+	/* 宽度有过渡：等到连续两次读数一致再断言。盯标签浏览器而不是内容区：内容区在过渡前段
+	   有一百多毫秒是平的，盯它会提前收工；直接比 '400px' 更是会读到首帧的值，断言等于没验 */
 	let mid = await metrics(page)
 	for (let attempt = 0; attempt < 20; attempt += 1) {
 		await page.waitForTimeout(120)
 		const next = await metrics(page)
-		if (Math.round(next.content.width) === Math.round(mid.content.width)) break
+		if (Math.round(next.browser.width) === Math.round(mid.browser.width)) break
 		mid = next
 	}
 	expect(mid.content.width).toBeGreaterThanOrEqual(400)
