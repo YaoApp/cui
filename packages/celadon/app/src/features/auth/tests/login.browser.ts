@@ -411,7 +411,7 @@ test('keeps the boundary compliant inside the client and intentionally light on 
       指针也要移开：上一条用例留下的指针位置可能正落在字段上，悬停档同样不是要核的静止档。 */
   const settle = async () => {
     const field = page.locator('.login__form .input')
-    await expect(field).toBeVisible()
+    await expect(field).toBeVisible({ timeout: 20_000 })
     await field.fill('max@example.com')
     await field.blur()
     await page.mouse.move(2, 2)
@@ -444,6 +444,8 @@ test('keeps the boundary compliant inside the client and intentionally light on 
   await expect.poll(async () => (await measure()).ratio, { timeout: 20_000 }).toBeGreaterThanOrEqual(3)
   const inClientDark = await measure()
   expect(inClientDark.ratio).toBeGreaterThanOrEqual(3)
+  /* 浅色档本来就过 3:1，只验比例证明不了「换到了暗色那套 token」：描边颜色必须真的变了 */
+  expect(inClientDark.border).not.toBe(inClient.border)
   await shot(page, 'dark-in-client')
 
   console.log('[login] boundary standalone light', standalone.border, 'on', standalone.background, '=', standalone.ratio.toFixed(2))

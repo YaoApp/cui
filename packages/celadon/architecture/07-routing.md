@@ -46,7 +46,7 @@
 - **读（URL → store）只在 `navigationType === 'POP'`** —— 首次进入 + 浏览器前进 / 后退。
 - **写（store → URL）只在值真的变了时** —— 没变不动历史。
 
-实现只有一处：**页面自己的同步钩子**（如 `features/scaffold/routing/use-routing-url-sync.ts`）。其他地方**不许**在 effect 里写 URL
+实现只有一处：**页面自己的同步钩子**（如 `features/scaffold/routing/hooks/use-routing-url-sync.ts`）。其他地方**不许**在 effect 里写 URL
 （机器强制 `check-effect-url-write.mjs`，例外清单已清空（绑定钩子随侧边面撤掉了））。
 
 **为什么**：两个方向都活着、又互相触发，就是死循环（实测把 vitest 卡死，用例超时都拦不住）。

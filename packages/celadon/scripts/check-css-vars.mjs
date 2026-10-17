@@ -30,7 +30,7 @@ const sources = [TOKENS, ...files].filter((file) => {
 });
 const declared = new Set();
 for (const file of sources) {
-	const text = readFileSync(file, 'utf8');
+	const text = readFileSync(file, 'utf8').replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
 	for (const match of text.matchAll(/(--[a-z0-9-]+)\s*:/gi)) declared.add(match[1]);
 }
 
