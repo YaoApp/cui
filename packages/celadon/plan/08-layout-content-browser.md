@@ -1,8 +1,8 @@
-# 08 · 布局：未完成（跟踪）
+# 08 · 布局：未完成（跟踪，已归档）
 
 - 本册**只列还要做的事**；已完成的事实与读数见 [08-layout-implemented.md](08-layout-implemented.md)。
 - 依据：`design/main-shell.md` §四 · §五 · §七 · `design/foundations.md` F4 与 F6 · `design/layout.md` · `architecture/06-state.md` §2.3。
-- 状态：**无未完成项**（2026-10-17）。本册留空，新事项出现时再记。
+- 状态：**已归档**（2026-10-17）。收口时无未完成项；本册不再更新，后续事项按新编号另立计划。
 
 ## 0. 待办
 
