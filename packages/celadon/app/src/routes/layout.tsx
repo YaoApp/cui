@@ -94,9 +94,10 @@ export function AppLayout() {
 	const setBrowserSide = useColumnsStore((state) => state.setBrowserSide)
 	const navWidth = useColumnsStore((state) => state.navWidth)
 	/* 栏宽上限 = 窗口 − 导航区（收起时为 0）− 内容区最小 400 − 把手 8；下限是侧栏最小 300。
-	   取它和存值里的较小者，列与栏内的壳才用同一个数，不会一个被夹住、一个照旧。 */
+	   默认档（没拖过）同样按它收：否则窄窗口下默认 400 也放不下，栏内的定尺壳会溢出到列外。
+	   列与栏内的壳用同一个数，不会一个被夹住、一个照旧。 */
 	const sideRoom = Math.max(300, viewportWidth - (navCollapsed ? 0 : (navWidth ?? 280)) - 400 - 8)
-	const browserWidthShown = browserWidth === null ? null : Math.min(browserWidth, sideRoom)
+	const browserWidthShown = Math.min(browserWidth ?? 400, sideRoom)
 	const setNavWidth = useColumnsStore((state) => state.setNavWidth)
 
 	const account = useAuthStore((state) => state.user)

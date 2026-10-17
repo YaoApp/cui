@@ -10,11 +10,11 @@
   background: var(--background-surface);
 }
 
-/* 内容面左上角圆角：只在 Windows 生效（自绘顶栏与内容面在左上角相接的那一端）；
-   Web 不用圆角，macOS 通栏，两端都不适用。导航列收起时内容面顶到窗口左缘，圆角照旧保留，
-   因为「挨着窗口左上」这个位置没变。换边后紧挨导航的那一栏是标签浏览器，圆角归它，
-   本栏四角一律取直角；半径取 --radius-large（12px） */
-[data-controls='own']:not([data-mirror]) .content {
+/* 内容面左上角圆角：只在 Windows 桌面端生效（与标签浏览器那条用同一个判据 data-os）。
+   自绘顶栏与内容面在左上角相接的那一端才画圆角；Web 不用圆角，macOS 通栏，两端都不适用。
+   导航列收起时内容面顶到窗口左缘，圆角照旧保留，因为「挨着窗口左上」这个位置没变。
+   换边后紧挨导航的那一栏是标签浏览器，圆角归它，本栏四角一律取直角；半径取 --radius-large（12px） */
+[data-os='windows']:not([data-mirror]) .content {
   border-start-start-radius: var(--radius-large);
 }
 
