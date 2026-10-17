@@ -4,11 +4,18 @@
    检查面：design/tokens.less 的声明 + app/src 下 .less 里的声明 + app/src 下 .less 里的使用。 */
 import { fileURLToPath } from 'node:url';
 import { dirname, join, relative, resolve } from 'node:path';
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 
+/* 目标：不给参数时检查本包；给一个目录时把它当包根（检查器自测用，样本与真实包同构：
+   包根/{design/tokens.less, app/src/**}{,*.less}）。 */
 const PACKAGE = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const TOKENS = join(PACKAGE, 'design', 'tokens.less');
-const APP_SRC = join(PACKAGE, 'app', 'src');
+const TARGET = process.argv[2] ? resolve(process.argv[2]) : PACKAGE;
+const TOKENS = join(TARGET, 'design', 'tokens.less');
+const APP_SRC = join(TARGET, 'app', 'src');
+if (!existsSync(APP_SRC)) {
+	console.log('✗ app/src does not exist — the checker refuses to pass on an empty tree (target: ' + TARGET + ')');
+	process.exit(1);
+}
 
 function walk(dir, out = []) {
 	for (const name of readdirSync(dir)) {
