@@ -152,16 +152,18 @@ test('lands the drop by the whole list when the strip holds a swapped segment', 
 	await page.mouse.move(active.x + active.width + 30, home.y + home.height / 2, { steps: 10 })
 	await page.mouse.up()
 
-	/* 刷新后按整个数组重建：条上是列表前两项加上当前页那一项，菜单里依次是 beta 与首页 */
+	/* 刷新后按整个数组重建：这一栏只放得下当前页，其余按数组次序列在菜单里。
+	   首页落在最末，说明落点是按整个列表算的，没有只按可见那一段插 */
 	await page.reload()
 	await expect
 		.poll(() => labels(page))
-		.toEqual(['alpha.example.com/one', 'gamma.example.com/three'])
-	await page.locator('.browser__more').click()
+		.toEqual(['gamma.example.com/three'])
+	await page.locator('.browser__bar > .browser__more').click()
 	/* 菜单是弹层，挂载比点击晚一拍：先等条数到位再读文字，否则读到空数组（CI 机器慢时必现） */
 	const menuLabels = page.locator('.browser__menu-item .browser__menu-label')
-	await expect(menuLabels).toHaveCount(2)
+	await expect(menuLabels).toHaveCount(3)
 	expect(await menuLabels.allInnerTexts()).toEqual([
+		'alpha.example.com/one',
 		'beta.example.com/two',
 		'首页'
 	])

@@ -10,7 +10,7 @@ export type MotionPanelProps = HTMLMotionProps<'div'> & {
 
 /** 参与列联动的容器：位置与尺寸变化交给 Motion 的布局投影，动画期间不动布局。
  *
- * 约定见 `plan/08-layout-motion.md`：
+ * 用法约定：
  * - 外壳用本组件（`layout`），内部的条目与文字再加 `position`（对应 `layout="position"`）；
  * - 位移型元素一律 `position`，否则父级尺寸变化的投影会把文字一起缩放，出现变形与发虚；
  * - 减少动效偏好下退化为瞬时，不播放动画；

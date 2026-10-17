@@ -17,9 +17,10 @@
 | [`checkbox/`](checkbox/README.zh-CN.md) | 复选框。 |
 | [`dialog/`](dialog/README.zh-CN.md) | 弹层页面，两档宽度。 |
 | [`drawer/`](drawer/README.zh-CN.md) | 从窗口一侧滑入的面板。 |
-| [`icon/`](icon/README.zh-CN.md) | 界面图标，四档尺寸。 |
+| [`icon/`](icon/README.zh-CN.md) | 界面图标，五档尺寸。 |
 | [`input/`](input/README.zh-CN.md) | 输入框。 |
 | [`link/`](link/README.zh-CN.md) | 站内与站外共用的文字链接。 |
+| [`motion/`](motion/README.zh-CN.md) | 收放动画用的布局投影。 |
 | [`otp-field/`](otp-field/README.zh-CN.md) | 一次性口令输入。 |
 | [`scroll-area/`](scroll-area/README.zh-CN.md) | 滚动容器，溢出时画边缘阴影。 |
 | [`segmented-control/`](segmented-control/README.zh-CN.md) | 分段选择器。 |
@@ -39,5 +40,5 @@ import { Button, Icon, Tooltip } from '@/components/base'
 ## 约定
 
 - 目录槽位与组件同构：`index.ts` · `<名>.tsx` · `<名>.test.tsx` · `<名>.less` · `parts/` · `hooks/`。
-- 每个组件目录都有自己的中文使用说明，文件名是 `README.zh-CN.md`。
+- 每个组件目录都带两份说明：英文 `README.md` 与中文 `README.zh-CN.md`，两份内容对应。
 - 裸控件禁令：`features/`、`routes/`、`components/`（本目录豁免）里不许裸写 `<button>` 与 `<select>`，由 `pnpm check` 强制。

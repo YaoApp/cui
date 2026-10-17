@@ -1,6 +1,6 @@
 /* 自绘的窗口键：最小化 · 最大化与还原 · 关闭。只在窗口键归我们自己的平台（Windows）出现，
-   macOS 有原生交通灯、Web 没有窗口可管，两者都不画（见内部文档「桌面客户端壳」第二节的规格）。
-   三个键等距、细线字形、无底色，关闭键平时也是普通灰，悬停才用危险色。 */
+   macOS 有原生交通灯、Web 没有窗口可管，两者都不画。
+   三个键等距、细线字形、无底色，悬停与按下沿用 `Button` 的 `plain` 档。 */
 import { useTranslation } from '@/platform/i18n'
 import { useWindowChrome } from '@/platform/client'
 import { Button, Icon } from '@/components/base'

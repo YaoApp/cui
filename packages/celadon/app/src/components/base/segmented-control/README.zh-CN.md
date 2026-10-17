@@ -1,7 +1,7 @@
 # components/base/segmented-control
 
-`components/base/segmented-control` 是分段选择器：一组互斥的短选项排成一段，选中项高亮。它用在上游的
-RadioGroup 之上，因此是一组单选语义，而不是若干独立按钮。
+`components/base/segmented-control` 是分段选择器：一组互斥的短选项排成一段，选中项高亮。外层是一组
+`role="group"`，每个选项是原生按钮并用 `aria-pressed` 表达选中，因此是一组互斥选择，而不是若干独立开关。
 
 适合视图切换、过滤档位、二到四选一的场景。选项多于五个，或文字较长时改用 `components/base/select`。
 
@@ -18,7 +18,7 @@ RadioGroup 之上，因此是一组单选语义，而不是若干独立按钮。
 
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| `options` | `readonly SegmentedOption[]` | 无 | 选项。每项含 `value` 与 `label`。 |
+| `options` | `readonly SegmentedOption[]` | 无 | 选项。每项含 `value` 与 `label`，可选 `icon`（段内左侧图标）与 `disabled`。 |
 | `value` | `string` | 无 | 当前值。受控，组件不自己存。 |
 | `onValueChange` | `(value: string) => void` | 无 | 切换回调。 |
 | `aria-label` | `string` | 无 | 这一组选项的名字，必填。 |
@@ -40,7 +40,8 @@ RadioGroup 之上，因此是一组单选语义，而不是若干独立按钮。
 
 ## 无障碍
 
-- 单选语义，方向键在选项间移动；测试里不要用 `.selectOption()` 或 `toHaveValue()`。
+- 外层是 `role="group"` 并带 `aria-label`；每个选项是按钮，选中态用 `aria-pressed="true"` 表达。
+- 左右方向键在选项间移动并直接切换选中；测试用 `getByRole('button')` 与 `toHaveAttribute('aria-pressed', 'true')`，不要用 `.selectOption()` 或 `toHaveValue()`。
 - 必须给 `aria-label`，让读屏知道这一组在选什么。
 
 ## 验证方式
@@ -49,4 +50,4 @@ RadioGroup 之上，因此是一组单选语义，而不是若干独立按钮。
 
 ## 已知限制
 
-- 选项只为文字；需要图标或更复杂内容时另议。
+- 选项由图标与文字组成；更复杂的自定义内容不在这一件里，另议。

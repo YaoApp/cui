@@ -12,22 +12,29 @@ export type ScrollAreaProps = {
   /** 常驻：这一块的滚动条一直展示（内容区这类主阅读区用）；默认为假，指针进入才出现 */
   persistent?: boolean
   className?: string
+  /** 滚动区自身的标识与语义：标签浏览器的面板用它挂 `role="tabpanel"` 与 `aria-labelledby` */
+  id?: string
+  role?: string
+  'aria-labelledby'?: string
 }
 
 /* 三栏各自的滚动容器：滚动行为与滚动条由上游部件负责，边缘阴影按上游给出的
    `data-overflow-y-start` / `data-overflow-y-end` 出现或消失（只有真的溢出才画）。
-   见 `architecture/03-boundaries.md` §3 与 `plan/08-layout-base.md` 第 12 条。 */
+   见 `architecture/03-boundaries.md` §3。 */
 export function ScrollArea({
   children,
   size = 'medium',
   persistent = false,
   className,
+  id,
+  role,
+  'aria-labelledby': ariaLabelledby,
 }: ScrollAreaProps) {
   const classes = ['scroll-area', `scroll-area--${size}`, persistent ? 'scroll-area--persistent' : '', className]
     .filter(Boolean)
     .join(' ')
   return (
-    <BaseScrollArea.Root className={classes}>
+    <BaseScrollArea.Root className={classes} id={id} role={role} aria-labelledby={ariaLabelledby}>
       <BaseScrollArea.Viewport className="scroll-area__viewport">
         {children}
       </BaseScrollArea.Viewport>

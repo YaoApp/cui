@@ -3,7 +3,7 @@
 `components/base/scroll-area` 是滚动容器。滚动行为与溢出状态交给上游的 `@base-ui/react` 的 ScrollArea：
 视口上用 `data-overflow-y-start` 与 `data-overflow-y-end` 暴露"哪一侧还有内容"，本组件据此画边缘阴影。
 
-三栏各自的滚动都用它：导航列的上区与「当前」区、内容区、标签浏览器的标签条与页面。
+三栏各自的滚动都用它：导航列的上区与「当前」区、内容区、标签浏览器的页面。标签条本身不是滚动容器，放不下的标签收进 `⌄` 菜单。
 
 ## 目录内容
 
@@ -20,6 +20,9 @@
 | --- | --- | --- | --- |
 | `children` | `ReactNode` | 无 | 可滚动的内容。 |
 | `className` | `string` | 无 | 追加到根元素，用于给调用方自己的布局。 |
+| `id` | `string` | 无 | 根元素的 id。标签浏览器给页面面板一个 id，标签的 `aria-controls` 指向它。 |
+| `role` | `string` | 无 | 根元素的角色。标签浏览器传 `tabpanel`。 |
+| `aria-labelledby` | `string` | 无 | 指向当前标签，面板因此按它正在显示的那一页被读出来。 |
 
 ## 使用方式
 
@@ -37,7 +40,7 @@
 | --- | --- |
 | 缺省 | 滚动条不可见，两侧都没有阴影。 |
 | 溢出 | 还有内容的一侧出现渐隐阴影，上边与下边各自判定。 |
-| 悬停 | 滚动条淡入，滑块取 `--border-control`。 |
+| 悬停 | 滚动条淡入，滑块取 `--scrollbar-thumb`（值为 `--border-control`）；指针停在滑块上时取 `--scrollbar-thumb-hover`（值为 `--border-hover`）。 |
 | 滚动中 | 滚动条保持可见。 |
 
 ## 验证方式

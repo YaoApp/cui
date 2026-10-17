@@ -16,7 +16,7 @@ import { useColumnsStore } from '@/stores/layout/columns'
 /* 路由表：**只做装配**，业务实现不住这里。应用挂在构建决定的段下（base，见 04-host-integration.md）；
    路径**在 base 之下**：根是入口判定，产品页在导航六项的地址下。 */
 
-/* 产品面：第一阶段先落收件箱组装页，其余四个入口用占位页（见 plan/08-layout-base.md §3.3 与 §4）。 */
+/* 产品面：收件箱是组装页，其余四个入口当前用占位页。 */
 const productRoutes: RouteObject[] = [
 	{ path: 'new', element: <PlaceholderPage titleKey='shell.navigation.item.new' /> },
 	{ path: 'inbox', element: <InboxPage /> },

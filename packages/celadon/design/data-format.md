@@ -1,7 +1,7 @@
 # 数据格式（对应 data-format.html）
 
-> 页面上所有值都由浏览器**实时调用 `Intl.*`** 计算，不是写死的字符串 —— 所以它同时是
-> [`plan/19-data-format.md`](../plan/19-data-format.md) §3.4 样例表的**校验**。
+> 页面上所有值都由浏览器**实时调用 `Intl.*`** 计算，不是写死的字符串，因此这一页同时充当
+> 数据格式样例表的**校验**。
 > **固定样例**保证可复现：时间戳 `2026-09-30T08:12:34Z` · 数值 `1234.56` / `12345` / `1280` / `-100` · 大小 `900B` / `2.1KB` / `1.8MB` / `2MB` · 词表 `阿 波 蔡 邓 徐 张` · 列表 `甲|乙|丙`。
 > 切换语言看同一份数据的变化；**某个 `Intl` 能力缺失时只让那一节显示原因，不把整页留白**。
 
@@ -19,7 +19,7 @@
 
 ## 相对时间阶梯
 
-`Intl.RelativeTimeFormat({ numeric: "auto" })` —— 阈值见 `19` §3.1。
+`Intl.RelativeTimeFormat({ numeric: "auto" })`，阈值按当前语言的相对时间规则取。
 
 | 项 | 规则 / API |
 | --- | --- |
@@ -32,13 +32,13 @@
 
 ## 时区
 
-Intl.DateTimeFormat({ timeZone }) —— 同一时间戳在四个时区下的显示；落库格式带偏移与 IANA 括注（`19` §2）。
+Intl.DateTimeFormat({ timeZone })：同一时间戳在四个时区下的显示；落库格式带偏移与 IANA 括注。
 
 | 项 | 规则 / API |
 | --- | --- |
 | 四个时区 | `UTC` · `Asia/Shanghai` · `America/New_York` · `Europe/Berlin` |
 | 偏移 | `timeZoneName: "longOffset"` 取 `formatToParts` |
-| 落库格式 | 带偏移与 IANA 括注（`19` §2），例：`2026-09-30T16:12:34+08:00[Asia/Shanghai]` |
+| 落库格式 | 带偏移与 IANA 括注，例：`2026-09-30T16:12:34+08:00[Asia/Shanghai]` |
 
 ## 数字 · 单位 · 货币
 
@@ -59,16 +59,16 @@ Intl.NumberFormat / ListFormat —— 千分位 · 大数缩写 · 文件大小�
 
 ## 排序（按语言）
 
-同一组词按语言排序；标识符与路径**不本地化**，按码位（`19` §3.6）。
+同一组词按语言排序；标识符与路径**不本地化**，按码位。
 
 | 项 | 规则 / API |
 | --- | --- |
 | 按语言 | `new Intl.Collator(L).compare` |
-| 按码位 | `.sort()`（标识符与路径不本地化，`19` §3.6） |
+| 按码位 | `.sort()`（标识符与路径不本地化） |
 
 ## 双向文本（RTL）
 
-方向性图标镜像 · bidi 隔离 · 视觉回归 —— 规则见 `19` §4，效果演示见 [css-logical.html](css-logical.html)。
+方向性图标镜像 · bidi 隔离 · 视觉回归，效果演示见 [css-logical.html](css-logical.html)。
 
 | 项 | 规则 / API |
 | --- | --- |

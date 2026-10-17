@@ -1,5 +1,5 @@
 import './browser.less'
-import { useEffect, useState, type CSSProperties, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { Menu as BaseMenu } from '@base-ui/react/menu'
 import { Button } from '@/components/base/button'
 import { Icon } from '@/components/base/icon'
@@ -16,6 +16,10 @@ import { useSplitResize } from './hooks/use-split-resize'
 import { useColumnResize } from './hooks/use-column-resize'
 
 export type { BrowserTab } from './types'
+
+/** 两组标签与各自面板的 id 前缀：两组并存时 id 不撞，标签的 `aria-controls` 找得到自己那一块面板 */
+const PRIMARY_GROUP_ID = 'browser-primary'
+const SECONDARY_GROUP_ID = 'browser-secondary'
 
 /** 主栏顶栏两侧的键：装配层给状态与动作，图形与文案由这一层按本栏来画（后两栏换边后本栏是主栏时才用） */
 export type BarKey = {
@@ -78,18 +82,13 @@ export type BrowserProps = {
   onSecondaryRefresh?: (key: string) => void
   onSecondaryCloseOthers?: (key: string) => void
   onSecondaryCloseAll?: () => void
-  /** 指针在第二个面板按下：把焦点栏切过去 */
-  onSecondaryFocus?: () => void
-  /** 聚焦哪个面板（0 是第一个）：标签条的点击落在聚焦的那个面板上 */
-  focusedPane?: number
-  onFocusPane?: (pane: number) => void
   /** 面板独占整扇窗口：导航区与内容区让位，只留这一栏（与窗口自身的最大化不是一件事） */
   exclusive?: boolean
   onExclusive?: () => void
 }
 
-/* 标签浏览器：顶部标签条（新建吸附右端，放不下的进下拉菜单上段，标签可拖动换序），
-   下面当前页或两个面板。标签是全局一套，与会话弱关联（`design/main-shell.md` §五）；
+/* 标签浏览器：顶部标签条（新建键紧跟最后一颗标签，放不下的进下拉菜单上段，标签可拖动换序），
+   下面当前页；分屏时是两栏，每栏各有一组标签与自己的页（`design/main-shell.md` §五）；
    标签数据与页内容都由装配层给，组件不认识业务（`architecture/03-boundaries.md` §2 的层间方向）。 */
 export function Browser({
   tabs,
@@ -127,9 +126,6 @@ export function Browser({
   onSecondaryRefresh,
   onSecondaryCloseOthers,
   onSecondaryCloseAll,
-  onSecondaryFocus = () => {},
-  focusedPane = 0,
-  onFocusPane = () => {},
   exclusive = false,
   onExclusive = () => {},
 }: BrowserProps) {
@@ -144,7 +140,7 @@ export function Browser({
   const columnResize = useColumnResize(width, onWidth, side)
   /* 分屏能不能开，按**本栏实宽**判：宽度由分界线拖出来，窗口宽只是其中一半条件。
      两个长度 token 从 `.celadon` 上读一次（默认宽与最小宽），读不到就用回退值 */
-  const [limits, setLimits] = useState({ defaultWidth: 400, sideMin: 300 })
+  const [limits, setLimits] = useState({ defaultWidth: 400, sideMin: 300, paneMin: 240 })
   useEffect(() => {
     const read = (name: string, fallback: number) => {
       const raw = getComputedStyle(document.body).getPropertyValue(name).trim()
@@ -154,9 +150,23 @@ export function Browser({
     setLimits({
       defaultWidth: read('--side-width-reading', 400),
       sideMin: read('--side-min', 300),
+      paneMin: read('--pane-min-height', 240),
     })
   }, [])
-  const tooNarrowToSplit = (width ?? limits.defaultWidth) < limits.sideMin * 2
+  /* 本栏页面的实际高度：上下分栏的判定要用它，窗口高不算顶栏与侧栏头部 */
+  const [bodyHeight, setBodyHeight] = useState(0)
+  const bodyRef = useRef<HTMLDivElement | null>(null)
+  useEffect(() => {
+    const node = bodyRef.current
+    if (!node) return
+    const measure = () => setBodyHeight(node.getBoundingClientRect().height)
+    measure()
+    /* 单测环境没有 ResizeObserver：只量一次即可，真机上再跟窗口变化 */
+    if (typeof ResizeObserver === 'undefined') return
+    const observer = new ResizeObserver(measure)
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [split])
   /* 下拉菜单的开合：下拉键与在顶栏空白处点右键都开它 */
   const [menuOpen, setMenuOpen] = useState(false)
   /* 标签自己的右键菜单：记下点的是哪一页与指针位置，菜单按指针位置定位 */
@@ -171,7 +181,13 @@ export function Browser({
     : null
   const closableCount = tabs.filter((tab) => tab.closable).length
   const otherClosableCount = tabs.filter((tab) => tab.closable && tab.key !== tabMenu?.key).length
-  const blocked = splitBlocked || tooNarrowToSplit
+  /* 两个方向各按自己的条件判：
+     左右看**实际栏宽**能不能放下两块（两倍侧栏最小宽再加分隔条）；
+     上下看**实际栏高**能不能放下两块（两倍面板最小高再加新栏自己那条标签条）。
+     已经开着一个方向时，另一个方向按同一个条件判，切不过去就不会出现放不下的场面 */
+  const columnsRoom = width ?? limits.defaultWidth
+  const columnsBlocked = splitBlocked || columnsRoom < limits.sideMin * 2 + 8
+  const rowsBlocked = bodyHeight > 0 && bodyHeight < limits.paneMin * 2 + 40
   /* 标签条的溢出量在这里算：算出来的可见段交给标签条渲染，放不下的那些进菜单上段。
      放在这一层是因为菜单也在这一层，不必再从下面把结果报上来 */
   const { containerRef: tabsContainerRef, overflow } = useTabOverflow(tabs, activeKey)
@@ -216,7 +232,7 @@ export function Browser({
           分界线句柄留在这一层外面，因此不会被裁掉（见 browser.less 的同名规则） */}
       <div className="browser__clip">
         <div className="browser__shell">
-      {/* 顶栏：空白处点右键开同一个下拉菜单（标签上的右键留给标签自己的菜单，第 13 条） */}
+      {/* 顶栏：空白处点右键开同一个下拉菜单；标签上的右键留给标签自己的菜单 */}
       <div
         className="browser__bar"
         style={barInset ? ({ "--bar-inset": "var(--traffic-lights-width)" } as CSSProperties) : undefined}
@@ -273,6 +289,7 @@ export function Browser({
           >
             <BrowserTabs
               group="secondary"
+              idPrefix={SECONDARY_GROUP_ID}
               tabs={secondaryTabs}
               activeKey={secondaryActiveKey}
               containerRef={secondaryTabsRef}
@@ -316,6 +333,7 @@ export function Browser({
         ) : null}
         <BrowserTabs
           group="primary"
+          idPrefix={PRIMARY_GROUP_ID}
           tabs={tabs}
           activeKey={activeKey}
           containerRef={tabsContainerRef}
@@ -368,7 +386,8 @@ export function Browser({
                 </BaseMenu.Item>
                 <BaseMenu.Item
                   className="browser__menu-item"
-                  disabled={blocked && split === 'none'}
+                  title={columnsBlocked && split !== 'columns' ? t('shell.browser.split.blocked') : undefined}
+                  disabled={columnsBlocked && split !== 'columns'}
                   aria-pressed={split === 'columns'}
                   onClick={() => onSplit(split === 'columns' ? 'none' : 'columns')}
                 >
@@ -377,7 +396,8 @@ export function Browser({
                 </BaseMenu.Item>
                 <BaseMenu.Item
                   className="browser__menu-item"
-                  disabled={blocked && split === 'none'}
+                  title={rowsBlocked && split !== 'rows' ? t('shell.browser.split.tooShallow') : undefined}
+                  disabled={rowsBlocked && split !== 'rows'}
                   aria-pressed={split === 'rows'}
                   onClick={() => onSplit(split === 'rows' ? 'none' : 'rows')}
                 >
@@ -535,14 +555,13 @@ export function Browser({
           第一面板的比例由分隔条拖动给出（跟手，见 hooks/use-split-resize）。 */}
       <div
         className="browser__body"
+        ref={bodyRef}
         data-split={split}
         data-dragging={splitResize.dragging || undefined}
       >
         <div
           className="browser__pane"
-          data-focused={focusedPane === 0 || undefined}
           data-sized={split === 'none' ? undefined : 'true'}
-          onPointerDown={() => onFocusPane(0)}
           style={
             split === 'none'
               ? undefined
@@ -551,7 +570,17 @@ export function Browser({
                 : { inlineSize: `${splitRatio * 100}%` }
           }
         >
-          <ScrollArea className="browser__page" size="medium" persistent>{children}</ScrollArea>
+          <ScrollArea
+            className="browser__page"
+            size="medium"
+            persistent
+            /* 主栏这一块是被控面板：id 与组前缀一致，标签的 aria-controls 指到这里 */
+            id={`${PRIMARY_GROUP_ID}-panel`}
+            role="tabpanel"
+            aria-labelledby={`${PRIMARY_GROUP_ID}-tab-${activeKey}`}
+          >
+            {children}
+          </ScrollArea>
         </div>
         {split === 'none' ? null : (
           <>
@@ -559,6 +588,11 @@ export function Browser({
               className="browser__divider"
               role="separator"
               aria-orientation={split === 'columns' ? 'vertical' : 'horizontal'}
+              /* 分隔条是可控的：读屏要能读出当前比例与可调范围（与钩子里的 0.2 到 0.8 同口径） */
+              aria-label={t('shell.browser.split.divider')}
+              aria-valuemin={20}
+              aria-valuemax={80}
+              aria-valuenow={Math.round(splitRatio * 100)}
               tabIndex={0}
               data-no-drag
               data-highlighted={splitResize.highlighted || undefined}
@@ -578,13 +612,12 @@ export function Browser({
               onClose={onSecondaryClose}
               onNew={onSecondaryNew}
               onReorder={onSecondaryReorder}
+              idPrefix={SECONDARY_GROUP_ID}
               menuActions={{
                 onRefresh: onSecondaryRefresh,
                 onCloseOthers: onSecondaryCloseOthers,
                 onCloseAll: onSecondaryCloseAll
               }}
-              onFocus={onSecondaryFocus}
-              focused={focusedPane === 1}
               /* 上下分栏时新栏自己画标签条；左右分栏时标签条在顶栏左段 */
               showStrip={split === 'rows'}
               /* 比例记的是主栏那一份，新栏取补出来的那一份 */

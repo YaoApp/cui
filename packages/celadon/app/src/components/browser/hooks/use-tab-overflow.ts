@@ -40,7 +40,8 @@ export function useTabOverflow(tabs: BrowserTab[], activeKey: string): TabOverfl
 			if (items.length === 0) return
 
 			const gap = Math.round(Number.parseFloat(getComputedStyle(row).columnGap) || 0)
-			const newKey = row.querySelector<HTMLElement>('.browser__new')
+			/* 新建键在 `tablist` 之外、与标签行同属裁切容器：预留量按容器里那一个算 */
+			const newKey = container.querySelector<HTMLElement>('.browser__new')
 			const reserve = newKey ? Math.round(newKey.getBoundingClientRect().width) + gap : 0
 
 			/* 宽度取整再累加，留一像素余量，与标题截断的判定口径一致 */

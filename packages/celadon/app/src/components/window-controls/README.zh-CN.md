@@ -36,7 +36,16 @@ import { WindowControls } from '@/components/window-controls'
 
 ## 尺寸与间距
 
-按参照客户端的实测规格：键的命中区 32 见方、中心间距 34、细线字形 12 见方、关闭键右缘留白 14。最大化与还原用同一档细线画，还原时叠出第二层方框。
+键的命中区 32 见方、间距 8（中心距 40）、细线字形 14；右缘留白取标题栏自己的 8 像素内距。最大化与还原用同一档细线画，还原时叠出第二层方框。
+
+## 状态
+
+| 状态 | 表达方式 |
+| --- | --- |
+| 缺省 | 透明底，字色取 `--text-secondary`。 |
+| 悬停 | 走 `Button` 的 `plain` 档：底取 `--background-hover`，字色提到 `--text-primary`；关闭键不做特别配色。 |
+| 按下 | 只做 F4 press 场景的缩放，不换色。 |
+| 焦点 | 画 `--focus-ring`。 |
 
 ## 无障碍
 
@@ -44,7 +53,7 @@ import { WindowControls } from '@/components/window-controls'
 
 ## 验证方式
 
-`pnpm vitest run app/src/components/window-controls/window-controls.test.tsx`；真机验证在 Windows 上做，规格与参照图见内部文档「桌面客户端壳」第二节。
+`pnpm vitest run app/src/components/window-controls/window-controls.test.tsx`；真机验证在 Windows 客户端里做，用窗口级截图核对三个键的位置与字形。
 
 ## 已知限制
 

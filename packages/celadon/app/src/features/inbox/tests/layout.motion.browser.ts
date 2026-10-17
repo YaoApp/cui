@@ -73,7 +73,16 @@ test('keeps the browser content still while the column opens and closes', async 
 
 	await page.locator('.browser__close').click()
 	await expect(browser).toHaveAttribute('data-collapsed', 'true')
-	const opening = await sample('.content__head-key--browser')
+	/* 采样依赖逐帧，机器忙时可能整段动画落在两次采样之间：最多重开三次，
+	   只要有一次采到「栏比内容窄」的那几帧就成立 */
+	let opening: Array<{ column: number; content: number }> = []
+	for (let attempt = 0; attempt < 3; attempt += 1) {
+		opening = await sample('.content__head-key--browser')
+		if (opening.some((row) => row.column < row.content)) break
+		await expect(browser).not.toHaveAttribute('data-collapsed', 'true')
+		await page.locator('.browser__close').click()
+		await expect(browser).toHaveAttribute('data-collapsed', 'true')
+	}
 	/* 本栏在长，而栏内文本块的宽度只有一个取值：窗口在变、内容不动 */
 	expect(new Set(opening.map((row) => row.content)).size).toBe(1)
 	expect(opening.some((row) => row.column < row.content)).toBe(true)
@@ -95,11 +104,11 @@ test('keeps the boundary drag instant while the layout animation is on', async (
 
 	await page.mouse.move(grip.x + grip.width / 2, y)
 	await page.mouse.down()
-	await page.mouse.move(grip.x + grip.width / 2 - 200, y, { steps: 6 })
+	await page.mouse.move(grip.x + grip.width / 2 - 320, y, { steps: 6 })
 	await expect(browser).toHaveAttribute('data-dragging', 'true')
 	// 跟手：拖动中没有阻尼拖尾，栏宽与指针走过的距离一致（允许 2 像素误差）
 	const moved = (await browser.boundingBox())!.width
-	expect(Math.abs(moved - (before + 200))).toBeLessThanOrEqual(2)
+	expect(Math.abs(moved - (before + 320))).toBeLessThanOrEqual(2)
 	await page.mouse.up()
 
 	// 松手后投影接手，宽度落定在拖动结束的位置

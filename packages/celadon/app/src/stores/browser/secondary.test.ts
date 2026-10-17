@@ -94,3 +94,50 @@ describe('secondary tab group', () => {
 		expect(new Set(keys).size).toBe(keys.length)
 	})
 })
+
+/* 升级路径：只测动作函数的话，把 `migrate` 整段删掉也照样绿，所以这里走真实的水合 */
+describe('secondary tab group · hydration', () => {
+	beforeEach(() => {
+		window.localStorage.clear()
+		reset()
+	})
+
+	const store = (data: unknown) =>
+		window.localStorage.setItem('cui.browser.secondary', JSON.stringify({ state: data, version: 1 }))
+
+	it('falls back to the first page when the stored active page is gone', async () => {
+		store({
+			tabs: [
+				{ key: 'secondary-1', target: { kind: 'home' } },
+				{ key: 'secondary-2', target: { kind: 'external', url: 'https://a.example' } }
+			],
+			activeKey: 'secondary-9',
+			recent: [{ key: 'secondary-2', label: 'a.example', target: { kind: 'external', url: 'https://a.example' } }]
+		})
+		await useSecondaryTabsStore.persist.rehydrate()
+		expect(useSecondaryTabsStore.getState().tabs).toHaveLength(2)
+		expect(useSecondaryTabsStore.getState().activeKey).toBe('secondary-1')
+		expect(useSecondaryTabsStore.getState().recent).toHaveLength(1)
+	})
+
+	it('keeps a stored active page that still exists', async () => {
+		store({
+			tabs: [
+				{ key: 'secondary-1', target: { kind: 'home' } },
+				{ key: 'secondary-2', target: { kind: 'external', url: 'https://a.example' } }
+			],
+			activeKey: 'secondary-2',
+			recent: []
+		})
+		await useSecondaryTabsStore.persist.rehydrate()
+		expect(useSecondaryTabsStore.getState().activeKey).toBe('secondary-2')
+	})
+
+	it('treats a record without pages as an empty group', async () => {
+		store({ activeKey: 'secondary-1' })
+		await useSecondaryTabsStore.persist.rehydrate()
+		expect(useSecondaryTabsStore.getState().tabs).toEqual([])
+		expect(useSecondaryTabsStore.getState().activeKey).toBe('')
+		expect(useSecondaryTabsStore.getState().recent).toEqual([])
+	})
+})

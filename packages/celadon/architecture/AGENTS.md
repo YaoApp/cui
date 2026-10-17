@@ -69,7 +69,7 @@
 pnpm dev            # 开发服务（vite）
 pnpm build          # 构建产物 dist/（拟人层测的是它）
 pnpm lint           # 基础语法：stylelint · eslint · tsc
-pnpm check          # 规范门禁：12 个检查器（自测 87 个样本用例，见 scripts/tests/README.md）
+pnpm check          # 规范门禁：12 个检查器（自测 91 个样本用例，见 scripts/tests/README.md）
 pnpm test           # 单元 / 组件
 pnpm test:browser   # 浏览器（真实渲染）
 pnpm test:persona   # 拟人（剧本 + 采集脚本 + 看图）

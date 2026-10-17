@@ -36,9 +36,13 @@ function renderBrowser(props: Partial<Parameters<typeof Browser>[0]> = {}) {
 describe('Browser', () => {
   it('draws the tab strip, the more key, the window keys and the current page', () => {
     renderBrowser()
-    expect(screen.getByRole('tablist', { name: '标签浏览器' })).toBeVisible()
+    expect(screen.getByRole('tablist', { name: '主栏标签' })).toBeVisible()
     expect(screen.getByRole('tab', { name: '首页' })).toHaveAttribute('aria-selected', 'true')
     expect(screen.getByRole('button', { name: '新建标签' })).toBeVisible()
+    // 新建键不在 tablist 里：它不是一个标签，读屏不该把它念成标签
+    expect(screen.getByRole('tablist', { name: '主栏标签' })).not.toContainElement(
+      screen.getByRole('button', { name: '新建标签' })
+    )
     // 分屏收进下拉，顶栏只留新建、下拉与后段两颗窗口键
     expect(screen.queryByRole('button', { name: '左右分栏' })).toBeNull()
     expect(screen.queryByRole('button', { name: '上下分栏' })).toBeNull()

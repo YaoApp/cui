@@ -49,10 +49,10 @@
 | `children` | `ReactNode` | 无 | 下区的二级导航，由业务域以插槽给；不传时下区只有场景标题。 |
 | `onSelect` | `(item: NavItem) => void` | 无 | 选中一个条目。条目是真链接，带修饰键的点击交还浏览器。 |
 
-部件级 props：`NavHeader` 取 `onToggle`（Web 上另有内部平台判定）；`NavMain` 取 `items` · `compact` · `folded` · `onToggleFold` · `onSelect`；
+部件级 props：`NavHeader` 取 `mainFolded` · `onToggle` · `onToggleMain`；`NavMain` 取 `items` · `folded` · `onSelect`；
 `NavScene` 取 `items` · `currentLabel` · `sceneIcon` · `folded` · `columnWidth` · `onSelect` · `onUnfold` · `children`；
-`NavFooter` 取 `name` · `shortcuts` · `onSelect`；`NavList` 取 `items` · `label` · `compact` · `onSelect`；
-`NavItemRow` 取 `item` · `compact` · `onSelect`；`NavMenu` 取 `items` · `currentLabel` · `sceneIcon` · `columnWidth` · `onSelect`。
+`NavFooter` 取 `name` · `shortcuts` · `onSelect`；`NavList` 取 `items` · `label` · `onSelect`；
+`NavItemRow` 取 `item` · `onSelect`；`NavMenu` 取 `items` · `currentLabel` · `sceneIcon` · `columnWidth` · `onSelect`。
 
 `NavItem` 的字段：
 
@@ -100,10 +100,10 @@ const items: NavItem[] = [
 | 悬停 | 底取 `--nav-hover`（导航列专用档，通用 `--background-hover` 只服务白底场景）；键盘高亮 `[data-highlighted]` 同用这一档。 |
 | 焦点 | `box-shadow: var(--focus-ring)`，由 `:focus-visible` 触发。 |
 | 当前 | 底取 `--nav-select`，文字取 `--text-primary`，并带 `aria-current="page"`；选中由明度差表达，不用品牌色。 |
-| 未读 | 角标底取 `--brand-soft`，字色取 `--brand-ink`；当前项上的角标不渲染，样式保留。 |
-| 整列收起 | 列宽为 `0`（`[data-width='zero']`），内距与右侧描边一起收到零，整列不可见；重新展开的出口在内容列头左端。 |
+| 未读 | 角标底取 `--brand-soft`，字色取 `--brand-ink`；主导航条目只要 `badge` 有值就画角标，当前项也画。收件箱二级导航里的角标当前不渲染，样式保留。 |
+| 整列收起 | 列宽为 `0`（`[data-width='zero']`），内距与右侧描边一起收到零，整列不可见，同时带 `inert` 与 `aria-hidden`，键盘不会落进这一列；重新展开的出口在内容列头左端。 |
 | 上区折叠 | 上区收缩到零高：折叠体的高度由 Motion 动到 `0`（`overflow: hidden`），上区自身 `flex: 0 1 auto` 不吃剩余高度；列底出现「当前」那一行与展开键。 |
-| 拖动列宽 | 指针进入右缘 4 像素带后光标即时变化、高亮延迟 300 毫秒出现；按下按帧应用，双击复位，方向键调整。把手上标了 `data-no-drag`，窗口拖动不吃它。 |
+| 拖动列宽 | 指针进入右缘 8 像素的把手后光标即时变化、高亮延迟 300 毫秒出现（高亮带本身 4 像素）；按下按帧应用，双击复位，方向键调整。把手上标了 `data-no-drag`，窗口拖动不吃它。 |
 | 窗口拖动与双击 | 窗口顶带（`--window-drag-band`，48 像素）内的空白处：**按下并移动**拖动窗口，双击在最大化与还原之间切换，单击不做任何事；两个平台都由应用受理。列头空白处可以拖，列头里的键与右缘把手不吃这两个动作；顶带里不参与文本选择，指针是箭头。 |
 | 内容超高 | 上区与下区**各自**有滚动区：区域自身裁切（`overflow: hidden`），内部滚动区吃剩余高度并**在悬停时显示滚动条**。两区互不叠压。 |
 
@@ -112,7 +112,7 @@ const items: NavItem[] = [
 - 整列是 `<nav>`，带无障碍名；上区列表带自己的名字。
 - 每个条目是带真实 `href` 的链接，可右键、复制、在新窗口打开；左键点击交给调用方路由。
 - 折叠后「当前」那一行是菜单触发元素，带 `aria-expanded`；菜单打开时焦点进菜单，方向键在条目间移动，`Esc` 关闭并把焦点交回这一行。
-- 图标按钮一律给 `aria-label`，并有文字提示；整列收起后不再参与焦点顺序。
+- 图标按钮一律给 `aria-label`，并有文字提示；整列收起时带 `inert` 与 `aria-hidden`，不再参与焦点顺序（`layout.shell.browser.ts` 有一条用例核对收起后焦点落不进去）。
 - 拖动把手是 `role="separator"`，带 `aria-valuemin` · `aria-valuemax` · `aria-valuenow`，支持方向键。
 
 ## 验证方式
@@ -124,6 +124,6 @@ const items: NavItem[] = [
 ## 已知限制
 
 - 折叠动画用 Motion 的弹簧参数（`stiffness 420` · `damping 38` · `mass 0.9`），减少动效偏好下退化为瞬时；参数与 `design/foundations.md` 的时长档位没有强绑定，改样式不会同步改它。
-- 列宽可拖区间为 `264–420`，窄视口（`≤1023`）由 `collapsed` 自动收起，走的是同一个状态与同一套样式；窄视口下临时展开的浮层（覆盖中栏）尚未实现。
+- 列宽可拖区间为 `264–420`，视口窄到 `987` 以下时由 `--nav-auto-collapse`（`988`）那一档自动收起，走的是同一个状态与同一套样式；窄视口下临时展开的浮层（覆盖中栏）尚未实现。
 - 二级导航只在收件箱接上；其余场景随各自业务域落地。
 - 未读数只接 `badge` 这个口子，真实数字由装配层给。

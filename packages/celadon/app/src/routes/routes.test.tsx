@@ -56,7 +56,7 @@ describe('the route table', () => {
     const index = surface?.children?.[0]
     expect(index?.index).toBe(true)
     expect(index?.element).toBeTruthy()
-    /* 产品面：收件箱组装页与四个占位页（见 plan/08-layout-base.md §3.3 与 §4） */
+    /* 产品面：收件箱组装页与四个占位页 */
     expect(pathsOf(productChildren)).toEqual(['new', 'inbox', 'apps', 'board', 'workspace', 'computer'])
   })
 

@@ -77,8 +77,6 @@ export function AppLayout() {
 	const setSplitRatio = useColumnsStore((state) => state.setSplitRatio)
 	const browserWidth = useColumnsStore((state) => state.browserWidth)
 	const setBrowserWidth = useColumnsStore((state) => state.setBrowserWidth)
-	/* 聚焦哪个面板（0 是第一个）；新栏的页由它自己那一组标签决定，不再另存一个 key */
-	const [focusedPane, setFocusedPane] = useState(0)
 	/* 面板独占整扇窗口：这一档把导航区与内容区让出去（见 design/main-shell.md §七） */
 	const [exclusive, setExclusive] = useState(false)
 	/* 独占档里 `Esc` 退出，回到原来的三栏（见 design/main-shell.md §七） */
@@ -196,7 +194,6 @@ export function AppLayout() {
 	const mergeSecondaryIntoPrimary = () => {
 		secondaryTabs.forEach((tab) => openTab(tab.target, { title: tab.title, icon: tab.icon }))
 		clearSecondary()
-		setFocusedPane(0)
 	}
 	/* 分栏与新栏的空与非空只有两条规则，按「是不是首帧」分开：
 	   首帧（刷新恢复）分栏开着而新栏为空，补一张首页，避免空面板；
@@ -214,10 +211,9 @@ export function AppLayout() {
 			return
 		}
 		if (secondaryTabs.length === 0) {
-			setFocusedPane(0)
 			setBrowserSplit('none')
 		}
-	}, [browserSplit, secondaryTabs.length, seedSecondary, setBrowserSplit, setFocusedPane])
+	}, [browserSplit, secondaryTabs.length, seedSecondary, setBrowserSplit])
 
 	/* 新标签页上的「打开过的东西」：store 按使用顺序记着，关掉页也不消失；点一条复用同一页打开 */
 	const recent = recentTabs.map((entry) => ({ key: entry.key, label: entry.label }))
@@ -397,7 +393,6 @@ export function AppLayout() {
 					closeSecondary(key)
 					/* 关到一个不剩：关掉分栏回到单面板，主栏不动，也不往主栏搬标签 */
 					if (secondaryTabs.length <= 1) {
-						setFocusedPane(0)
 						setBrowserSplit('none')
 					}
 				}}
@@ -410,9 +405,6 @@ export function AppLayout() {
 				}}
 				onSecondaryCloseOthers={(key) => closeOthersSecondary(key)}
 				onSecondaryCloseAll={() => closeAllSecondary()}
-				onSecondaryFocus={() => setFocusedPane(1)}
-				focusedPane={focusedPane}
-				onFocusPane={setFocusedPane}
 				exclusive={exclusive}
 				onExclusive={() => setExclusive(!exclusive)}
 			>

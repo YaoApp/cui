@@ -1,7 +1,7 @@
 # components/content
 
 `components/content` 是应用中间的内容区，三栏里的第二栏。它只管最小宽保护与自己这一块的滚动，栏宽由三栏的列轨给；
-让位顺序见 `design/foundations.md` F6：第三栏先缩、再整条消失，中栏才可能低于最小。
+让位顺序见 `design/foundations.md` F6：内容区先压到最小 400，第三栏再压到最小 300，然后导航列收为零宽，最后整条消失的是次栏（正常态是第三栏，换边后是内容区）。
 
 同一目录下还有一个通用的占位页 `PlaceholderPage`：骨架阶段每一页只画页名与一句说明，业务内容随后接真接口。
 它不认识业务，页名由调用方给。
@@ -12,6 +12,7 @@
 | --- | --- |
 | `content.tsx` | `Content` 组件与 `ContentProps`。包一层滚动容器。 |
 | `content.less` | 中栏的最小宽、底色、内距与说明文字样式。 |
+| `parts/head/` | `ContentHead`：列头，标题与两端槽位的键。 |
 | `parts/placeholder/` | `PlaceholderPage`：页名加一句说明的占位页。 |
 | `index.ts` | 对外出口，即 `Content`、`PlaceholderPage` 与各自的类型。 |
 
@@ -22,6 +23,11 @@
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | `children` | `ReactNode` | 无 | 页面内容，通常是路由的出口。 |
+| `title` | `string` | 无 | 列头标题；不传就不画列头。 |
+| `navCollapsed` | `boolean` | `false` | 导航列是否收起：收起才接管交通灯留白。 |
+| `lead` | `HeadKey` | 无 | 列头左端槽位的键；不传则留空。 |
+| `trail` | `HeadKey` | 无 | 列头右端槽位的键；不传则留空。 |
+| `hidden` | `boolean` | `false` | 本栏收掉了（换边后次栏是内容区）：内容不再可达，也从无障碍树里摘掉。 |
 
 `PlaceholderPage`：
 

@@ -1,6 +1,6 @@
 /* 标签浏览器（第三栏）：宽度按 design/foundations.md F6 —— 最小 300，上限由列轨给；
    让位顺序里内容区先缩、它随后缩到最小，导航区收起之后才轮到它整条消失。
-   标签条不换行，溢出横向滚动，新建与操作钮吸附在右端。 */
+   标签条不换行也不横向滚动：放不下的进 `⌄` 菜单，新建键紧跟最后一颗标签。 */
 .browser {
 	flex: none;
 	position: relative;
@@ -376,14 +376,24 @@
 	z-index: 1;
 }
 
-/* 标签区裁切：只渲染放得下的标签，新建键在预算里被预留，因此不会被裁掉 */
+/* 标签区裁切：标签行始终渲染全部标签，放不下的收成不可见并脱离排布（宽度照量得到），
+   新建键在预算里被预留，因此不会被裁掉。
+   容器本身排成一行，里面依次是标签行与新建键；新建键在 `tablist` 之外，
+   读屏不会把它当成标签，溢出预算按容器宽度减掉它的宽度来算 */
 .browser__tabs {
 	flex: 1;
 	min-inline-size: 0;
+	display: flex;
+	align-items: center;
+	gap: var(--spacing-4);
 	overflow: hidden;
 }
 
 .browser__tabs-row {
+	/* 行按内容取宽：新建键因此紧跟在最后一颗标签之后，而不是被推到容器最右；
+	   内容放不下时由外层裁切，行自己不参与收缩，标签宽度保持原样 */
+	flex: none;
+	min-inline-size: 0;
 	position: relative;
 	display: flex;
 	align-items: center;
@@ -433,6 +443,9 @@
    内容整体居中，块的左右边距因此严格相等 */
 .browser__tab {
 	display: flex;
+	/* 宽度由内容与上下限决定，不参与收缩：标签行是裁切容器里的弹性项，
+	   若允许收缩，放不下的那几页会先把看得见的挤窄，溢出量跟着算错 */
+	flex: none;
 	align-items: center;
 	gap: var(--spacing-4);
 	min-inline-size: var(--spacing-48);
