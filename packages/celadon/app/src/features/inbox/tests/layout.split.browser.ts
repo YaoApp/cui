@@ -3,7 +3,7 @@ import { columns, markSignedIn, openTabMenu, widenBrowser } from './layout.helpe
 
 /* 分屏这一层：进分屏与换方向、两颗键的可用性、分隔条的拖动与复位、
    分界线拖动时的跟手与选择锁、收起后宽度不被改掉、换边后仍可用、
-   两个面板各绑自己那一页、标签条的点击落在聚焦的面板。 */
+   两栏各有一组标签与自己的页、点哪一条标签条只换那一栏。 */
 
 test('splits the browser into two panes and back', async ({ page }) => {
 	await page.setViewportSize({ width: 1600, height: 900 })
@@ -317,7 +317,7 @@ test('shows another page in the second pane instead of the same page twice', asy
 	).toHaveText('首页')
 })
 
-test('switches the pane that has focus when a tab is clicked', async ({ page }) => {
+test('switches only the group whose strip was clicked', async ({ page }) => {
 	await page.setViewportSize({ width: 1600, height: 900 })
 	await markSignedIn(page)
 	await page.goto('/app/inbox')

@@ -205,7 +205,7 @@
 | --- | --- | --- |
 | 默认窗口 | `--window-default` × `--window-default-height` | `1280px × 820px` |
 | 最小窗口 | `--page-min-width` × `--page-min-height` | `520px × 600px` |
-| 侧栏拖拽把手 | `--side-resize-handle` | `6px` |
+| 侧栏拖拽把手 | `--side-resize-handle` | `8px` |
 
 - 阈值按**视口 CSS px** 判定（已含系统缩放）：4K@200% ≈ 1920 CSS px，与 1080p 的 1920 同构，因此同一套规则都合理。
 - 窗口只给默认/最小值（记住用户上次尺寸）；高度不足时收起次级工具条，**底栏保留**。

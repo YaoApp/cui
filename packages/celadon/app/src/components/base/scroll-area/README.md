@@ -5,7 +5,8 @@ UI's ScrollArea upstream: the viewport exposes which side still has content thro
 and `data-overflow-y-end`, and this component draws the edge shadows from them.
 
 All three columns scroll through it: the navigation column's upper area and its current area, the content
-column, and the tab browser's strip and page.
+column, and the tab browser's page. The tab strip is not a scroll container; tabs that do not fit go into the
+`⌄` menu.
 
 ## Contents
 
@@ -43,7 +44,7 @@ The container fills the parent's remaining height by itself, so the parent has t
 | --- | --- |
 | Default | The scrollbar is invisible and neither side has a shadow. |
 | Overflow | The side that still has content gets a fading shadow; top and bottom are decided separately. |
-| Hover | The scrollbar fades in and the thumb takes `--border-control`. |
+| Hover | The scrollbar fades in and the thumb takes `--scrollbar-thumb` (which is `--border-control`); over the thumb itself it takes `--scrollbar-thumb-hover` (which is `--border-hover`). |
 | Scrolling | The scrollbar stays visible. |
 
 ## Verification

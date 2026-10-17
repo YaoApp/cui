@@ -22,7 +22,7 @@ caller in the product needs it, and check for an upstream part before writing be
 | [`icon/`](icon/README.md) | Interface icons, four size steps. |
 | [`input/`](input/README.md) | Text fields. |
 | [`link/`](link/README.md) | The text link shared by internal and external targets. |
-| [`motion/`](motion/README.zh-CN.md) | Layout projection for the open and close animation. |
+| [`motion/`](motion/README.md) | Layout projection for elements that must follow a column resize. |
 | [`otp-field/`](otp-field/README.md) | One-time passcode input. |
 | [`scroll-area/`](scroll-area/README.md) | Scroll container that draws edge shadows on overflow. |
 | [`segmented-control/`](segmented-control/README.md) | Segmented selector. |

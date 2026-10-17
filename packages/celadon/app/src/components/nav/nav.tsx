@@ -71,6 +71,9 @@ export function Nav({
 				.filter(Boolean)
 				.join(' ')}
 			aria-label={t('shell.navigation.label')}
+			/* 整列收起后整条不可见：从无障碍树与焦点顺序里摘掉，键盘不会落进零宽的列 */
+			aria-hidden={collapsed || undefined}
+			inert={collapsed || undefined}
 		>
 			{chrome.controls === 'own' ? null : (
 				<NavHeader

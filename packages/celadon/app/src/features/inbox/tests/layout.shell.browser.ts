@@ -115,6 +115,15 @@ test('collapses the navigation column to zero and remembers it after a reload', 
 	const contentBox = await page.locator('.content').boundingBox()
 	expect(Math.round(contentBox?.x ?? -1)).toBe(0)
 	await expect(page.getByRole('button', { name: '展开导航' })).toBeVisible()
+	/* 收起的整列既不可见也不可达：带 inert 与 aria-hidden，键盘不会落进零宽的那一列 */
+	await expect(nav).toHaveAttribute('inert', '')
+	await expect(nav).toHaveAttribute('aria-hidden', 'true')
+	const focusLandedInNav = await page.evaluate(() => {
+		const link = document.querySelector<HTMLElement>('.nav a')
+		link?.focus()
+		return Boolean(document.activeElement?.closest('nav'))
+	})
+	expect(focusLandedInNav).toBe(false)
 
 	await page.reload()
 	await expect.poll(async () => nav.evaluate((el) => el.getBoundingClientRect().width)).toBeLessThan(1)

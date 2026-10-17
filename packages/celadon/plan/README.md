@@ -20,7 +20,7 @@
 
 | # | 计划 | 管什么 | 状态 |
 | --- | --- | --- | --- |
-| 00 | [design-system](00-design-system.md) | 设计体系（token · 图标 · 页面）| 进行中 |
+| 00 | [design-system](00-design-system.md) | 设计体系（token · 图标 · 页面）| **已归档**（2026-09-30 的历史记录；现行规则见 `design/`） |
 | 01 | [infrastructure](01-infrastructure.md) | 工程地基：**架构文档 + 规范脚本** + 构建/生成脚本 + 测试装置 | ✅ **已完成**（2026-10-03）|
 | **02** | [**platform**](02-platform.md) | **产品级平台地基**：`client/` · `service/` · `credential/` · `transport/` · `data/` · `bridge/` | ✅ **平台层已完成**（2026-10-04）|
 | **03** | [**data**](03-data.md) | 数据层：**00 代码结构** + **0 统一抽象** + **1 业务接口清单**（含 WebSocket/流式）| **进行中**：出口 · 四态 · 失效 · 两个真域（`test` · `user`）已落地 |

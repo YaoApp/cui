@@ -55,11 +55,11 @@ rules sit in the same file under its own heading.
 | `children` | `ReactNode` | none | The secondary navigation in the lower area, supplied by the feature as a slot; without it the lower area shows only the scene title. |
 | `onSelect` | `(item: NavItem) => void` | none | Selects an entry. Entries are real links, so modified clicks are handed back to the browser. |
 
-Part-level props: `NavHeader` takes `onToggle` (on the web it also does an internal platform check);
-`NavMain` takes `items`, `compact`, `folded`, `onToggleFold` and `onSelect`;
+Part-level props: `NavHeader` takes `mainFolded`, `onToggle` and `onToggleMain`;
+`NavMain` takes `items`, `folded` and `onSelect`;
 `NavScene` takes `items`, `currentLabel`, `sceneIcon`, `folded`, `columnWidth`, `onSelect`, `onUnfold` and
-`children`; `NavFooter` takes `name`, `shortcuts` and `onSelect`; `NavList` takes `items`, `label`, `compact`
-and `onSelect`; `NavItemRow` takes `item`, `compact` and `onSelect`; `NavMenu` takes `items`, `currentLabel`,
+`children`; `NavFooter` takes `name`, `shortcuts` and `onSelect`; `NavList` takes `items`, `label` and
+`onSelect`; `NavItemRow` takes `item` and `onSelect`; `NavMenu` takes `items`, `currentLabel`,
 `sceneIcon`, `columnWidth` and `onSelect`.
 
 Fields of `NavItem`:
@@ -108,10 +108,10 @@ const items: NavItem[] = [
 | Hover | Background takes `--nav-hover` (the navigation-only step; the generic `--background-hover` serves white surfaces); the keyboard highlight `[data-highlighted]` uses the same step. |
 | Focus | `box-shadow: var(--focus-ring)`, triggered by `:focus-visible`. |
 | Current | Background takes `--nav-select`, text takes `--text-primary`, and the entry carries `aria-current="page"`; selection is expressed by lightness, not by the brand colour. |
-| Unread | The badge background takes `--brand-soft` and its text `--brand-ink`; on the current entry the badge is not rendered, though its style stays. |
-| Column collapsed | Width is `0` (`[data-width='zero']`), padding and the right border go to zero with it, and the column is invisible; the way back is the left end of the content column head. |
+| Unread | The badge background takes `--brand-soft` and its text `--brand-ink`; a main entry draws its badge whenever `badge` has a value, the current entry included. The inbox secondary navigation draws no badge for now, though its style stays. |
+| Column collapsed | Width is `0` (`[data-width='zero']`), padding and the right border go to zero with it, and the column is invisible; it also carries `inert` and `aria-hidden`, so the keyboard cannot land inside. The way back is the left end of the content column head. |
 | Upper area folded | The upper area shrinks to zero height: Motion animates the folded body to `0` (`overflow: hidden`) and the area itself is `flex: 0 1 auto` so it takes no remaining height; the current row and the expand key appear at the foot. |
-| Dragging the width | Once the pointer enters the 4 pixel band on the right edge the cursor changes at once and the highlight appears after 300 milliseconds; a press applies per frame, a double click resets, and the arrow keys adjust. The handle is marked `data-no-drag`, so window dragging does not take it. |
+| Dragging the width | Once the pointer enters the 8 pixel handle on the right edge the cursor changes at once and the highlight (4 pixels wide) appears after 300 milliseconds; a press applies per frame, a double click resets, and the arrow keys adjust. The handle is marked `data-no-drag`, so window dragging does not take it. |
 | Window drag and double click | In the blank part of the top band (`--window-drag-band`, 48 pixels): a **press plus movement** drags the window, a double click toggles maximise and restore, and a single click does nothing; both platforms are handled by the app. Column heads can be dragged; the keys inside them and the right-edge handle do not take these two actions, and the band never selects text and always shows an arrow cursor. |
 | Content taller than the area | The upper and lower areas **each** scroll: the area clips itself (`overflow: hidden`) and the inner scroll area takes the remaining height and **shows its scrollbar on hover**. The two areas never overlap. |
 
@@ -122,7 +122,8 @@ const items: NavItem[] = [
   a plain left click goes to the caller's router.
 - Once folded, the current row is the menu trigger and carries `aria-expanded`; opening the menu moves focus
   into it, the arrow keys move between entries, and `Esc` closes it and returns focus to the row.
-- Icon buttons always have an `aria-label` and a text hint; a collapsed column leaves the focus order.
+- Icon buttons always have an `aria-label` and a text hint; a collapsed column carries `inert` and
+  `aria-hidden`, so it leaves the focus order (`layout.shell.browser.ts` proves focus cannot land inside).
 - The drag handle is `role="separator"` with `aria-valuemin`, `aria-valuemax` and `aria-valuenow`, and it
   responds to the arrow keys.
 

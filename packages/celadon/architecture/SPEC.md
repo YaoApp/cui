@@ -78,7 +78,7 @@
   选择类基础件按 **ARIA combobox / listbox / option** 用法使用（受控走 `value` + `onValueChange`），
   测试里**不用** `.selectOption()` / `toHaveValue()`。
 - **图标**：源是 `design/icons/manifest.json` → 跑 `node scripts/build-icons.mjs`；
-  界面图标用 `<Icon name="i-<域>-<名>" size={16} />`（尺寸档 14 / 16 / 20 / 24），品牌标识用 `<BrandMark>`。
+  界面图标用 `<Icon name="i-<域>-<名>" size={16} />`（尺寸档 14 / 16 / 18 / 20 / 24），品牌标识用 `<BrandMark>`。
   不许自绘 `<svg>`、不许装 `lucide-react`、不许在组件里写图标路径。
 - **动效**：默认 CSS + token；只有手势 / 编排 / 布局动画才引 `motion`；每个动效场景必须标注归属。
 

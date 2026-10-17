@@ -1,8 +1,9 @@
 # components/base/segmented-control
 
 `components/base/segmented-control` is a segmented selector: a set of mutually exclusive short options laid
-out in one segment, with the selected one highlighted. It is built on Base UI's RadioGroup, so it carries
-radio semantics rather than a row of independent buttons.
+out in one segment, with the selected one highlighted. The wrapper is a `role="group"`, each option is a
+native button and selection is expressed with `aria-pressed`, so the group is one mutually exclusive choice
+rather than a row of independent toggles.
 
 It suits view switching, filter levels and choices between two and four options. With more than five options
 or with long labels, use `components/base/select` instead.
@@ -42,8 +43,10 @@ or with long labels, use `components/base/select` instead.
 
 ## Accessibility
 
-- Radio semantics: the arrow keys move between options. Do not use `.selectOption()` or `toHaveValue()` in
-  tests.
+- The wrapper is a `role="group"` with an `aria-label`; every option is a button and the selected one carries
+  `aria-pressed="true"`.
+- The left and right arrow keys move between options and switch the selection directly. Tests use
+  `getByRole('button')` and `toHaveAttribute('aria-pressed', 'true')`, not `.selectOption()` or `toHaveValue()`.
 - `aria-label` is required so screen readers know what the group selects.
 
 ## Verification

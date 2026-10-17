@@ -8,7 +8,7 @@ by the platform; the component itself makes no judgement.
 | File | Contents |
 | --- | --- |
 | `window-controls.tsx` | Rendering of the three keys and the wiring of their actions |
-| `window-controls.less` | Size, spacing, glyphs and hover (the close key uses the danger step on hover) |
+| `window-controls.less` | Size, spacing and glyphs; hover comes from the `Button` plain step, and the close key gets no special colour |
 | `window-controls.test.tsx` | The self-drawn platform draws three keys with three actions; the middle key turns into restore when maximised; native and window-less platforms draw nothing |
 | `index.ts` | The module's public surface |
 

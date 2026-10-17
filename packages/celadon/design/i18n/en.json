@@ -750,7 +750,7 @@
   },
   "df": {
     "title": "Data format · four languages",
-    "subtitle": "Every value on this page is computed by the browser through **Intl at runtime**, not typed in. That makes it the **check** for the sample table in `plan/19-data-format.md` §3.4. Switch language to see the same data written the way each one does it.",
+    "subtitle": "Every value on this page is computed by the browser through **Intl at runtime**, not typed in, which makes this page the **check** for the data-format rules. Switch language to see the same data written the way each one does it.",
     "s1title": "Date and time",
     "s1hint": "One instant rendered per language with `Intl.DateTimeFormat`; relative time uses fixed sample intervals (`Intl.RelativeTimeFormat`).",
     "s2title": "Relative time ladder",

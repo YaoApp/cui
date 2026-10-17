@@ -19,7 +19,7 @@
 
 ## 相对时间阶梯
 
-`Intl.RelativeTimeFormat({ numeric: "auto" })` —— 阈值见 `19` §3.1。
+`Intl.RelativeTimeFormat({ numeric: "auto" })`，阈值按当前语言的相对时间规则取。
 
 | 项 | 规则 / API |
 | --- | --- |
@@ -32,13 +32,13 @@
 
 ## 时区
 
-Intl.DateTimeFormat({ timeZone }) —— 同一时间戳在四个时区下的显示；落库格式带偏移与 IANA 括注（`19` §2）。
+Intl.DateTimeFormat({ timeZone })：同一时间戳在四个时区下的显示；落库格式带偏移与 IANA 括注。
 
 | 项 | 规则 / API |
 | --- | --- |
 | 四个时区 | `UTC` · `Asia/Shanghai` · `America/New_York` · `Europe/Berlin` |
 | 偏移 | `timeZoneName: "longOffset"` 取 `formatToParts` |
-| 落库格式 | 带偏移与 IANA 括注（`19` §2），例：`2026-09-30T16:12:34+08:00[Asia/Shanghai]` |
+| 落库格式 | 带偏移与 IANA 括注，例：`2026-09-30T16:12:34+08:00[Asia/Shanghai]` |
 
 ## 数字 · 单位 · 货币
 
@@ -59,16 +59,16 @@ Intl.NumberFormat / ListFormat —— 千分位 · 大数缩写 · 文件大小�
 
 ## 排序（按语言）
 
-同一组词按语言排序；标识符与路径**不本地化**，按码位（`19` §3.6）。
+同一组词按语言排序；标识符与路径**不本地化**，按码位。
 
 | 项 | 规则 / API |
 | --- | --- |
 | 按语言 | `new Intl.Collator(L).compare` |
-| 按码位 | `.sort()`（标识符与路径不本地化，`19` §3.6） |
+| 按码位 | `.sort()`（标识符与路径不本地化） |
 
 ## 双向文本（RTL）
 
-方向性图标镜像 · bidi 隔离 · 视觉回归 —— 规则见 `19` §4，效果演示见 [css-logical.html](css-logical.html)。
+方向性图标镜像 · bidi 隔离 · 视觉回归，效果演示见 [css-logical.html](css-logical.html)。
 
 | 项 | 规则 / API |
 | --- | --- |

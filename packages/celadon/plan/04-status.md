@@ -15,7 +15,7 @@
 | `platform/{i18n,theme,router,icons,utils}` | 语言包按域就近（`features/*/locales/*.json` 与全局 `src/locales/*.json`）· 主题写入 `data-theme` · 页标题 · 失败码转界面文案 | 门禁 · 单元用例 |
 | `data/request` 与 `data/hooks` | 出口 `send`（`{method, path, headers?, input?}`，不含会话开关）· 四态唯一实现 `useRequest` · 失效按 key 收敛 | 单元用例 |
 | `data/{helloworld,test,user}` | 三个真域：测试端点 · 用户与登录 · 真实用户接口 | 单元用例 |
-| `components/base` | 18 个基础件（按钮 · 输入 · 复选框 · 选择器 · 分段选择 · 弹层三件 · 图标 · 品牌标识 · 滚动 · 提示 · 加载 · 验证码两件 · 动效），每个目录带中英 README | 单元用例 · 浏览器用例 |
+| `components/base` | 18 个基础件（按钮 · 输入 · 复选框 · 选择器 · 分段选择 · 弹层三件 · 图标 · 品牌标识 · 滚动 · 提示 · 加载 · 链接 · 一次性口令 · 验证码两件 · 动效），每个目录带中英 README | 单元用例 · 浏览器用例 |
 | `components/{nav,content,browser,page,title-bar,window-controls}` | 三栏结构件与页面公共件，见 [`07-layout.md`](07-layout.md) | 单元用例 · 浏览器用例 |
 | `routes` | 三栏装配（两组标签 · 分屏 · 让位 · 换边 · 独占）· 入口判定 · 产品面各页 · `/scaffold/*` · 未知路径返回入口 | 单元用例 · 浏览器用例 |
 | `features/auth` | 登录 · 注册 · 欢迎 · 服务器选择 · 第三方回跳与回跳落点 · 会话失效与退出 | 单元用例 · 浏览器用例 |

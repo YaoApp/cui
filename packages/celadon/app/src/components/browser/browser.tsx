@@ -87,8 +87,8 @@ export type BrowserProps = {
   onExclusive?: () => void
 }
 
-/* 标签浏览器：顶部标签条（新建吸附右端，放不下的进下拉菜单上段，标签可拖动换序），
-   下面当前页或两个面板。标签是全局一套，与会话弱关联（`design/main-shell.md` §五）；
+/* 标签浏览器：顶部标签条（新建键紧跟最后一颗标签，放不下的进下拉菜单上段，标签可拖动换序），
+   下面当前页；分屏时是两栏，每栏各有一组标签与自己的页（`design/main-shell.md` §五）；
    标签数据与页内容都由装配层给，组件不认识业务（`architecture/03-boundaries.md` §2 的层间方向）。 */
 export function Browser({
   tabs,

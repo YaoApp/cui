@@ -2,8 +2,9 @@
 
 `components/content` is the middle column of the three: the content area. It owns only its minimum width and
 its own scrolling; the column width comes from the three-column track. The give-way order is in
-`design/foundations.md` F6: the third column shrinks first and disappears entirely before the middle column
-can go below its minimum.
+`design/foundations.md` F6: the content column drops to its 400 minimum first, the third column then drops to
+its 300 minimum, the navigation column collapses to zero width, and the last column to disappear is the
+secondary one (the tab browser normally, the content column after a swap).
 
 The same directory holds a generic `PlaceholderPage`: while a feature is still a skeleton it draws only the
 page name and one line of explanation, and real content follows. It knows nothing about the product; the page

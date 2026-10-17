@@ -4,9 +4,10 @@
 through Motion's layout projection, so the layout itself is not re-flowed while the animation runs. It wraps
 Motion's `motion.div` and adds two transitions plus two helpers that read the duration and easing from CSS.
 
-Use it on containers whose width changes while their contents are laid out once at the destination width:
-the navigation column, the content column and the tab browser. Closing, opening and swapping the last two
-columns all go through it.
+Use it where a column resizes and an element inside it must follow without being scaled. Its only current
+call site is the content column head (`content/parts/head`, passed as `header` with `position`), whose title
+follows the column while the width changes. Folding, swapping and splitting the three columns use CSS
+transitions and tokens instead, per the ownership rule in `architecture/12-motion.md`.
 
 ## Contents
 
@@ -28,16 +29,24 @@ columns all go through it.
 ## Usage
 
 ```tsx
-<MotionPanel as="aside" className="layout__nav">
-  <MotionPanel position className="nav__header">…</MotionPanel>
+<MotionPanel
+  as="header"
+  position
+  className="content__head"
+  data-controls={chrome.controls}
+  data-nav={navCollapsed ? 'collapsed' : 'expanded'}
+>
+  {…}
 </MotionPanel>
 ```
 
 ## Conventions
 
-- The shell uses `layout` (that is, no `position`), and every row and text inside it passes `position`.
+- Displacement elements (a column head, rows, text) always pass `position`: they translate without scaling,
+  so text neither deforms nor blurs.
 - The first placement does not animate (`initial={false}`): restoring a stored value lands in one frame.
-- Under `prefers-reduced-motion: reduce` it degrades to `PANEL_INSTANT` and lands instantly.
+- Under `prefers-reduced-motion: reduce` it degrades to `PANEL_INSTANT` and lands instantly; spring parameters
+  cannot be expressed as CSS variables, so the component reads the library's preference itself.
 - The spring parameters live in `panel-motion.ts`; duration and easing come from `--duration-base` and
   `--easing-decelerate` in `design/tokens.less`.
 

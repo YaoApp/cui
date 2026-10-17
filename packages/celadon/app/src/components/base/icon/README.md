@@ -2,7 +2,7 @@
 
 `components/base/icon` renders interface icons. The artwork comes from the repository sprite, whose source is
 `design/icons/manifest.json` and which is assembled by `node scripts/build-icons.mjs`; the component scales
-a 24-unit grid to four sizes and keeps the stroke consistent.
+a 24-unit grid to five sizes and keeps the stroke consistent.
 
 Every icon in the interface uses this component. Do not hand-draw `<svg>` and do not put icon paths in
 components.
@@ -21,7 +21,7 @@ components.
 | Prop | Type | Default | Notes |
 | --- | --- | --- | --- |
 | `name` | `IconId` | none | The icon name, one to one with the manifest; a wrong name is caught by the type. |
-| `size` | `14 \| 16 \| 20 \| 24` | `16` | Size step. 16 is the product default. |
+| `size` | `14 \| 16 \| 18 \| 20 \| 24` | `16` | Size step. 16 is the product default; navigation entries pass 18. |
 | `label` | `string` | none | Pass it when the icon carries meaning: the icon becomes `role="img"` with an accessible name. Leave it out for decoration and the icon is hidden from screen readers. |
 | `className` | `string` | none | Extra class names. |
 

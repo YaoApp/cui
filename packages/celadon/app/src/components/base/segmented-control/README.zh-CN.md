@@ -1,7 +1,7 @@
 # components/base/segmented-control
 
-`components/base/segmented-control` 是分段选择器：一组互斥的短选项排成一段，选中项高亮。它用在上游的
-RadioGroup 之上，因此是一组单选语义，而不是若干独立按钮。
+`components/base/segmented-control` 是分段选择器：一组互斥的短选项排成一段，选中项高亮。外层是一组
+`role="group"`，每个选项是原生按钮并用 `aria-pressed` 表达选中，因此是一组互斥选择，而不是若干独立开关。
 
 适合视图切换、过滤档位、二到四选一的场景。选项多于五个，或文字较长时改用 `components/base/select`。
 
@@ -40,7 +40,8 @@ RadioGroup 之上，因此是一组单选语义，而不是若干独立按钮。
 
 ## 无障碍
 
-- 单选语义，方向键在选项间移动；测试里不要用 `.selectOption()` 或 `toHaveValue()`。
+- 外层是 `role="group"` 并带 `aria-label`；每个选项是按钮，选中态用 `aria-pressed="true"` 表达。
+- 左右方向键在选项间移动并直接切换选中；测试用 `getByRole('button')` 与 `toHaveAttribute('aria-pressed', 'true')`，不要用 `.selectOption()` 或 `toHaveValue()`。
 - 必须给 `aria-label`，让读屏知道这一组在选什么。
 
 ## 验证方式

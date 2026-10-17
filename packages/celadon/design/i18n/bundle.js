@@ -752,7 +752,7 @@ window.CELADON_I18N = {
     },
     "df": {
       "title": "Data format · four languages",
-      "subtitle": "Every value on this page is computed by the browser through **Intl at runtime**, not typed in. That makes it the **check** for the sample table in `plan/19-data-format.md` §3.4. Switch language to see the same data written the way each one does it.",
+      "subtitle": "Every value on this page is computed by the browser through **Intl at runtime**, not typed in, which makes this page the **check** for the data-format rules. Switch language to see the same data written the way each one does it.",
       "s1title": "Date and time",
       "s1hint": "One instant rendered per language with `Intl.DateTimeFormat`; relative time uses fixed sample intervals (`Intl.RelativeTimeFormat`).",
       "s2title": "Relative time ladder",
@@ -1629,7 +1629,7 @@ window.CELADON_I18N = {
     },
     "df": {
       "title": "データ形式 · 4 言語対照",
-      "subtitle": "このページの値はすべてブラウザが**実行時に Intl を呼んで**算出したもので、書き込んだ文字列ではありません。つまり `plan/19-data-format.md` §3.4 のサンプル表の**検証**でもあります。言語を切り替えて、同じデータの書き方の違いをご覧ください。",
+      "subtitle": "このページの値はすべてブラウザが**実行時に Intl を呼んで**算出したもので、書き込んだ文字列ではありません。つまりこのページ自体がデータ形式ルールの**検証**です。言語を切り替えて、同じデータの書き方の違いをご覧ください。",
       "s1title": "日付と時刻",
       "s1hint": "同じ瞬間を `Intl.DateTimeFormat` で言語ごとに描画。相対時刻は固定のサンプル間隔（`Intl.RelativeTimeFormat`）で示します。",
       "s2title": "相対時刻の段階",
@@ -2506,7 +2506,7 @@ window.CELADON_I18N = {
     },
     "df": {
       "title": "数据格式 · 四语对照",
-      "subtitle": "本页所有值都由浏览器**实时调用 Intl.\\*** 计算，不是写死的字符串 —— 所以它同时是 `plan/19-data-format.md` §3.4 那张样例表的**校验**。切换语言，看同一份数据的写法变化。",
+      "subtitle": "本页所有值都由浏览器**实时调用 Intl.\\*** 计算，不是写死的字符串，因此这一页就是数据格式规则的**校验**。切换语言，看同一份数据的写法变化。",
       "s1title": "日期与时间",
       "s1hint": "同一时刻用 `Intl.DateTimeFormat` 按语言渲染；相对时间用固定样例间隔（`Intl.RelativeTimeFormat`）。",
       "s2title": "相对时间阶梯",
@@ -3383,7 +3383,7 @@ window.CELADON_I18N = {
     },
     "df": {
       "title": "資料格式 · 四語對照",
-      "subtitle": "本頁所有值都由瀏覽器**即時呼叫 Intl.\\*** 計算，不是寫死的字串 —— 所以它同時是 `plan/19-data-format.md` §3.4 那張樣例表的**校驗**。切換語言，看同一份資料的寫法變化。",
+      "subtitle": "本頁所有值都由瀏覽器**即時呼叫 Intl.\\*** 計算，不是寫死的字串，因此這一頁就是資料格式規則的**校驗**。切換語言，看同一份資料的寫法變化。",
       "s1title": "日期與時間",
       "s1hint": "同一時刻用 `Intl.DateTimeFormat` 依語言呈現；相對時間用固定樣例間隔（`Intl.RelativeTimeFormat`）。",
       "s2title": "相對時間階梯",
