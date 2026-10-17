@@ -159,20 +159,18 @@
 	transition: none;
 }
 
-/* 第二栏在视觉上的位置：左右分栏放左边、上下分栏放下面。
-   DOM 次序固定为「主栏 · 分隔条 · 第二栏」，切方向只改这里的 order，两栏不重挂，
-   滚动位置、地址草稿与拖动中的手势都不会丢。左右分栏时分隔条也要跟着前移，
-   否则它会留在最右边、压住这一栏的分界线（拖栏宽会被它接走）。 */
-.browser__body[data-split='columns'] .browser__pane--secondary {
-	order: -2;
+/* 第二个面板自己的小条：高度与标签条一致，写出它绑的是哪一页 */
+.browser__pane-head {
+	flex: none;
+	block-size: var(--row-height);
+	display: flex;
+	align-items: center;
+	padding-inline: var(--spacing-8);
+	border-block-end: var(--border-width) solid var(--border-subtle);
+	color: var(--text-secondary);
+	cursor: default;
+	user-select: none;
 }
-
-.browser__body[data-split='columns'] .browser__divider {
-	order: -1;
-}
-
-/* 第二栏的标签条那一行由 parts/secondary-pane/secondary-pane.less 负责，
-   旧的小条（只写一页名字、不能切换）已随两组标签模型删除 */
 
 /* 标签条右端的「…」更多菜单：口径与导航列折叠菜单一致 ——
    项内距纵向 8、横向 12，行高凑到 32（design/layout.md §3 的列表项），项间距 4，悬停与键盘高亮同一底色 */
