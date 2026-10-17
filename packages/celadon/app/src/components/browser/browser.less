@@ -389,7 +389,9 @@
 }
 
 .browser__tabs-row {
-	flex: 1;
+	/* 行按内容取宽：新建键因此紧跟在最后一颗标签之后，而不是被推到容器最右；
+	   内容放不下时由外层裁切，行自己不参与收缩，标签宽度保持原样 */
+	flex: none;
 	min-inline-size: 0;
 	position: relative;
 	display: flex;
