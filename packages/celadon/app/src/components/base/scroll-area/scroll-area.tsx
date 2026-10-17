@@ -20,7 +20,7 @@ export type ScrollAreaProps = {
 
 /* 三栏各自的滚动容器：滚动行为与滚动条由上游部件负责，边缘阴影按上游给出的
    `data-overflow-y-start` / `data-overflow-y-end` 出现或消失（只有真的溢出才画）。
-   见 `architecture/03-boundaries.md` §3 与 `plan/08-layout-base.md` 第 12 条。 */
+   见 `architecture/03-boundaries.md` §3。 */
 export function ScrollArea({
   children,
   size = 'medium',
