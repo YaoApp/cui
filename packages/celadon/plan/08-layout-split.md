@@ -66,12 +66,12 @@
 - [x] **2. 第二组标签 store**：已完成。`stores/browser/secondary.ts` 复用同一套纯函数，持久化键 `cui.browser.secondary` 版本 2 并有迁移（旧 `activeKey` 失效时回落首项）；`seed()` 幂等、`clear()` 保留「打开过」、**首页可关**、提供 `isEmpty` 给分栏层；新增 9 条单元用例。
 - [x] **3. 标签条组件补齐**：已完成。新增 `parts/tab-menu/`（标签右键菜单与溢出菜单，按组传入动作）；新栏在左右分栏（顶栏左段）与上下分栏（自己那一块顶部）都有 `⌄` 与右键菜单，只作用于本栏这一组；顺带把用例里「更多」的定位限定到主栏那一个。
 - [x] **4. 新栏与顶栏**：已完成。左右分栏时新栏标签条进顶栏左段（`.browser__bar-secondary`，独立溢出测量），上下分栏时画在新栏那一块顶部（`showStrip={split === 'rows'}`）；分栏键与收起键只在主栏段。
-- [ ] **5. 排布、比例与几何**：**拖动与次序已完成**：DOM 固定「主栏 · 分隔条 · 新栏」，左右分栏新栏 `order: -2`、分隔条 `order: -1`；方向换算放在分隔条钩子里（左右取反、上下不取反），存进去的始终是主栏占比，连续拖动与复位后再拖都不跳，四条浏览器用例锁住。**未完成**：顶栏左段的宽度用内联样式算，没有抽成 `--split-ratio` 变量；旧版本存过的 `splitRatio` 没有迁移入口。
+- [x] **5. 排布、比例与几何**：已完成，按开发阶段的决定不做旧值迁移。DOM 固定「主栏 · 分隔条 · 新栏」，左右分栏新栏 `order: -2`、分隔条 `order: -1`；方向换算放在分隔条钩子里（左右取反、上下不取反），存进去的始终是主栏占比，连续拖动与复位后再拖都不跳；两栏尺寸、顶栏左段与页面分隔条共用同一份比例，顶栏段用内联样式给出，未抽成变量。
 - [x] **6. 焦点与落点**：已完成主路径。点新栏把焦点切到 1；新建、切换、关闭、拖动都只作用于本组（各条标签条自带动作）；新栏地址入口走本组 `navigate`；关空与合并后焦点回 0。可见焦点指示与非焦点栏降档底色还没做。
 - [x] **7. 关空即关分栏 / 主动合并**：已完成。关空判定改成**订阅式**：首帧（刷新恢复）分栏开着而新栏为空时补一张首页，之后新栏被任何路径关到一个不剩（单关、关闭其它、关闭全部、批量关闭）都关分栏并回单面板，两条规则在同一个 effect 里按首帧标志分开，不会互相打架；主动关分栏经主栏入口并入去重。新栏的标签条目前只接了单关与新建，`closeOthers`/`closeAll` 的菜单入口属第 3 条，接上后会自动走这条订阅，不需要再改。
-- [ ] **8. 判定与门槛**：左右分栏按**实际栏宽**（`browserWidthShown`，已按 `sideRoom` 夹过）≥ 600 + 8 像素分隔条；上下分栏按**实际栏高** ≥ 两块面板最小高度之和（新增 `--pane-min-height` token，并算上新栏自己的标签条 40 像素，高度从新栏容器的实际尺寸取，不用 `window.innerHeight`）；装配层现有的 `splitBlocked`（视口宽 ≤1287）删掉，由实际栏宽取代；已经开着一个方向时，另一个方向的键要按该方向的判定置灰，不能「切过去才发现放不下」。
+- [x] **8. 判定与门槛**：已完成。两个方向各按自己的条件判：左右看本栏实际宽度（`width`，已按 `sideRoom` 夹过）是否够两块并排再加 8 像素分隔条；上下看 `.browser__body` 的实际高度（`ResizeObserver` 实时量）是否够两倍 `--pane-min-height` 再加新栏标签条 40 像素。装配层原来那条按视口宽一刀切的 `splitBlocked` 只挡左右，不再误挡上下；已开着一个方向时，另一个方向按自己的条件判。置灰原因分两种并四语齐（栏宽不足、高度不足）。浏览器用例 `gates each split direction by its own room` 覆盖三种窗口。
 - [ ] **9. 无障碍**：两组标签条各自 `tablist` 与 `idPrefix`，标签 id、`aria-controls`、`aria-selected` 齐备；被控面板补 `role="tabpanel"` 与对应 id；`＋` 与 `⌄` 移出 `tablist` 并同步改 `useTabOverflow` 的预留计算；两组同名标签按 `data-group` 限定；分隔条补 `aria-valuemin`/`max`/`now`；「新栏」限定四语齐。
-- [ ] **10. 用例、迁移与文档**：按下面的矩阵改写与新增，补迁移用例（旧比例、旧 `cui.browser.secondary` v1、已开分栏刷新），并同步六处文档（见第 5 节）。
+- [ ] **10. 用例、迁移与文档**：**用例已完成一部分**：`layout.split.browser.ts` 17 条覆盖分组独立、方向门槛、关空即关分栏、主动合并、刷新恢复、两栏同底色、拖动与复位后再拖、新栏两套菜单；旧值迁移按第 5 条的决定不做。**未完成**：旧 `cui.browser.secondary` v1 的迁移用例，以及第 5 节列的六处文档同步。
 
 ## 1. 口径（实现依据）
 
@@ -121,19 +121,20 @@
 
 ### 2.5 判定、无障碍与文档（步骤 8、9、10）
 
-- 两根判定（左右看宽、上下看高）都按实际尺寸；两颗粒键各自的 `disabled` 独立，已开分栏时另一个方向不满足就不允许切换；置灰原因区分「窗口太窄」与「窗口太矮」，接上 `shell.browser.split.blocked` 的四语文案。
+- 两根判定（左右看宽、上下看高）都按实际尺寸；两颗键各自的 `disabled` 独立，已开分栏时另一个方向不满足就不允许切换；置灰原因区分「窗口太窄」与「窗口太矮」，前者用 `shell.browser.split.blocked`，后者用 `shell.browser.split.tooShallow`，四语齐。
 - 新增 `--pane-min-height` token 后必须跑 `node scripts/build-css.mjs` 并提交两份 `tokens.css`，否则 `check-generated` 会红；新 `.less` 要过 `check-css-vars` 与 `check-tokens`。
-- 文档同步六处：`design/main-shell.md`（标签不再全局一套、分栏两栏归属）、`design/layout.md` 与 `design/foundations.md`（如有分栏描述）、`plan/08-layout-implemented.md`（分栏一节重写，含第 83/87/102/111 行的旧说法）、`plan/README.md`（索引状态）、`architecture/07-routing.md` 与 `architecture/15-platform.md`（若涉及侧栏描述）。
+- 文档同步六处：`design/main-shell.md`（标签按栏各成一套、分栏两栏归属）、`design/foundations.md`（分屏的两个方向门槛与 `--pane-min-height`）、`plan/08-layout-implemented.md`（分栏一节重写）、`plan/README.md`（索引状态）、`architecture/07-routing.md` 与 `architecture/15-platform.md`（若涉及侧栏描述）。前四处已同步。
 
 ## 3. 用例矩阵
 
 | 类别 | 文件 | 内容 |
 | --- | --- | --- |
-| 会红要改写 | `features/inbox/tests/layout.split.browser.ts:41-49` | 1280×800「两颗键都禁用」：上下看高度后不再成立 |
-| 会红要改写 | 同文件 `:8-40` · `:205-231` · `:232-275` · `:277-305` · `:306-337` | 打开分栏后的面板结构、换边拖动、第二面板内容、点标签切焦点按两组模型改写 |
-| 会红要改写 | `features/inbox/tests/layout.exclusive.browser.ts:33-39` | 独占与分栏叠加 |
-| 新增 | `features/inbox/tests/layout.split.browser.ts` | 两栏各自新建/关闭/右键/溢出 · 上下分栏标签条在下方块顶 · 关空自动关分栏（含 `closeAll`）· 主动合并去重 · 刷新恢复两组（含空栏补首页）· 焦点与外链落点 · 窄窗口两方向置灰 · 切方向页面不重挂 · 两组 key 不冲突 · 顶栏接缝与分隔条对齐 |
-| 新增 | `stores/browser/tab-group.test.ts` · `secondary.test.ts` | 全量动作、排序越界、key 分配、首页回落、最近上限；第二组独立持久化、首页可关、v1→v2 迁移 |
+| 已改写 | `features/inbox/tests/layout.split.browser.ts:41-49` | 1280×800 那条「两颗键都禁用」改成 `gates each split direction by its own room`：1280×800 断言左右灰、上下可用，再压到 520 高断言上下也灰 |
+| 已改写 | 同文件 `:8-40` · `:205-231` · `:232-275` · `:277-305` · `:306-337` | 打开分栏后的面板结构、换边拖动、第二面板内容、点标签切焦点，都按两组模型改写 |
+| 已改写 | `features/inbox/tests/layout.exclusive.browser.ts:33-39` | 独占与分栏叠加；`layout.motion.browser.ts` 的分界线拖动因新门槛把拖动距离改到 320 像素 |
+| 已新增 | `features/inbox/tests/layout.split.browser.ts` | 现 17 条：两栏各自新建/关闭 · 两栏同底色 · 新栏右键与溢出菜单 · 关空退回单栏 · 主动合并去重 · 刷新恢复两组 · 拖动与双击复位后再拖 · 方向门槛三种窗口 |
+| 已新增 | `stores/browser/tab-group.test.ts` · `secondary.test.ts` | 全量动作、排序越界、key 分配、首页回落、最近上限；第二组独立持久化、首页可关、v1→v2 迁移 |
+| 待办 | 同上 | 旧 `cui.browser.secondary` v1 的迁移用例；`idPrefix` 与 `aria-controls` 的无障碍用例（属第 9 条） |
 | 选择器收口 | 各浏览器用例 | 两组并存时 `.browser__more`、`.browser__new`、`getByRole('tab', { name: '首页' })`、`document.querySelector('.browser__tabs')` 都要按 `data-group` 限定 |
 
 ## 4. 目录结构

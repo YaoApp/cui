@@ -28,7 +28,7 @@
 | **05** | [**scaffold**](05-scaffold.md) | **归档脚手架 + 统一导航与页面样式**：目录与路由改名 · 导航收一处 · 删返回按钮 · 页面样式抽一层 | **已实施**（2026-10-04）|
 | **06** | [**login**](06-login.md) | **产品级登录与注册**（实现结果册）：数据层 · 五个页面与共用件 · 域状态与本机记录 · 入口与默认路由 · 会话失效与退出 | **已完成**（2026-10-09，见 §7 读数）|
 | **07** | [**design-review-entry**](07-design-review-entry.md) | **入口三页的设计复核记录**：阻塞 2 · 重要 9 · 次要 11 · 建议 2 | **待处理**（2026-10-05，只记录未改）|
-| **08** | [**layout-implemented**](08-layout-implemented.md) · [**content-browser（跟踪）**](08-layout-content-browser.md) · [split](08-layout-split.md) · [base](08-layout-base.md) · [shell](08-layout-shell.md) · [motion](08-layout-motion.md) | **布局**：`08-layout-implemented.md` 是主册，把已经落地的部分（三栏与窗口 · 导航列 · 标签浏览器顶栏与标签 · 两处收放的动效 · 后两栏换边的键位与收放）压成一册备查；`08-layout-content-browser.md` 是**唯一**的跟踪册，未完成的工作都在那里；`08-layout-split.md` 是分栏的现状、参考形态与方案，评审后再落地；`base` 是第一阶段的骨架清单，`shell` 与 `motion` 是实施记录 | **完成**（2026-10-17）：已实现部分见主册，跟踪册无未完成项；不做的与以后实现的条目见主册第 11、12 节 |
+| **08** | [**layout-implemented**](08-layout-implemented.md) · [**content-browser（跟踪）**](08-layout-content-browser.md) · [split](08-layout-split.md) · [base](08-layout-base.md) · [shell](08-layout-shell.md) · [motion](08-layout-motion.md) | **布局**：`08-layout-implemented.md` 是主册，把已经落地的部分（三栏与窗口 · 导航列 · 标签浏览器顶栏与标签 · 两组标签的分栏 · 两处收放的动效 · 后两栏换边的键位与收放）压成一册备查；`08-layout-content-browser.md` 是**唯一**的跟踪册，未完成的工作都在那里；`08-layout-split.md` 是分栏的方案与实现记录；`base` 是第一阶段的骨架清单，`shell` 与 `motion` 是实施记录 | **完成**（2026-10-17）：已实现部分见主册，跟踪册无未完成项；不做的与以后实现的条目见主册第 11、12 节 |
 
 **开工顺序**：**先 §0**（桌面壳的分支与桥，见 `02-platform.md` §0；**逐条命令清单在桌面仓的 `plan/01-bridge-commands.md`**，本仓不放 —— 宿主侧没有可自由增删的 rustapi，平台层的桌面侧就无处可验）；然后按 §1 的表做：`client/` → `service/` → `credential/` → `transport/` → `data/` → `bridge/`。
 

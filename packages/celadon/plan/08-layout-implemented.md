@@ -80,10 +80,10 @@ app/src/
 
 - **列序**：互换只对调内容区与标签浏览器，导航列恒为第一；用显式 `order` 表达，不用 `row-reverse`。
 - **让位顺序**：内容区先到最小 400，然后标签浏览器到最小 300，然后导航区收起为零宽，最后标签浏览器整条收成零宽。窄视口两档由装配层按视口宽度判定，与手动收起走同一个状态。
-- **分屏**：一层分屏，两个面板各自绑页，支持左右与上下两种朝向；两颗分栏键按**本栏实宽**与栏高判定可用性，不足时置灰。菜单里的两项分栏、换边、独占由下拉键与顶栏空白处右键两处触发。
+- **分屏**：一层分屏，两个面板各有一组标签与自己的活动页，两组互不引用，key 由同一个分配器给出因此全仓唯一。左右分屏时新栏在左、主栏在右，两段标签条并排留在顶栏；上下分屏时主栏在上、新栏在下，两块各自在顶部有一条标签条。整条栏位只有一条分隔线，从顶栏下缘贯穿到栏底。新栏开出来只有首页，它的首页可以关，关到一个不剩自动退回单栏；主动关分屏时新栏的页按顺序并入主栏并去重。两颗分屏键各按自己的空间判定：左右看本栏实际宽度能否并排两块（两倍侧栏最小宽加分隔条），上下看本栏页面实际高度能否叠放两块（两倍 `--pane-min-height` 加新栏标签条），不足时置灰并写明原因。菜单里的两项分屏、换边、独占由下拉键与顶栏空白处右键两处触发。
 - **分隔与边界**：面板之间的分隔条跟手拖动、双击回平分、比例夹在 0.2 与 0.8；内容区与标签浏览器之间的分界线可拖、双击回默认宽；两处口径与导航列右缘一致（抓手 8 像素 · 悬停延迟 300 毫秒 · 4 像素高亮带 · 拖动锁文本选择）。宽度只写自定义属性，不写内联 `inline-size`，收起态才压得住。
 - **面板独占**：整栏占满整扇窗口，导航区与内容区让位，`Esc` 退出；独占与「导航区收起」同时成立时按独占优先，避免右侧空出一条。
-- **状态与偏好**：侧别 · 分屏方向 · 分屏比例 · 本栏宽度都记本机并刷新保持；标签与面板的绑定是装配层的视图状态，不入偏好。
+- **状态与偏好**：侧别 · 分屏方向 · 分屏比例 · 本栏宽度都记本机并刷新保持；两组标签各记一份（主栏 `cui.browser` v3，新栏 `cui.browser.secondary` v2），刷新后两栏各自恢复，分屏开着而新栏为空时补一张首页。标签与面板的绑定是装配层的视图状态，不入偏好。
 - **动效**：三栏与面板的容器都是稳定盒子，互换只改顺序与位置、不重建节点；收放与分栏用 CSS 过渡（`--duration-base` 配进场减速缓动），拖动期间一律关掉。
 
 ## 5. 导航列
@@ -145,8 +145,8 @@ app/src/
 ## 10. 验证方式
 
 - 单元用例与组件同目录：`nav.test.tsx` · `nav.client.test.tsx` · `hooks/use-nav-resize.test.tsx` · `content.test.tsx` · `browser.test.tsx`（均在 `app/src/components/` 内）。
-- 标签集与目标解析：`app/src/stores/browser/tabs.test.ts` 与 `targets.test.ts`。
-- 浏览器用例按层拆开：`app/src/features/inbox/tests/layout.shell.browser.ts`（三栏骨架 · 导航 · 本栏收放与列头 · 换边 · 让位）· `layout.split.browser.ts`（分屏与分隔条）· `layout.exclusive.browser.ts`（上下分栏与独占）· `layout.motion.browser.ts`（动效），共用件在 `layout.helpers.ts`。
+- 标签集与目标解析：`app/src/stores/browser/tabs.test.ts` 与 `targets.test.ts`；两组标签的纯函数在 `tab-group.test.ts`，第二组 store 在 `secondary.test.ts`。
+- 浏览器用例按层拆开：`app/src/features/inbox/tests/layout.shell.browser.ts`（三栏骨架 · 导航 · 本栏收放与列头 · 换边 · 让位）· `layout.split.browser.ts`（两组标签 · 方向门槛 · 分母线与拖动 · 关空退回单栏 · 新栏两套菜单）· `layout.exclusive.browser.ts`（上下分栏与独占）· `layout.motion.browser.ts`（动效），共用件在 `layout.helpers.ts`。
 - 组件自验：`app/src/components/browser/tests/tab.browser.ts`（标签与关闭键 · 截断提示）· `exclusive-width.browser.ts`（独占与导航收起同时成立时的栏宽）· `overflow.browser.ts`（溢出与菜单上段 · 当前页留在条上）· `drag.browser.ts`（拖动换序与让位预览 · 小位移按点击 · `Esc` 取消 · 关闭键上不起拖 · 拖动中锁选择）。
 
 ## 11. 不做
