@@ -16,7 +16,9 @@ const clamp = (value: number) => Math.min(MAX_RATIO, Math.max(MIN_RATIO, value))
 export function useSplitResize(
   orientation: SplitOrientation,
   ratio: number,
-  onChange: (ratio: number) => void
+  onChange: (ratio: number) => void,
+  /** 指针往正方向拖动时比例是变小还是变大：左右分栏新栏在左、比例记主栏，所以取反 */
+  reverse = false
 ) {
   const nodeRef = useRef<HTMLDivElement | null>(null)
   const [dragging, setDragging] = useState(false)
@@ -24,6 +26,8 @@ export function useSplitResize(
   const start = useRef({ x: 0, y: 0, ratio })
   const ratioRef = useRef(ratio)
   ratioRef.current = ratio
+  const reverseRef = useRef(reverse)
+  reverseRef.current = reverse
 
   /* 抓手本身只有几像素宽，比例要按**容器**算：按抓手算的话，拖一点点就被夹到上下限，看起来就是跳 */
   const containerBox = () => nodeRef.current?.parentElement?.getBoundingClientRect() ?? null
@@ -55,7 +59,9 @@ export function useSplitResize(
       if (span === 0) return
       const moved =
         orientation === 'rows' ? event.clientY - start.current.y : event.clientX - start.current.x
-      onChange(clamp(start.current.ratio + moved / span))
+      /* 左右分栏新栏在左：指针往右，主栏那一份变小，所以位移取反。
+         这里只反转换算，不改存进去的值，下一次拖动读到的起点才是同一个口径，不会越拖越跳 */
+      onChange(clamp(start.current.ratio + (reverseRef.current ? -moved : moved) / span))
     }
     const end = (event: PointerEvent) => {
       setDragging(false)
@@ -95,7 +101,7 @@ export function useSplitResize(
     (event: ReactKeyboardEvent<HTMLDivElement>) => {
       const move = (delta: number) => {
         event.preventDefault()
-        onChange(clamp(ratioRef.current + delta))
+        onChange(clamp(ratioRef.current + (reverseRef.current ? -delta : delta)))
       }
       if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') move(-STEP)
       else if (event.key === 'ArrowRight' || event.key === 'ArrowDown') move(STEP)

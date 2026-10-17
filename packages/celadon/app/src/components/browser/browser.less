@@ -616,3 +616,37 @@
 
 /* 让位顺序的最后一步（design/foundations.md F6）：内容区与标签浏览器都到了最小宽、导航区也收起之后，
    仍然放不下时标签浏览器整条收成零宽，规则在 routes/layout.less 里（用零宽而不是 display: none，动效才量得到前后状态）。 */
+
+/* 第二栏的标签条在顶栏里另起一段（左右分栏）：宽度按同一份比例给，
+   与下方的新栏对齐。顶栏本身不画竖线，整条栏位只有一条线，就是页面的分隔条
+   （从顶栏下缘起、贯穿两块页面），拖动时也始终只有这一条。
+   两段都留出与主栏一致的前内距，第一颗标签的左缘因此不贴边。 */
+.browser__bar-secondary {
+	flex: none;
+	min-inline-size: 0;
+	box-sizing: border-box;
+	display: flex;
+	align-items: center;
+	margin-inline-start: calc(-1 * var(--spacing-8));
+	padding-inline: var(--spacing-8);
+}
+
+/* 分栏时主栏那一段也补上同样的前内距：两段的第一颗标签与各自栏的左缘距离一致 */
+.browser[data-split='columns'] .browser__bar > .browser__tabs {
+	padding-inline-start: var(--spacing-8);
+}
+
+.browser__bar-secondary > .browser__tabs {
+	flex: 1;
+	min-inline-size: 0;
+}
+
+/* 左右分栏的视觉次序：新栏在最左，分隔条紧随其后（DOM 仍是「主栏 · 分隔条 · 新栏」，
+   切方向只改 order，页面不重挂） */
+.browser__body[data-split='columns'] .browser__pane--secondary {
+	order: -2;
+}
+
+.browser__body[data-split='columns'] .browser__divider {
+	order: -1;
+}

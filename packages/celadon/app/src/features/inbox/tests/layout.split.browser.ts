@@ -70,7 +70,8 @@ test('drags the divider and resets it by double click', async ({ page }) => {
 	await page.mouse.move(box.x + box.width * 0.25, handle.y + handle.height / 2, { steps: 6 })
 	await page.mouse.up()
 	const dragged = await widths()
-	expect(dragged[0]).toBeLessThan(dragged[1])
+	/* 分隔条拖到整条宽度的 25%：新栏在左因此变窄，主栏（DOM 里的第一个面板）在右变宽 */
+	expect(dragged[1]).toBeLessThan(dragged[0])
 
 	// 双击回平分
 	await divider.dblclick()
@@ -245,7 +246,8 @@ test('keeps the split and the boundary working after the browser moves to the le
 	await page.mouse.up()
 	await openTabMenu(page, browser)
 	await page.getByRole('menuitem', { name: '左右分栏' }).click()
-	await browser.getByRole('button', { name: '更多' }).click()
+	/* 分栏后新栏也有自己的「更多」，这里点主栏顶栏那一个 */
+	await browser.locator('.browser__bar > .browser__more').click()
 	await page.getByRole('menuitem', { name: '换到另一侧' }).click()
 
 	await expect(browser).toHaveAttribute('data-side', 'left')
@@ -296,11 +298,14 @@ test('shows another page in the second pane instead of the same page twice', asy
 	await openTabMenu(page, browser)
 	await page.getByRole('menuitem', { name: '左右分栏' }).click()
 
-	// 第一个面板是当前页（example.com），第二个面板绑另一页（首页），两页不重样
+	// 第一个面板是当前页（example.com），第二个面板自带一组标签、活动页是首页，两页不重样
 	const panes = browser.locator('.browser__pane')
 	await expect(panes).toHaveCount(2)
 	await expect(panes.nth(0).getByText('example.com')).toHaveCount(1)
-	await expect(browser.locator('.browser__pane-head')).toHaveText('首页')
+	/* 左右分栏时新栏的标签条在顶栏左段，按 data-group 限定它 */
+	await expect(
+		browser.locator('.browser__bar-secondary').getByRole('tab', { selected: true })
+	).toHaveText('首页')
 })
 
 test('switches the pane that has focus when a tab is clicked', async ({ page }) => {
@@ -321,17 +326,201 @@ test('switches the pane that has focus when a tab is clicked', async ({ page }) 
 	await page.mouse.up()
 	await openTabMenu(page, browser)
 	await page.getByRole('menuitem', { name: '左右分栏' }).click()
-	// 起始：第一个面板 example.com，第二个面板首页
-	await expect(browser.locator('.browser__pane-head')).toHaveText('首页')
+	const secondaryStrip = browser.locator('.browser__bar-secondary')
+	// 起始：主栏是 example.com，新栏自带一组标签、活动页是首页
+	await expect(secondaryStrip.getByRole('tab', { selected: true })).toHaveText('首页')
 
-	// 聚焦第二个面板后点「首页」标签：只换第二个面板，第一个面板不动
-	await panes.nth(1).click()
-	await browser.getByRole('tab', { name: '首页' }).click()
-	await expect(browser.locator('.browser__pane-head')).toHaveText('首页')
+	// 新栏的标签条只作用于新栏：点它的新建键，新栏多一页，主栏不动
+	await secondaryStrip.getByRole('button', { name: '新建标签' }).click()
+	await expect(secondaryStrip.getByRole('tab')).toHaveCount(2)
 	await expect(panes.nth(0).getByText('example.com')).toHaveCount(1)
 
-	// 聚焦第一个面板后点「首页」标签：换的是第一个面板，第二个面板的小条跟着变它自己那一页
+	// 点新栏的「首页」那一页：只换新栏，主栏还是 example.com
+	await secondaryStrip.getByRole('tab', { name: '首页' }).click()
+	await expect(secondaryStrip.getByRole('tab', { selected: true })).toHaveText('首页')
+	await expect(panes.nth(0).getByText('example.com')).toHaveCount(1)
+
+	// 点主栏标签条上的「首页」：换的是主栏那一栏，新栏保持自己那一页
 	await panes.nth(0).click()
-	await browser.getByRole('tab', { name: '首页' }).click()
+	await browser.locator('.browser__tabs-row').last().getByRole('tab', { name: '首页' }).click()
 	await expect(panes.nth(0).getByLabel('外部地址')).toHaveCount(1)
+	await expect(secondaryStrip.getByRole('tab', { selected: true })).toHaveText('首页')
+})
+
+test('closes the split when the second pane runs out of tabs', async ({ page }) => {
+	await page.setViewportSize({ width: 1600, height: 900 })
+	await markSignedIn(page)
+	await page.goto('/app/inbox')
+	const browser = columns(page).browser
+	await widenBrowser(page)
+	await openTabMenu(page, browser)
+	await page.getByRole('menuitem', { name: '左右分栏' }).click()
+	const strip = browser.locator('.browser__bar-secondary')
+	await expect(strip.getByRole('tab')).toHaveCount(1)
+
+	// 新栏只有首页那一页：关掉它，分栏自动关闭，主栏原样留着
+	await strip.getByRole('tab', { name: '首页' }).hover()
+	await strip.locator('.browser__tab-close').click()
+	await expect(browser).toHaveAttribute('data-split', 'none')
+	await expect(browser.locator('.browser__pane')).toHaveCount(1)
+	await expect(browser.locator('.browser__bar-secondary')).toHaveCount(0)
+})
+
+test('merges the second pane into the main one when the split is switched off', async ({ page }) => {
+	await page.setViewportSize({ width: 1600, height: 900 })
+	await markSignedIn(page)
+	await page.goto('/app/inbox')
+	const browser = columns(page).browser
+	await widenBrowser(page)
+	await openTabMenu(page, browser)
+	await page.getByRole('menuitem', { name: '左右分栏' }).click()
+	const strip = browser.locator('.browser__bar-secondary')
+
+	// 新栏开一页外部地址（地址入口在新栏的页面里，不在顶栏那一段）
+	await strip.getByRole('button', { name: '新建标签' }).click()
+	const secondaryPane = browser.locator('.browser__pane--secondary')
+	await secondaryPane.getByLabel('外部地址').fill('merge.example.com')
+	await secondaryPane.getByLabel('外部地址').press('Enter')
+	await expect(strip.getByRole('tab', { name: 'merge.example.com' })).toHaveCount(1)
+
+	// 主动关分栏：新栏的页并进主栏并经主栏入口去重，只留一份
+	await openTabMenu(page, browser)
+	await page.getByRole('menuitem', { name: '左右分栏' }).click()
+	await expect(browser).toHaveAttribute('data-split', 'none')
+	const names = await browser.locator('.browser__tab-label').allInnerTexts()
+	expect(names.filter((name) => name === 'merge.example.com')).toHaveLength(1)
+})
+
+test('restores both tab groups after a reload and never leaves an empty pane', async ({ page }) => {
+	await page.setViewportSize({ width: 1600, height: 900 })
+	await markSignedIn(page)
+	await page.goto('/app/inbox')
+	const browser = columns(page).browser
+	await widenBrowser(page)
+	await openTabMenu(page, browser)
+	await page.getByRole('menuitem', { name: '左右分栏' }).click()
+	const strip = browser.locator('.browser__bar-secondary')
+	await strip.getByRole('button', { name: '新建标签' }).click()
+	const secondaryPane = browser.locator('.browser__pane--secondary')
+	await secondaryPane.getByLabel('外部地址').fill('keep.example.com')
+	await secondaryPane.getByLabel('外部地址').press('Enter')
+	await expect(strip.getByRole('tab', { name: 'keep.example.com' })).toHaveCount(1)
+
+	await page.reload()
+	await expect(browser).toHaveAttribute('data-split', 'columns')
+	await expect(browser.locator('.browser__pane')).toHaveCount(2)
+	const restored = browser.locator('.browser__bar-secondary')
+	await expect(restored.getByRole('tab', { selected: true })).toHaveText('keep.example.com')
+	/* 主栏的标签条在顶栏右段，两栏各自恢复，新栏不是空的 */
+	await expect(browser.locator('.browser__tabs-row').last().getByRole('tab', { name: '首页' })).toHaveCount(1)
+})
+
+test('paints both panes with the same background', async ({ page }) => {
+	await page.setViewportSize({ width: 1600, height: 900 })
+	await markSignedIn(page)
+	await page.goto('/app/inbox')
+	const browser = columns(page).browser
+	await widenBrowser(page)
+	await openTabMenu(page, browser)
+	await page.getByRole('menuitem', { name: '左右分栏' }).click()
+	await expect(browser.locator('.browser__pane')).toHaveCount(2)
+
+	/* 两栏的页面底必须同色：新栏单独写底色会让一栏白、一栏灰 */
+	const paints = await browser.locator('.browser__pane').evaluateAll((els) =>
+		els.map((el) => {
+			let node: HTMLElement | null = el as HTMLElement
+			while (node) {
+				const colour = getComputedStyle(node).backgroundColor
+				if (colour && colour !== 'rgba(0, 0, 0, 0)') return colour
+				node = node.parentElement
+			}
+			return 'none'
+		})
+	)
+	expect(paints[0]).toBe(paints[1])
+})
+
+test('keeps the drag in step after the double click resets the ratio', async ({ page }) => {
+	await page.setViewportSize({ width: 1600, height: 900 })
+	await markSignedIn(page)
+	await page.goto('/app/inbox')
+	const browser = columns(page).browser
+	await widenBrowser(page)
+	await openTabMenu(page, browser)
+	await page.getByRole('menuitem', { name: '左右分栏' }).click()
+	const divider = browser.locator('.browser__divider')
+	const widths = async () =>
+		browser
+			.locator('.browser__pane')
+			.evaluateAll((els) => els.map((el) => Math.round(el.getBoundingClientRect().width)))
+
+	const drag = async (delta: number) => {
+		const handle = (await divider.boundingBox())!
+		await page.mouse.move(handle.x + handle.width / 2, handle.y + 200)
+		await page.mouse.down()
+		await page.mouse.move(handle.x + handle.width / 2 + delta, handle.y + 200, { steps: 6 })
+		await page.mouse.up()
+		await page.waitForTimeout(300)
+	}
+
+	await drag(60)
+	const first = await widths()
+	// 新栏在左：往右拖它变宽（DOM 里第二个面板），主栏在右变窄
+	expect(first[1]).toBeGreaterThan(first[0])
+
+	await divider.dblclick()
+	await page.waitForTimeout(400)
+	const even = await widths()
+	expect(Math.abs(even[0] - even[1])).toBeLessThanOrEqual(8)
+
+	/* 复位之后再拖同样的距离，位移应与第一次一致，不能跳一大块 */
+	await drag(60)
+	const second = await widths()
+	expect(second[0]).toBe(first[0])
+	expect(second[1]).toBe(first[1])
+
+	/* 连续再拖一次同样距离：位移必须与上一次相同，且方向跟着指针（新栏继续变宽、主栏继续变窄） */
+	await drag(60)
+	const third = await widths()
+	expect(third[1]).toBe(second[1] + 60)
+	expect(third[0]).toBe(second[0] - 60)
+
+	/* 反向拖同样的距离回到原位：方向也跟手，不跳 */
+	await drag(-60)
+	const back = await widths()
+	expect(back[0]).toBe(second[0])
+	expect(back[1]).toBe(second[1])
+})
+
+test('opens the tab menu and the overflow menu on the second pane', async ({ page }) => {
+	await page.setViewportSize({ width: 1600, height: 900 })
+	await markSignedIn(page)
+	await page.goto('/app/inbox')
+	const browser = columns(page).browser
+	await widenBrowser(page)
+	await openTabMenu(page, browser)
+	await page.getByRole('menuitem', { name: '左右分栏' }).click()
+	const strip = browser.locator('.browser__bar-secondary')
+	const pane = browser.locator('.browser__pane--secondary')
+
+	// 新栏开一页外部地址
+	await strip.getByRole('button', { name: '新建标签' }).click()
+	await pane.getByLabel('外部地址').fill('menu.example.com')
+	await pane.getByLabel('外部地址').press('Enter')
+	await expect(strip.getByRole('tab', { name: 'menu.example.com' })).toHaveCount(1)
+
+	// 右键新栏的标签：弹出的是新栏自己的菜单，四项都在
+	await strip.getByRole('tab', { name: 'menu.example.com' }).click({ button: 'right' })
+	const menu = page.locator('.browser__menu')
+	await expect(menu).toHaveCount(1)
+	await expect(menu.getByText('刷新')).toHaveCount(1)
+	await expect(menu.getByText('关闭这个标签')).toHaveCount(1)
+	await expect(menu.getByText('关闭其他标签')).toHaveCount(1)
+	await expect(menu.getByText('关闭全部标签')).toHaveCount(1)
+	await page.keyboard.press('Escape')
+	await expect(page.locator('.browser__menu')).toHaveCount(0)
+
+	// 溢出键也在新栏这一段里，并且有自己的菜单
+	await strip.locator('.browser__more').click()
+	await expect(page.locator('.browser__menu').getByText('关闭全部标签')).toHaveCount(1)
 })

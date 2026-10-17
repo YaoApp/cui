@@ -8,6 +8,8 @@ import { Tooltip } from '@/components/base/tooltip'
 import { useTranslation } from '@/platform/i18n'
 import type { BrowserSplit } from '@/stores/layout/columns'
 import { BrowserTabs } from './parts/tabs'
+import { SecondaryPane } from './parts/secondary-pane'
+import { TabContextMenu, TabOverflowMenu } from './parts/tab-menu'
 import { useTabOverflow } from './hooks/use-tab-overflow'
 import type { BrowserTab } from './types'
 import { useSplitResize } from './hooks/use-split-resize'
@@ -65,8 +67,19 @@ export type BrowserProps = {
   children: ReactNode
   /** 第二个面板的当前页；只有分屏时才渲染 */
   secondary?: ReactNode
-  /** 第二个面板那一页的名字，画在它自己的小条上 */
-  secondaryLabel?: string
+  /** 第二个面板自己的一组标签与活动页：每组独立，互不引用 */
+  secondaryTabs?: BrowserTab[]
+  secondaryActiveKey?: string
+  onSecondaryActivate?: (key: string) => void
+  onSecondaryClose?: (key: string) => void
+  onSecondaryNew?: () => void
+  onSecondaryReorder?: (key: string, index: number) => void
+  /** 新栏标签的刷新、关闭其它、关闭全部：只作用于新栏这一组 */
+  onSecondaryRefresh?: (key: string) => void
+  onSecondaryCloseOthers?: (key: string) => void
+  onSecondaryCloseAll?: () => void
+  /** 指针在第二个面板按下：把焦点栏切过去 */
+  onSecondaryFocus?: () => void
   /** 聚焦哪个面板（0 是第一个）：标签条的点击落在聚焦的那个面板上 */
   focusedPane?: number
   onFocusPane?: (pane: number) => void
@@ -105,7 +118,16 @@ export function Browser({
   secondaryKey,
   children,
   secondary = null,
-  secondaryLabel = '',
+  secondaryTabs = [],
+  secondaryActiveKey = '',
+  onSecondaryActivate = () => {},
+  onSecondaryClose = () => {},
+  onSecondaryNew = () => {},
+  onSecondaryReorder = () => {},
+  onSecondaryRefresh,
+  onSecondaryCloseOthers,
+  onSecondaryCloseAll,
+  onSecondaryFocus = () => {},
   focusedPane = 0,
   onFocusPane = () => {},
   exclusive = false,
@@ -115,7 +137,9 @@ export function Browser({
   const splitResize = useSplitResize(
     split === 'rows' ? 'rows' : 'columns',
     splitRatio,
-    onSplitRatio
+    onSplitRatio,
+    /* 左右分栏新栏在左、比例记主栏：指针往右是主栏变小，换算取反；上下分栏方向本来就对 */
+    split === 'columns'
   )
   const columnResize = useColumnResize(width, onWidth, side)
   /* 分屏能不能开，按**本栏实宽**判：宽度由分界线拖出来，窗口宽只是其中一半条件。
@@ -138,12 +162,24 @@ export function Browser({
   /* 标签自己的右键菜单：记下点的是哪一页与指针位置，菜单按指针位置定位 */
   const [tabMenu, setTabMenu] = useState<{ key: string; point: { x: number; y: number } } | null>(null)
   const contextTab = tabMenu ? (tabs.find((tab) => tab.key === tabMenu.key) ?? null) : null
+  /* 新栏标签的右键菜单：左右分栏时新栏的标签条在顶栏，菜单也挂在这一层 */
+  const [secondaryTabMenu, setSecondaryTabMenu] = useState<{ key: string; point: { x: number; y: number } } | null>(
+    null
+  )
+  const secondaryContextTab = secondaryTabMenu
+    ? (secondaryTabs.find((tab) => tab.key === secondaryTabMenu.key) ?? null)
+    : null
   const closableCount = tabs.filter((tab) => tab.closable).length
   const otherClosableCount = tabs.filter((tab) => tab.closable && tab.key !== tabMenu?.key).length
   const blocked = splitBlocked || tooNarrowToSplit
   /* 标签条的溢出量在这里算：算出来的可见段交给标签条渲染，放不下的那些进菜单上段。
      放在这一层是因为菜单也在这一层，不必再从下面把结果报上来 */
   const { containerRef: tabsContainerRef, overflow } = useTabOverflow(tabs, activeKey)
+  /* 第二组标签条（左右分栏时进顶栏左段）的溢出按它自己的宽度算，与主栏互不影响 */
+  const { containerRef: secondaryTabsRef, overflow: secondaryOverflow } = useTabOverflow(
+    secondaryTabs,
+    secondaryActiveKey
+  )
   return (
     <aside
       className="browser"
@@ -227,7 +263,59 @@ export function Browser({
             </span>
           </span>
         ) : null}
+        {/* 左右分栏：新栏的标签条进顶栏左段，与主栏同一条基线；上下分栏时它在自己那一块顶部 */}
+        {split === 'columns' ? (
+          <div
+            className="browser__bar-secondary"
+            data-group="secondary"
+            /* 与下方新栏同宽：样式里用负外边距把起点拉回最左，这里的比例直接用新栏那一份 */
+            style={{ inlineSize: `${(1 - splitRatio) * 100}%` }}
+          >
+            <BrowserTabs
+              group="secondary"
+              tabs={secondaryTabs}
+              activeKey={secondaryActiveKey}
+              containerRef={secondaryTabsRef}
+              visibleKeys={secondaryOverflow.visibleKeys}
+              onActivate={onSecondaryActivate}
+              onClose={onSecondaryClose}
+              onNew={onSecondaryNew}
+              onReorder={onSecondaryReorder}
+              onTabContextMenu={(key, point) => setSecondaryTabMenu({ key, point })}
+            />
+            {/* 新栏自己的溢出键：放不下的页与关闭项都在它自己的菜单里 */}
+            <TabOverflowMenu
+              hiddenTabs={secondaryOverflow.hiddenTabs}
+              actions={{
+                onActivate: onSecondaryActivate,
+                onClose: onSecondaryClose,
+                onRefresh: onSecondaryRefresh,
+                onCloseOthers: onSecondaryCloseOthers,
+                onCloseAll: onSecondaryCloseAll
+              }}
+              label={t('shell.browser.label')}
+            />
+            {/* 新栏标签的右键菜单：与溢出菜单同一组动作，只作用于新栏 */}
+            {secondaryContextTab ? (
+              <TabContextMenu
+                tab={secondaryContextTab}
+                point={secondaryTabMenu?.point ?? null}
+                actions={{
+                  onActivate: onSecondaryActivate,
+                  onClose: onSecondaryClose,
+                  onRefresh: onSecondaryRefresh,
+                  onCloseOthers: onSecondaryCloseOthers,
+                  onCloseAll: onSecondaryCloseAll
+                }}
+                onOpenChange={(open) => {
+                  if (!open) setSecondaryTabMenu(null)
+                }}
+              />
+            ) : null}
+          </div>
+        ) : null}
         <BrowserTabs
+          group="primary"
           tabs={tabs}
           activeKey={activeKey}
           containerRef={tabsContainerRef}
@@ -483,11 +571,31 @@ export function Browser({
             >
               <span className="browser__grip" aria-hidden="true" />
             </div>
-            <div className="browser__pane" data-focused={focusedPane === 1 || undefined} onPointerDown={() => onFocusPane(1)}>
-              {/* 第二个面板自己的小条：写出它绑的是哪一页，与第一个面板的内容区分开 */}
-              <div className="browser__pane-head">{secondaryLabel}</div>
-              <ScrollArea className="browser__page" size="medium" persistent>{secondary}</ScrollArea>
-            </div>
+            <SecondaryPane
+              tabs={secondaryTabs}
+              activeKey={secondaryActiveKey}
+              onActivate={onSecondaryActivate}
+              onClose={onSecondaryClose}
+              onNew={onSecondaryNew}
+              onReorder={onSecondaryReorder}
+              menuActions={{
+                onRefresh: onSecondaryRefresh,
+                onCloseOthers: onSecondaryCloseOthers,
+                onCloseAll: onSecondaryCloseAll
+              }}
+              onFocus={onSecondaryFocus}
+              focused={focusedPane === 1}
+              /* 上下分栏时新栏自己画标签条；左右分栏时标签条在顶栏左段 */
+              showStrip={split === 'rows'}
+              /* 比例记的是主栏那一份，新栏取补出来的那一份 */
+              size={
+                split === 'rows'
+                  ? { blockSize: `${(1 - splitRatio) * 100}%` }
+                  : { inlineSize: `${(1 - splitRatio) * 100}%` }
+              }
+            >
+              {secondary}
+            </SecondaryPane>
           </>
         )}
       </div>
