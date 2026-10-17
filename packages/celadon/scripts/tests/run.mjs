@@ -23,6 +23,7 @@ const CASES = resolve(HERE, 'cases')
  *  它的 `app/src/` 与 `design/` 同级（样本与真实包同构：包根/{design,app/src}）。 */
 const SUITES = [
   ['check-css-conventions.mjs', 'css-conventions'],
+  ['check-css-vars.mjs', 'css-vars'],
   ['check-tokens.mjs', 'tokens', 'design'],
   ['check-i18n.mjs', 'i18n'],
   ['check-i18n-types.mjs', 'i18n-types'],
