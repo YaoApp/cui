@@ -21,7 +21,7 @@ or with long labels, use `components/base/select` instead.
 
 | Prop | Type | Default | Notes |
 | --- | --- | --- | --- |
-| `options` | `readonly SegmentedOption[]` | none | The options. Each has `value` and `label`. |
+| `options` | `readonly SegmentedOption[]` | none | The options. Each has `value` and `label`, plus an optional `icon` (drawn at the left of the segment) and `disabled`. |
 | `value` | `string` | none | The current value. Controlled; the component keeps no state. |
 | `onValueChange` | `(value: string) => void` | none | Called when the selection changes. |
 | `aria-label` | `string` | none | The name of the group. Required. |
@@ -55,4 +55,5 @@ Unit tests sit next to the component: `segmented-control.test.tsx`.
 
 ## Known limits
 
-- Options are text only; icons or richer content are a separate decision.
+- Options carry an icon and a label; richer custom content is not part of this component and is a separate
+  decision.

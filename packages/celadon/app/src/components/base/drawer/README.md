@@ -21,7 +21,7 @@ you look at alongside the page, such as filters, details and settings.
 | `title` | `ReactNode` | none | The title. |
 | `closeLabel` | `string` | none | Accessible name of the close key; the caller reads it from the language bundle. |
 | `footer` | `ReactNode` | none | The action area at the foot. |
-| `side` | `'start' \| 'end'` | `'end'` | Which side it slides in from. A logical direction, so it flips in mirrored languages. |
+| `side` | `'start' \| 'end'` | `'start'` | Which side it slides in from. A logical direction, so it flips in mirrored languages. |
 | `initialFocus` | `boolean \| RefObject` | none | Where focus lands after opening. |
 | `className` | `string` | none | Extra class names. |
 | `children` | `ReactNode` | none | The drawer body. |

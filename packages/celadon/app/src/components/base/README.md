@@ -19,7 +19,7 @@ caller in the product needs it, and check for an upstream part before writing be
 | [`checkbox/`](checkbox/README.md) | Checkboxes. |
 | [`dialog/`](dialog/README.md) | Overlay pages, two width steps. |
 | [`drawer/`](drawer/README.md) | A panel that slides in from one side of the window. |
-| [`icon/`](icon/README.md) | Interface icons, four size steps. |
+| [`icon/`](icon/README.md) | Interface icons, five size steps. |
 | [`input/`](input/README.md) | Text fields. |
 | [`link/`](link/README.md) | The text link shared by internal and external targets. |
 | [`motion/`](motion/README.md) | Layout projection for elements that must follow a column resize. |

@@ -18,7 +18,7 @@
 
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| `options` | `readonly SegmentedOption[]` | 无 | 选项。每项含 `value` 与 `label`。 |
+| `options` | `readonly SegmentedOption[]` | 无 | 选项。每项含 `value` 与 `label`，可选 `icon`（段内左侧图标）与 `disabled`。 |
 | `value` | `string` | 无 | 当前值。受控，组件不自己存。 |
 | `onValueChange` | `(value: string) => void` | 无 | 切换回调。 |
 | `aria-label` | `string` | 无 | 这一组选项的名字，必填。 |
@@ -50,4 +50,4 @@
 
 ## 已知限制
 
-- 选项只为文字；需要图标或更复杂内容时另议。
+- 选项由图标与文字组成；更复杂的自定义内容不在这一件里，另议。

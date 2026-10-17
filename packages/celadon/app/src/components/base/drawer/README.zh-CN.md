@@ -20,7 +20,7 @@
 | `title` | `ReactNode` | 无 | 标题。 |
 | `closeLabel` | `string` | 无 | 关闭键的无障碍名，调用方从语言包取。 |
 | `footer` | `ReactNode` | 无 | 底部操作区。 |
-| `side` | `'start' \| 'end'` | `'end'` | 从哪一侧滑入。逻辑方向，镜像语言下自动换边。 |
+| `side` | `'start' \| 'end'` | `'start'` | 从哪一侧滑入。逻辑方向，镜像语言下自动换边。 |
 | `initialFocus` | `boolean \| RefObject` | 无 | 打开后焦点落点。 |
 | `className` | `string` | 无 | 追加类名。 |
 | `children` | `ReactNode` | 无 | 抽屉正文。 |

@@ -17,7 +17,7 @@
 | [`checkbox/`](checkbox/README.zh-CN.md) | 复选框。 |
 | [`dialog/`](dialog/README.zh-CN.md) | 弹层页面，两档宽度。 |
 | [`drawer/`](drawer/README.zh-CN.md) | 从窗口一侧滑入的面板。 |
-| [`icon/`](icon/README.zh-CN.md) | 界面图标，四档尺寸。 |
+| [`icon/`](icon/README.zh-CN.md) | 界面图标，五档尺寸。 |
 | [`input/`](input/README.zh-CN.md) | 输入框。 |
 | [`link/`](link/README.zh-CN.md) | 站内与站外共用的文字链接。 |
 | [`motion/`](motion/README.zh-CN.md) | 收放动画用的布局投影。 |
