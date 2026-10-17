@@ -95,11 +95,11 @@ test('keeps the boundary drag instant while the layout animation is on', async (
 
 	await page.mouse.move(grip.x + grip.width / 2, y)
 	await page.mouse.down()
-	await page.mouse.move(grip.x + grip.width / 2 - 200, y, { steps: 6 })
+	await page.mouse.move(grip.x + grip.width / 2 - 320, y, { steps: 6 })
 	await expect(browser).toHaveAttribute('data-dragging', 'true')
 	// 跟手：拖动中没有阻尼拖尾，栏宽与指针走过的距离一致（允许 2 像素误差）
 	const moved = (await browser.boundingBox())!.width
-	expect(Math.abs(moved - (before + 200))).toBeLessThanOrEqual(2)
+	expect(Math.abs(moved - (before + 320))).toBeLessThanOrEqual(2)
 	await page.mouse.up()
 
 	// 松手后投影接手，宽度落定在拖动结束的位置

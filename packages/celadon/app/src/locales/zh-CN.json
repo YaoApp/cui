@@ -99,6 +99,7 @@
   "shell.browser.split.columns": "左右分栏",
   "shell.browser.split.rows": "上下分栏",
   "shell.browser.split.blocked": "栏宽不足，拖宽侧边栏后再分栏",
+  "shell.browser.split.tooShallow": "高度不足，窗口拉高后再分栏",
   "shell.browser.action.more": "更多",
   "shell.browser.action.exclusive": "面板独占窗口",
   "shell.browser.action.blocked": "窗口太窄，放不下这一栏",

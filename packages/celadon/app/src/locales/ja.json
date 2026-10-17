@@ -99,6 +99,7 @@
   "shell.browser.split.columns": "左右に分割",
   "shell.browser.split.rows": "上下に分割",
   "shell.browser.split.blocked": "幅が足りません。列を広げてから分割してください",
+  "shell.browser.split.tooShallow": "高さが足りません。ウィンドウを高くしてから分割してください",
   "shell.browser.action.more": "その他",
   "shell.browser.action.exclusive": "パネルをウィンドウ全体に",
   "shell.browser.action.blocked": "ウィンドウが狭すぎてこの列を表示できません",

@@ -38,13 +38,22 @@ test('splits the browser into two panes and back', async ({ page }) => {
 	await expect(browser.locator('.browser__pane')).toHaveCount(1)
 })
 
-test('disables the split keys when the window cannot fit two panes', async ({ page }) => {
+test('gates each split direction by its own room', async ({ page }) => {
 	await page.setViewportSize({ width: 1280, height: 800 })
 	await markSignedIn(page)
 	await page.goto('/app/inbox')
 	const browser = columns(page).browser
+
+	/* 1280 宽：侧栏只有 400，放不下两块并排，左右分栏置灰；高度还有七百多，上下分栏可用 */
 	await openTabMenu(page, browser)
 	await expect(page.getByRole('menuitem', { name: '左右分栏' })).toBeDisabled()
+	await expect(page.getByRole('menuitem', { name: '上下分栏' })).toBeEnabled()
+	await page.keyboard.press('Escape')
+
+	/* 窗口压矮到 520：栏高放不下两块，上下分栏也置灰 */
+	await page.setViewportSize({ width: 1280, height: 520 })
+	await page.waitForTimeout(400)
+	await openTabMenu(page, browser)
 	await expect(page.getByRole('menuitem', { name: '上下分栏' })).toBeDisabled()
 })
 

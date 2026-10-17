@@ -1,5 +1,5 @@
 import './browser.less'
-import { useEffect, useState, type CSSProperties, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { Menu as BaseMenu } from '@base-ui/react/menu'
 import { Button } from '@/components/base/button'
 import { Icon } from '@/components/base/icon'
@@ -144,7 +144,7 @@ export function Browser({
   const columnResize = useColumnResize(width, onWidth, side)
   /* 分屏能不能开，按**本栏实宽**判：宽度由分界线拖出来，窗口宽只是其中一半条件。
      两个长度 token 从 `.celadon` 上读一次（默认宽与最小宽），读不到就用回退值 */
-  const [limits, setLimits] = useState({ defaultWidth: 400, sideMin: 300 })
+  const [limits, setLimits] = useState({ defaultWidth: 400, sideMin: 300, paneMin: 240 })
   useEffect(() => {
     const read = (name: string, fallback: number) => {
       const raw = getComputedStyle(document.body).getPropertyValue(name).trim()
@@ -154,9 +154,23 @@ export function Browser({
     setLimits({
       defaultWidth: read('--side-width-reading', 400),
       sideMin: read('--side-min', 300),
+      paneMin: read('--pane-min-height', 240),
     })
   }, [])
-  const tooNarrowToSplit = (width ?? limits.defaultWidth) < limits.sideMin * 2
+  /* 本栏页面的实际高度：上下分栏的判定要用它，窗口高不算顶栏与侧栏头部 */
+  const [bodyHeight, setBodyHeight] = useState(0)
+  const bodyRef = useRef<HTMLDivElement | null>(null)
+  useEffect(() => {
+    const node = bodyRef.current
+    if (!node) return
+    const measure = () => setBodyHeight(node.getBoundingClientRect().height)
+    measure()
+    /* 单测环境没有 ResizeObserver：只量一次即可，真机上再跟窗口变化 */
+    if (typeof ResizeObserver === 'undefined') return
+    const observer = new ResizeObserver(measure)
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [split])
   /* 下拉菜单的开合：下拉键与在顶栏空白处点右键都开它 */
   const [menuOpen, setMenuOpen] = useState(false)
   /* 标签自己的右键菜单：记下点的是哪一页与指针位置，菜单按指针位置定位 */
@@ -171,7 +185,13 @@ export function Browser({
     : null
   const closableCount = tabs.filter((tab) => tab.closable).length
   const otherClosableCount = tabs.filter((tab) => tab.closable && tab.key !== tabMenu?.key).length
-  const blocked = splitBlocked || tooNarrowToSplit
+  /* 两个方向各按自己的条件判：
+     左右看**实际栏宽**能不能放下两块（两倍侧栏最小宽再加分隔条）；
+     上下看**实际栏高**能不能放下两块（两倍面板最小高再加新栏自己那条标签条）。
+     已经开着一个方向时，另一个方向按同一个条件判，切不过去就不会出现放不下的场面 */
+  const columnsRoom = width ?? limits.defaultWidth
+  const columnsBlocked = splitBlocked || columnsRoom < limits.sideMin * 2 + 8
+  const rowsBlocked = bodyHeight > 0 && bodyHeight < limits.paneMin * 2 + 40
   /* 标签条的溢出量在这里算：算出来的可见段交给标签条渲染，放不下的那些进菜单上段。
      放在这一层是因为菜单也在这一层，不必再从下面把结果报上来 */
   const { containerRef: tabsContainerRef, overflow } = useTabOverflow(tabs, activeKey)
@@ -368,7 +388,8 @@ export function Browser({
                 </BaseMenu.Item>
                 <BaseMenu.Item
                   className="browser__menu-item"
-                  disabled={blocked && split === 'none'}
+                  title={columnsBlocked && split !== 'columns' ? t('shell.browser.split.blocked') : undefined}
+                  disabled={columnsBlocked && split !== 'columns'}
                   aria-pressed={split === 'columns'}
                   onClick={() => onSplit(split === 'columns' ? 'none' : 'columns')}
                 >
@@ -377,7 +398,8 @@ export function Browser({
                 </BaseMenu.Item>
                 <BaseMenu.Item
                   className="browser__menu-item"
-                  disabled={blocked && split === 'none'}
+                  title={rowsBlocked && split !== 'rows' ? t('shell.browser.split.tooShallow') : undefined}
+                  disabled={rowsBlocked && split !== 'rows'}
                   aria-pressed={split === 'rows'}
                   onClick={() => onSplit(split === 'rows' ? 'none' : 'rows')}
                 >
@@ -535,6 +557,7 @@ export function Browser({
           第一面板的比例由分隔条拖动给出（跟手，见 hooks/use-split-resize）。 */}
       <div
         className="browser__body"
+        ref={bodyRef}
         data-split={split}
         data-dragging={splitResize.dragging || undefined}
       >
