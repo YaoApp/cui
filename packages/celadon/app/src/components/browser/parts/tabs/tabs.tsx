@@ -8,6 +8,8 @@ import { useTabDrag } from '../../hooks/use-tab-drag'
 import { BrowserTabItem } from '../item'
 
 export type BrowserTabsProps = {
+	/** 这一条属于哪一组：落到 data-group，供用例与读屏在两组并存时限定定位 */
+	group?: 'primary' | 'secondary'
 	tabs: BrowserTab[]
 	activeKey: string
 	/** 裁切容器：溢出测量挂在这一层，由装配层创建并传下来 */
@@ -28,6 +30,7 @@ export type BrowserTabsProps = {
    它们由装配层放进下拉菜单；新建键在预算里被预留，因此永远留得住。
    拖动换序在行上接指针事件，落点由插入指示线表达（见 hooks/use-tab-drag）。 */
 export function BrowserTabs({
+	group,
 	tabs,
 	activeKey,
 	containerRef,
@@ -112,7 +115,7 @@ export function BrowserTabs({
 	}
 
 	return (
-		<div className="browser__tabs" ref={containerRef}>
+		<div className="browser__tabs" data-group={group} ref={containerRef}>
 			<div
 				className="browser__tabs-row"
 				role="tablist"
