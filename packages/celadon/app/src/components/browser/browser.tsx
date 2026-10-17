@@ -8,6 +8,7 @@ import { Tooltip } from '@/components/base/tooltip'
 import { useTranslation } from '@/platform/i18n'
 import type { BrowserSplit } from '@/stores/layout/columns'
 import { BrowserTabs } from './parts/tabs'
+import { SecondaryPane } from './parts/secondary-pane'
 import { useTabOverflow } from './hooks/use-tab-overflow'
 import type { BrowserTab } from './types'
 import { useSplitResize } from './hooks/use-split-resize'
@@ -65,8 +66,15 @@ export type BrowserProps = {
   children: ReactNode
   /** 第二个面板的当前页；只有分屏时才渲染 */
   secondary?: ReactNode
-  /** 第二个面板那一页的名字，画在它自己的小条上 */
-  secondaryLabel?: string
+  /** 第二个面板自己的一组标签与活动页：每组独立，互不引用 */
+  secondaryTabs?: BrowserTab[]
+  secondaryActiveKey?: string
+  onSecondaryActivate?: (key: string) => void
+  onSecondaryClose?: (key: string) => void
+  onSecondaryNew?: () => void
+  onSecondaryReorder?: (key: string, index: number) => void
+  /** 指针在第二个面板按下：把焦点栏切过去 */
+  onSecondaryFocus?: () => void
   /** 聚焦哪个面板（0 是第一个）：标签条的点击落在聚焦的那个面板上 */
   focusedPane?: number
   onFocusPane?: (pane: number) => void
@@ -105,7 +113,13 @@ export function Browser({
   secondaryKey,
   children,
   secondary = null,
-  secondaryLabel = '',
+  secondaryTabs = [],
+  secondaryActiveKey = '',
+  onSecondaryActivate = () => {},
+  onSecondaryClose = () => {},
+  onSecondaryNew = () => {},
+  onSecondaryReorder = () => {},
+  onSecondaryFocus = () => {},
   focusedPane = 0,
   onFocusPane = () => {},
   exclusive = false,
@@ -144,6 +158,11 @@ export function Browser({
   /* 标签条的溢出量在这里算：算出来的可见段交给标签条渲染，放不下的那些进菜单上段。
      放在这一层是因为菜单也在这一层，不必再从下面把结果报上来 */
   const { containerRef: tabsContainerRef, overflow } = useTabOverflow(tabs, activeKey)
+  /* 第二组标签条（左右分栏时进顶栏左段）的溢出按它自己的宽度算，与主栏互不影响 */
+  const { containerRef: secondaryTabsRef, overflow: secondaryOverflow } = useTabOverflow(
+    secondaryTabs,
+    secondaryActiveKey
+  )
   return (
     <aside
       className="browser"
@@ -227,7 +246,24 @@ export function Browser({
             </span>
           </span>
         ) : null}
+        {/* 左右分栏：新栏的标签条进顶栏左段，与主栏同一条基线；上下分栏时它在自己那一块顶部 */}
+        {split === 'columns' ? (
+          <div className="browser__bar-secondary" data-group="secondary">
+            <BrowserTabs
+              group="secondary"
+              tabs={secondaryTabs}
+              activeKey={secondaryActiveKey}
+              containerRef={secondaryTabsRef}
+              visibleKeys={secondaryOverflow.visibleKeys}
+              onActivate={onSecondaryActivate}
+              onClose={onSecondaryClose}
+              onNew={onSecondaryNew}
+              onReorder={onSecondaryReorder}
+            />
+          </div>
+        ) : null}
         <BrowserTabs
+          group="primary"
           tabs={tabs}
           activeKey={activeKey}
           containerRef={tabsContainerRef}
@@ -483,11 +519,26 @@ export function Browser({
             >
               <span className="browser__grip" aria-hidden="true" />
             </div>
-            <div className="browser__pane" data-focused={focusedPane === 1 || undefined} onPointerDown={() => onFocusPane(1)}>
-              {/* 第二个面板自己的小条：写出它绑的是哪一页，与第一个面板的内容区分开 */}
-              <div className="browser__pane-head">{secondaryLabel}</div>
-              <ScrollArea className="browser__page" size="medium" persistent>{secondary}</ScrollArea>
-            </div>
+            <SecondaryPane
+              tabs={secondaryTabs}
+              activeKey={secondaryActiveKey}
+              onActivate={onSecondaryActivate}
+              onClose={onSecondaryClose}
+              onNew={onSecondaryNew}
+              onReorder={onSecondaryReorder}
+              onFocus={onSecondaryFocus}
+              focused={focusedPane === 1}
+              /* 上下分栏时新栏自己画标签条；左右分栏时标签条在顶栏左段 */
+              showStrip={split === 'rows'}
+              /* 比例记的是主栏那一份，新栏取补出来的那一份 */
+              size={
+                split === 'rows'
+                  ? { blockSize: `${(1 - splitRatio) * 100}%` }
+                  : { inlineSize: `${(1 - splitRatio) * 100}%` }
+              }
+            >
+              {secondary}
+            </SecondaryPane>
           </>
         )}
       </div>
