@@ -44,6 +44,14 @@ export function AppLayout() {
      区别只在来源，视口驱动的这一档不写偏好。阈值取 token --nav-auto-collapse（972：导航区最小 + 内容区最小 + 侧栏最小 + 把手），
      即前两栏已经各自压到最小之后才轮到导航区收起（design/foundations.md F6）。 */
 	const narrow = useMediaQuery('(width <= 971px)')
+	/* 存下来的栏宽是偏好值：窗口放不下时按可用宽度收。否则列会被 max-inline-size 夹住，
+	   而栏内的定尺壳仍按存值画，左半边就被裁掉（把窗口拖窄之后，先前拖过的宽值还留着，就会这样）。 */
+	const [viewportWidth, setViewportWidth] = useState(() => window.innerWidth)
+	useEffect(() => {
+		const onResize = () => setViewportWidth(window.innerWidth)
+		window.addEventListener('resize', onResize)
+		return () => window.removeEventListener('resize', onResize)
+	}, [])
 	/* 继续压窄到主栏最小 + 次栏最小 + 把手（400 + 300 + 8），次栏也让不动了，整条收起（F6 的最后一步）。
 	   收掉的是次栏：正常态是标签浏览器，镜像态是内容区。 */
 	const narrowForSecondary = useMediaQuery('(width <= 707px)')
@@ -85,6 +93,10 @@ export function AppLayout() {
 	const navCollapsed = collapsed || narrow
 	const setBrowserSide = useColumnsStore((state) => state.setBrowserSide)
 	const navWidth = useColumnsStore((state) => state.navWidth)
+	/* 栏宽上限 = 窗口 − 导航区（收起时为 0）− 内容区最小 400 − 把手 8；下限是侧栏最小 300。
+	   取它和存值里的较小者，列与栏内的壳才用同一个数，不会一个被夹住、一个照旧。 */
+	const sideRoom = Math.max(300, viewportWidth - (navCollapsed ? 0 : (navWidth ?? 280)) - 400 - 8)
+	const browserWidthShown = browserWidth === null ? null : Math.min(browserWidth, sideRoom)
 	const setNavWidth = useColumnsStore((state) => state.setNavWidth)
 
 	const account = useAuthStore((state) => state.user)
@@ -245,8 +257,9 @@ export function AppLayout() {
 				side={browserSide}
 				collapsed={browserHidden}
 				primary={mirror}
-				/* 镜像态里本栏在窗口最左，导航区收起且平台有原生交通灯时，顶栏左端让出交通灯 */
-				barInset={mirror && navCollapsed && chrome.controls === 'native'}
+				/* 本栏落在窗口最左时，平台有原生交通灯就让顶栏左端让出红绿灯：
+				   面板独占时它是唯一一栏，镜像态里导航区收起时它也在最左 */
+				barInset={chrome.controls === 'native' && (exclusive || (mirror && navCollapsed))}
 				navKey={
 					mirror
 						? {
@@ -269,7 +282,7 @@ export function AppLayout() {
 				splitBlocked={splitBlocked}
 				splitRatio={splitRatio}
 				onSplitRatio={setSplitRatio}
-				width={browserWidth}
+				width={browserWidthShown}
 				onWidth={setBrowserWidth}
 				onSplit={(next) => {
 					/* 每次从单面板进分屏都从平分开始：上次拖过的比例会让点下去那一下跳 */

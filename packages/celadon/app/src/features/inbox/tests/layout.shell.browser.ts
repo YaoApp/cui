@@ -297,3 +297,45 @@ test('yields in order: content first, then the browser, then the navigation colu
 	await expect(page.locator('.layout')).toHaveAttribute('data-browser', 'collapsed')
 	await expect(columns(page).browser).toHaveCSS('inline-size', '0px')
 })
+
+test('keeps the clipped shell as wide as its column after the window narrows', async ({ page }) => {
+	await page.setViewportSize({ width: 1600, height: 900 })
+	await markSignedIn(page)
+	await page.goto('/app/inbox')
+	/* 先把标签浏览器拖宽，存下来的栏宽会大于窄窗口的上限 */
+	const edge = await page.locator('.browser__edge').boundingBox()
+	await page.mouse.move(edge!.x + edge!.width / 2, edge!.y + edge!.height / 2)
+	await page.mouse.down()
+	await page.mouse.move(edge!.x + edge!.width / 2 - 400, edge!.y + edge!.height / 2, { steps: 10 })
+	await page.mouse.up()
+	await page.waitForTimeout(400)
+	const wide = await page.evaluate(() => {
+		const column = document.querySelector('.layout > .browser')!.getBoundingClientRect()
+		const shell = document.querySelector('.browser__shell')!.getBoundingClientRect()
+		return { column: Math.round(column.left), shell: Math.round(shell.left), width: Math.round(column.width) }
+	})
+
+	/* 窗口压窄：列被上限夹住，栏内的定尺壳必须跟着，否则左半边会被裁掉 */
+	await page.setViewportSize({ width: 1295, height: 900 })
+	await page.waitForTimeout(600)
+	const narrow = await page.evaluate(() => {
+		const column = document.querySelector('.layout > .browser')!.getBoundingClientRect()
+		const shell = document.querySelector('.browser__shell')!.getBoundingClientRect()
+		const bar = document.querySelector('.browser__bar')!.getBoundingClientRect()
+		const tab = document.querySelector('.browser__tab')!.getBoundingClientRect()
+		return {
+			columnLeft: Math.round(column.left),
+			columnRight: Math.round(column.right),
+			shellLeft: Math.round(shell.left),
+			shellRight: Math.round(shell.right),
+			barLeft: Math.round(bar.left),
+			tabLeft: Math.round(tab.left)
+		}
+	})
+	expect(wide.width).toBeGreaterThan(700)
+	expect(narrow.shellLeft).toBe(narrow.columnLeft)
+	expect(narrow.shellRight).toBe(narrow.columnRight)
+	expect(narrow.barLeft).toBe(narrow.columnLeft)
+	/* 第一个标签整块在栏内：它的左缘不早于栏的左缘 */
+	expect(narrow.tabLeft).toBeGreaterThanOrEqual(narrow.columnLeft)
+})
