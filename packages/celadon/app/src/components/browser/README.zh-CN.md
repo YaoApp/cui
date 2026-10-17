@@ -59,9 +59,6 @@
 | `secondaryActiveKey` | `string` | 无 | 新栏的当前页。 |
 | `onSecondaryActivate` · `onSecondaryClose` · `onSecondaryNew` · `onSecondaryReorder` | 无 | 动作 | 只作用于新栏那一组。 |
 | `onSecondaryRefresh` · `onSecondaryCloseOthers` · `onSecondaryCloseAll` | 无 | 动作 | 新栏菜单里的三项，只作用于新栏。 |
-| `onSecondaryFocus` | `() => void` | 无 | 指针在新栏按下时把焦点切过去。 |
-| `focusedPane` | `number` | 无 | 聚焦哪个面板：面板底色的焦点指示与键盘落点都看它。 |
-| `onFocusPane` | `(pane: number) => void` | 无 | 面板被点中时交回编号。 |
 
 `BrowserTab`：`key`（页的稳定标识，页里换内容不变）· `label`（标签上的名字）· `closable`（是否画关闭键）· `icon`（可选，图形名；不给时按是否可关推）。
 

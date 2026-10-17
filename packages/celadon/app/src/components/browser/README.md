@@ -61,9 +61,6 @@ content come from the assembly layer, and the component reads no store.
 | `secondaryActiveKey` | `string` | none | The second pane's current page. |
 | `onSecondaryActivate` · `onSecondaryClose` · `onSecondaryNew` · `onSecondaryReorder` | — | actions | Apply to the second group only. |
 | `onSecondaryRefresh` · `onSecondaryCloseOthers` · `onSecondaryCloseAll` | — | actions | The three menu items of the second group; they apply to it only. |
-| `onSecondaryFocus` | `() => void` | none | Switches the focus to the second pane when the pointer presses inside it. |
-| `focusedPane` | `number` | none | Which pane has focus: the pane background's focus cue and the keyboard target both read it. |
-| `onFocusPane` | `(pane: number) => void` | none | Hands the pane number back when a pane is pressed. |
 
 `BrowserTab`: `key` (a stable page identity that survives a content change) · `label` (the name on the tab) ·
 `closable` (whether a close key is drawn) · `icon` (optional graphic name; without it the icon follows whether

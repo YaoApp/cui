@@ -18,9 +18,6 @@ export type SecondaryPaneProps = {
 	onReorder: (key: string, index: number) => void
 	/** 本栏标签的刷新、关闭其它、关闭全部，只作用于本栏 */
 	menuActions: Omit<TabMenuActions, 'onActivate' | 'onClose'>
-	/** 指针在本栏按下：把焦点栏切到这一栏 */
-	onFocus: () => void
-	focused: boolean
 	/** 上下分栏时标签条画在栏顶；左右分栏时标签条在顶栏，这里只画页面 */
 	showStrip: boolean
 	/** 本栏的尺寸：左右分栏给宽度、上下分栏给高度，取补出来的那一份 */
@@ -39,8 +36,6 @@ export function SecondaryPane({
 	onNew,
 	onReorder,
 	menuActions,
-	onFocus,
-	focused,
 	showStrip,
 	size,
 	children
@@ -50,12 +45,7 @@ export function SecondaryPane({
 	const actions: TabMenuActions = { onActivate, onClose, ...menuActions }
 	const contextTab = tabMenu ? (tabs.find((tab) => tab.key === tabMenu.key) ?? null) : null
 	return (
-		<div
-			className="browser__pane browser__pane--secondary"
-			data-focused={focused || undefined}
-			style={size}
-			onPointerDown={onFocus}
-		>
+		<div className="browser__pane browser__pane--secondary" style={size}>
 			{showStrip ? (
 				<div className="browser__pane-strip">
 					<BrowserTabs

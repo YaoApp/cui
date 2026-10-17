@@ -82,11 +82,6 @@ export type BrowserProps = {
   onSecondaryRefresh?: (key: string) => void
   onSecondaryCloseOthers?: (key: string) => void
   onSecondaryCloseAll?: () => void
-  /** 指针在第二个面板按下：把焦点栏切过去 */
-  onSecondaryFocus?: () => void
-  /** 聚焦哪个面板（0 是第一个）：标签条的点击落在聚焦的那个面板上 */
-  focusedPane?: number
-  onFocusPane?: (pane: number) => void
   /** 面板独占整扇窗口：导航区与内容区让位，只留这一栏（与窗口自身的最大化不是一件事） */
   exclusive?: boolean
   onExclusive?: () => void
@@ -131,9 +126,6 @@ export function Browser({
   onSecondaryRefresh,
   onSecondaryCloseOthers,
   onSecondaryCloseAll,
-  onSecondaryFocus = () => {},
-  focusedPane = 0,
-  onFocusPane = () => {},
   exclusive = false,
   onExclusive = () => {},
 }: BrowserProps) {
@@ -240,7 +232,7 @@ export function Browser({
           分界线句柄留在这一层外面，因此不会被裁掉（见 browser.less 的同名规则） */}
       <div className="browser__clip">
         <div className="browser__shell">
-      {/* 顶栏：空白处点右键开同一个下拉菜单（标签上的右键留给标签自己的菜单，第 13 条） */}
+      {/* 顶栏：空白处点右键开同一个下拉菜单；标签上的右键留给标签自己的菜单 */}
       <div
         className="browser__bar"
         style={barInset ? ({ "--bar-inset": "var(--traffic-lights-width)" } as CSSProperties) : undefined}
@@ -569,9 +561,7 @@ export function Browser({
       >
         <div
           className="browser__pane"
-          data-focused={focusedPane === 0 || undefined}
           data-sized={split === 'none' ? undefined : 'true'}
-          onPointerDown={() => onFocusPane(0)}
           style={
             split === 'none'
               ? undefined
@@ -628,8 +618,6 @@ export function Browser({
                 onCloseOthers: onSecondaryCloseOthers,
                 onCloseAll: onSecondaryCloseAll
               }}
-              onFocus={onSecondaryFocus}
-              focused={focusedPane === 1}
               /* 上下分栏时新栏自己画标签条；左右分栏时标签条在顶栏左段 */
               showStrip={split === 'rows'}
               /* 比例记的是主栏那一份，新栏取补出来的那一份 */
