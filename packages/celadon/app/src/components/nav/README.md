@@ -30,7 +30,7 @@ the product; entries, the current area and the account name all come from the as
 | `parts/footer/` | The foot row: the account menu on the left, 24 pixel shortcut icons on the right, pinned to the foot with `margin-block-start: auto`. |
 | `parts/list/` | The upper area's list container, rendering one row per entry. |
 | `parts/list/parts/item/` | One entry: icon, text, unread badge, current state. Renders a real link. |
-| `parts/menu/` | The find-back menu in the folded state, built on Base UI's `Menu` part. |
+| `parts/menu/` | The find-back menu in the folded state, built on Base UI's `Menu` part; it opens on click or keyboard activation, not on hover. |
 | `index.ts` | The module's public surface: `Nav`, `NavProps` and `NavItem`. |
 
 The four parts each have an `index.ts` that exports only their component and props type. There is **one**

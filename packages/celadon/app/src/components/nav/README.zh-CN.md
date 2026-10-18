@@ -26,7 +26,7 @@
 | `parts/footer/` | 底部一行：账户菜单在左，24 见方的快捷图标在右；`margin-block-start: auto` 钉在列底。 |
 | `parts/list/` | 上区列表容器，逐项渲染。 |
 | `parts/list/parts/item/` | 一个条目：图标、文字、未读角标、当前态。渲染真链接。 |
-| `parts/menu/` | 折叠态的找回菜单，用上游 `@base-ui/react` 的 `Menu` 部件。 |
+| `parts/menu/` | 折叠态的找回菜单，用上游 `@base-ui/react` 的 `Menu` 部件；点击或键盘激活才弹出，悬停不弹。 |
 | `index.ts` | 对外出口，即 `Nav`、`NavProps` 与 `NavItem`。 |
 
 四个部件各自一个 `index.ts`，只导出自己的组件与 props 类型。样式是**一份** `nav.less`，由 `nav.tsx` 引入：列容器与跨部件的状态规则（收起、折叠、贯通高度）在这里统一管，各部件自己的规则留在同一文件内按段落排布。

@@ -46,7 +46,7 @@ test.describe('导航列的交互', () => {
 		await expect(main).not.toHaveCSS('height', '0px')
 	})
 
-	test('折叠行的找回菜单：悬停可弹出，Esc 关闭；键盘进入时焦点交回触发元素', async ({ page }) => {
+	test('折叠行的找回菜单：点击弹出、悬停不弹，Esc 关闭；键盘进入时焦点交回触发元素', async ({ page }) => {
 		await page.mouse.move(140, 20)
 		await expect(page.locator(FOLD).first()).toHaveCSS('opacity', '1')
 		await page.locator(FOLD).first().click()
@@ -54,9 +54,12 @@ test.describe('导航列的交互', () => {
 		const trigger = page.locator('.nav__current').first()
 		await expect(trigger).toBeVisible()
 
-		/* 路径一：悬停弹出，Esc 关闭（这条路径下焦点从未进入菜单，不做焦点断言） */
-		await trigger.hover({ force: true })
+		/* 路径一：指针经过不弹（避免紧挨底部账户入口时误触），点击才弹，Esc 关闭 */
 		const menu = page.locator('.nav__menu')
+		await trigger.hover({ force: true })
+		await page.waitForTimeout(300)
+		await expect(menu).toBeHidden()
+		await trigger.click()
 		await expect(menu).toBeVisible({ timeout: 15000 })
 		await page.keyboard.press('Escape')
 		await expect(menu).toBeHidden()
