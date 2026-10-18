@@ -69,6 +69,21 @@ test('keeps a fixed width when the navigation column grows', async ({ page }) =>
   expect((await page.locator(POPUP).boundingBox())?.width).toBeCloseTo(320, 0)
 })
 
+test('keeps the footer name directly after the avatar', async ({ page }) => {
+  const avatar = page.locator('.nav__footer .avatar')
+  const name = page.locator('.nav__footer .user-menu__trigger-name')
+  await expect(name).toContainText('Mock OAuth User')
+
+  const avatarBox = (await avatar.boundingBox())!
+  const text = await name.evaluate((el) => {
+    const range = document.createRange()
+    range.selectNodeContents(el)
+    const box = range.getBoundingClientRect()
+    return { x: box.x, width: box.width }
+  })
+  expect(text.x).toBeCloseTo(avatarBox.x + avatarBox.width + 8, 0)
+})
+
 test('keeps a long name inside the footer trigger', async ({ page }) => {
   const trigger = page.locator(TRIGGER).first()
   const name = page.locator('.user-menu__trigger-name').first()
