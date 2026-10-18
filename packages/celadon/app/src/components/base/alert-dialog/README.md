@@ -29,6 +29,7 @@ unsaved page.
 | `onCancel` | `() => void` | none | Runs when the secondary action is chosen; without it the dialog only closes. |
 | `closeOnConfirm` | `boolean` | `true` | Whether to close after the primary action; pass `false` for an async action. |
 | `confirmDisabled` | `boolean` | `false` | Greys out the primary action while it runs. |
+| `cancelDisabled` | `boolean` | `false` | Greys out the secondary action while an async action runs. |
 | `className` | `string` | none | Extra class names. |
 | `children` | `ReactNode` | none | Anything extra to show. |
 

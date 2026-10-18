@@ -94,6 +94,18 @@ describe('UserMenu', () => {
     expect(onSignOut).toHaveBeenCalled()
   })
 
+  it('blocks both confirmation actions while sign-out is running', async () => {
+    const onSignOut = vi.fn(() => new Promise<boolean>(() => undefined))
+    setup({ onSignOut })
+    await userEvent.click(screen.getByRole('button', { name: /账户菜单/ }))
+    await userEvent.click(await screen.findByText('退出登录'))
+    await userEvent.click(within(screen.getByRole('alertdialog')).getByRole('button', { name: '退出登录' }))
+
+    const dialog = screen.getByRole('alertdialog')
+    expect(within(dialog).getByRole('button', { name: '正在退出…' })).toBeDisabled()
+    expect(within(dialog).getByRole('button', { name: '取消' })).toBeDisabled()
+  })
+
   it('shows a skeleton while loading', async () => {
     setup({ status: 'loading', name: '', plan: '' })
     await userEvent.click(screen.getByRole('button', { name: /账户菜单/ }))

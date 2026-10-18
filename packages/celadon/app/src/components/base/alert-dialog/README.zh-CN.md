@@ -27,6 +27,7 @@
 | `onCancel` | `() => void` | 无 | 选次操作时执行；不传则只关闭。 |
 | `closeOnConfirm` | `boolean` | `true` | 主操作后是否立即关闭；异步动作传 `false`，结果回来再关。 |
 | `confirmDisabled` | `boolean` | `false` | 主操作置灰，用于动作进行中。 |
+| `cancelDisabled` | `boolean` | `false` | 次操作置灰，用于异步动作进行中。 |
 | `className` | `string` | 无 | 追加类名。 |
 | `children` | `ReactNode` | 无 | 需要额外展示的内容。 |
 

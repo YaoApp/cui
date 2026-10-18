@@ -220,6 +220,7 @@ export function UserMenu({
         confirm={signingOut ? t('userMenu.signingOut') : t('userMenu.signOut')}
         closeOnConfirm={false}
         confirmDisabled={signingOut}
+        cancelDisabled={signingOut}
         onConfirm={() => {
           setSigningOut(true)
           setSignOutFailed(false)

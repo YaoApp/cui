@@ -23,6 +23,8 @@ export type AlertDialogProps = {
   closeOnConfirm?: boolean
   /** 确认键置灰（异步动作进行中）。 */
   confirmDisabled?: boolean
+  /** 取消键置灰（异步动作进行中，避免请求还在飞时关掉确认框）。 */
+  cancelDisabled?: boolean
   className?: string
   children?: ReactNode
 }
@@ -44,6 +46,7 @@ export function AlertDialog({
   onCancel,
   closeOnConfirm = true,
   confirmDisabled = false,
+  cancelDisabled = false,
   className,
   children,
 }: AlertDialogProps) {
@@ -62,7 +65,14 @@ export function AlertDialog({
             {children ? <div className="dialog__body">{children}</div> : null}
             <footer className="dialog__foot">
               <BaseAlertDialog.Close
-                render={<Button type="button" variant="ghost" onClick={onCancel} />}
+                render={
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={onCancel}
+                    disabled={cancelDisabled}
+                  />
+                }
               >
                 {cancel}
               </BaseAlertDialog.Close>
