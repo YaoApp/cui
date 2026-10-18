@@ -181,6 +181,17 @@ test('opens the settings window with the platform shortcut', async ({ page }) =>
   expect(await trigger.evaluate((el) => getComputedStyle(el).boxShadow)).toBe('none')
 })
 
+test('closes the account menu when the settings shortcut opens', async ({ page }) => {
+  const modifier = process.platform === 'darwin' ? 'Meta' : 'Control'
+  await page.locator(TRIGGER).click()
+  await expect(page.locator(POPUP)).toBeVisible()
+
+  await page.keyboard.press(`${modifier}+,`)
+  await expect(page.getByRole('dialog')).toBeVisible()
+  await expect(page.locator(POPUP)).toBeHidden()
+  await page.keyboard.press('Escape')
+})
+
 test('opens external links in a new page', async ({ page, context }) => {
   await page.locator(TRIGGER).click()
   const opened = context.waitForEvent('page')
