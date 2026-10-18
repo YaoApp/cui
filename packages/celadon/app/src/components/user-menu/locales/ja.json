@@ -1,0 +1,20 @@
+{
+  "userMenu.label": "アカウントメニュー",
+  "userMenu.profile": "プロフィールを開く",
+  "userMenu.signedOut": "未サインイン",
+  "userMenu.signIn": "サインイン",
+  "userMenu.retry": "再試行",
+  "userMenu.unavailable": "アカウントを利用できません",
+  "userMenu.usage": "使用量とアップグレード",
+  "userMenu.unit": "クレジット",
+  "userMenu.upgrade": "アップグレード",
+  "userMenu.settings": "設定",
+  "userMenu.team": "チーム",
+  "userMenu.home": "ホームページ",
+  "userMenu.help": "ヘルプ",
+  "userMenu.docs": "ドキュメント",
+  "userMenu.signOut": "サインアウト",
+  "userMenu.signOutTitle": "サインアウトしますか？",
+  "userMenu.signOutDescription": "続けるには再度サインインが必要です。",
+  "userMenu.cancel": "キャンセル"
+}

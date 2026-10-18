@@ -156,6 +156,7 @@ for (const lang of LANGS) {
    排除：locales/（语言包本身）· *.test.* / *.browser.* / *.agent.*（要用界面文字做断言）· *.d.ts（生成物）。 */
 const ALLOW_LITERALS = new Map([
   // ['app/src/features/<域>/<文件>.ts', '原因：这里是后端成品文本夹具，按 architecture/08-i18n.md §6② 原样显示、不翻译'],
+  ['app/src/data/user/mock.ts', '原因：套餐名属于服务端数据，mock 按接口返回的形状放成品文本，不进语言包'],
 ])
 const HAN_LITERAL = /[\u4e00-\u9fff]/
 const isExcludedCode = (name) =>

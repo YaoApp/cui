@@ -1,0 +1,20 @@
+{
+  "userMenu.label": "Account menu",
+  "userMenu.profile": "Open profile",
+  "userMenu.signedOut": "Not signed in",
+  "userMenu.signIn": "Sign in",
+  "userMenu.retry": "Retry",
+  "userMenu.unavailable": "Account unavailable",
+  "userMenu.usage": "Usage & Upgrade",
+  "userMenu.unit": "Credits",
+  "userMenu.upgrade": "Upgrade",
+  "userMenu.settings": "Settings",
+  "userMenu.team": "Team",
+  "userMenu.home": "Home page",
+  "userMenu.help": "Help",
+  "userMenu.docs": "Docs",
+  "userMenu.signOut": "Sign out",
+  "userMenu.signOutTitle": "Sign out?",
+  "userMenu.signOutDescription": "You will need to sign in again to continue.",
+  "userMenu.cancel": "Cancel"
+}

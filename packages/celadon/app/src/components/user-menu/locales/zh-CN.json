@@ -1,0 +1,20 @@
+{
+  "userMenu.label": "账户菜单",
+  "userMenu.profile": "打开个人资料",
+  "userMenu.signedOut": "未登录",
+  "userMenu.signIn": "登录",
+  "userMenu.retry": "重试",
+  "userMenu.unavailable": "账户不可用",
+  "userMenu.usage": "用量与升级",
+  "userMenu.unit": "积分",
+  "userMenu.upgrade": "升级",
+  "userMenu.settings": "设置",
+  "userMenu.team": "团队",
+  "userMenu.home": "首页",
+  "userMenu.help": "帮助",
+  "userMenu.docs": "文档",
+  "userMenu.signOut": "退出登录",
+  "userMenu.signOutTitle": "退出登录？",
+  "userMenu.signOutDescription": "退出后需要重新登录才能继续使用。",
+  "userMenu.cancel": "取消"
+}
