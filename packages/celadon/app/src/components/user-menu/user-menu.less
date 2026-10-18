@@ -1,12 +1,13 @@
 /* 账户菜单：底部一行的触发按钮与向上弹出的面板。
-   行高 32，身份段 56，菜单宽度由组件按导航列实测宽度写入内联样式。 */
+   行高 32，身份段 56，弹层宽度取 `--menu-width`。 */
 
 .user-menu__trigger {
 	box-sizing: border-box;
 	gap: var(--spacing-8);
 	min-inline-size: 0;
 	min-block-size: var(--spacing-32);
-	padding: 0 var(--spacing-4);
+	/* 左右不留内距：头像左缘与条目图标对齐，悬停底也从头像起画 */
+	padding: 0;
 	border-radius: var(--radius-small);
 	color: var(--text-secondary);
 }
