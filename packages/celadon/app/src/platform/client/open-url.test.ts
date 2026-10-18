@@ -22,6 +22,21 @@ describe('openUrl', () => {
     globalThis.open = original
   })
 
+  it('ignores addresses outside http and https', () => {
+    kind.value = 'web'
+    const open = vi.fn()
+    const original = globalThis.open
+    globalThis.open = open as unknown as typeof globalThis.open
+
+    openUrl('javascript:alert(1)')
+    openUrl('file:///etc/passwd')
+    openUrl('not a url')
+
+    expect(open).not.toHaveBeenCalled()
+    expect(openBrowser).not.toHaveBeenCalled()
+    globalThis.open = original
+  })
+
   it('hands the url to the host on the desktop', () => {
     kind.value = 'desktop'
     const open = vi.fn()
