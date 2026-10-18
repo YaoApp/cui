@@ -27,7 +27,7 @@ while a reference from a conversation opens a page in the third column.
 | `description` | `ReactNode` | none | Supporting text. |
 | `closeLabel` | `string` | none | Accessible name of the close key; the caller reads it from the language bundle. |
 | `footer` | `ReactNode` | none | The action area at the foot. |
-| `size` | `'form' \| 'page' \| 'full'` | `'form'` | Width step: the form step is 480, the page step takes the content column's readable cap, the full step fills the window with a 12 pixel margin. |
+| `size` | `'form' \| 'page' \| 'full'` | `'form'` | Width step: the form step is 480, the page step takes the content column's readable cap, the full step fills the window with a 24 pixel margin. |
 | `disablePointerDismissal` | `boolean` | `false` | When true an overlay click does not close it, for flows that must not be dismissed by accident. |
 | `initialFocus` | `boolean \| RefObject \| ((openType) => …)` | none | Where focus lands after opening; third-party controls such as human verification keep focus untouched. |
 | `className` | `string` | none | Extra class names. |

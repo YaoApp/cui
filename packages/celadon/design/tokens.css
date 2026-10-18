@@ -1499,9 +1499,10 @@
 .dialog--page {
   inline-size: min(100%, var(--dialog-width-wide));
 }
-/* 大尺寸档：四周只留 12，面板吃满其余空间；设置这类分区多、正文长的内容用它 */
+/* 大尺寸档：四周留 24，面板吃满其余空间；设置这类分区多、正文长的内容用它。
+   24 是面板内距同一档，窗口四边与面板内容之间因此是一层均匀的呼吸空间。 */
 .dialog__viewport--full {
-  padding: var(--spacing-12);
+  padding: var(--spacing-24);
 }
 .dialog--full {
   inline-size: 100%;

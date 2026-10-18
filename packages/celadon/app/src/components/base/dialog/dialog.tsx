@@ -6,7 +6,7 @@ import { Icon } from '@/components/base/icon'
 import './dialog.less'
 
 /** 面板宽度档：`form` 给表单与步骤（480），`page` 用来打开一整页内容（中栏可读宽），
-    `full` 用来装内容多的设置或工作台（四周留 12，面板占满其余空间）。 */
+    `full` 用来装内容多的设置或工作台（四周留 24，面板占满其余空间）。 */
 export type DialogSize = 'form' | 'page' | 'full'
 
 /** 打开弹窗的交互方式，取值与上游一致（上游该类型在它自己的工具包里，未随组件导出，这里照抄语义；
