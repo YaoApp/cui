@@ -29,7 +29,6 @@
 | `teamName` | `string` | 无 | 画团队徽标，并填在团队行右侧。 |
 | `usage` | `{ remaining: number \| null; upgradeUrl?: string }` | 无 | 余量用 `Intl.NumberFormat` 加本语言单位。 |
 | `shortcut` | `string` | 无 | 设置行右侧的快捷键，如 `⌘,` 或 `Ctrl+,`。 |
-| `width` | `number` | `264` | 弹层宽度；装配层按导航列实测宽度减 16 传入。 |
 | `variant` | `'footer' \| 'icon'` | `'footer'` | 底部一行带名字，列头只画头像。 |
 | `links` | `{ home, help, docs }` | 必填 | 三个外链地址。 |
 | `onOpenSettings` | `(section) => void` | 必填 | `profile` · `team` · `usage`。 |
@@ -41,6 +40,7 @@
 ## 行为
 
 - 向上弹出，间距 8；视口低于 560 像素时改为向下。
+- 弹层固定宽 `--menu-width`（320），不跟随导航列；只有很窄的视口下才按视口收窄。
 - 进场按 F4 的 `dropdown` 场景：200ms 减速，只动透明度与 0.98 的小缩放，缩放原点取定位器给的 `--transform-origin`；退场只淡出，120ms 加速。
 - 触发按钮不做按压缩放；菜单与按下同帧出现，缩放会像按到了第二件事。
 - `Esc` 关闭并把焦点还给触发按钮；点击外部或选中一项也关闭。

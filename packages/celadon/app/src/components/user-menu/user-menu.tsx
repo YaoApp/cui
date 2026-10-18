@@ -24,8 +24,6 @@ export type UserMenuProps = {
   usage?: { remaining: number | null; upgradeUrl?: string }
   /** 平台上设置的快捷键，如 `⌘,`；不传则不显示 */
   shortcut?: string
-  /** 菜单宽度（像素），由外侧按导航列实测宽度算好 */
-  width?: number
   /** 只影响触发按钮：底部一行带名字，内容列头只有头像 */
   variant?: 'footer' | 'icon'
   links: UserMenuLinks
@@ -49,7 +47,6 @@ export function UserMenu({
   teamName,
   usage,
   shortcut,
-  width = 264,
   variant = 'footer',
   links,
   onOpenSettings,
@@ -110,11 +107,7 @@ export function UserMenu({
             align={variant === 'footer' ? 'start' : 'end'}
             sideOffset={8}
           >
-            <BaseMenu.Popup
-              className='user-menu__popup'
-              style={{ inlineSize: `${width}px` }}
-              aria-label={t('userMenu.label')}
-            >
+            <BaseMenu.Popup className='user-menu__popup' aria-label={t('userMenu.label')}>
               {status === 'unavailable' ? (
                 <>
                   <UserMenuIdentity

@@ -31,7 +31,6 @@ not call any API.
 | `teamName` | `string` | none | Draws the team badge and fills the right side of the Team row. |
 | `usage` | `{ remaining: number \| null; upgradeUrl?: string }` | none | Remaining credits are formatted with `Intl.NumberFormat` plus the localised unit. |
 | `shortcut` | `string` | none | Shown on the Settings row, e.g. `⌘,` or `Ctrl+,`. |
-| `width` | `number` | `264` | Popup width; the assembly passes the live column width minus 16. |
 | `variant` | `'footer' \| 'icon'` | `'footer'` | Footer shows the name; the head trigger shows the avatar only. |
 | `links` | `{ home, help, docs }` | required | External addresses. |
 | `onOpenSettings` | `(section) => void` | required | `profile` · `team` · `usage`. |
@@ -43,6 +42,7 @@ not call any API.
 ## Behaviour
 
 - Opens upward with an 8 pixel gap; a viewport shorter than 560 pixels flips it downward.
+- The popup has a fixed `--menu-width` (320) and does not follow the navigation column; it only clamps to the viewport on very narrow screens.
 - Entrance follows the `dropdown` scene: 200ms decelerate, opacity plus a 0.98 scale from the `--transform-origin` the positioner provides; the exit only fades, 120ms accelerate.
 - The trigger does not scale on press; it opens the menu in the same frame, so a press effect would read as a second action.
 - `Esc` closes and returns focus to the trigger; clicking outside or choosing an item also closes.

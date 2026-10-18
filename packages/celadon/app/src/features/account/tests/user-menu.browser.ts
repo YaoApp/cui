@@ -26,6 +26,8 @@ test('opens from the footer, shows the mock account and closes on Escape', async
   await trigger.click()
   const popup = page.locator(POPUP)
   await expect(popup).toBeVisible()
+  await page.waitForTimeout(250)
+  expect((await popup.boundingBox())?.width).toBeCloseTo(320, 0)
   await expect(popup).toContainText('Mock OAuth User')
   await expect(popup).toContainText('体验版')
   await expect(popup).toContainText('用量')
@@ -46,6 +48,25 @@ test('opens from the footer, shows the mock account and closes on Escape', async
   await page.keyboard.press('Escape')
   await expect(popup).toBeHidden()
   await expect(trigger).toBeFocused()
+})
+
+test('keeps a fixed width when the navigation column grows', async ({ page }) => {
+  await page.locator(TRIGGER).click()
+  await page.waitForTimeout(250)
+  expect((await page.locator(POPUP).boundingBox())?.width).toBeCloseTo(320, 0)
+  await page.keyboard.press('Escape')
+
+  const grip = page.locator('.nav__resize')
+  const box = await grip.boundingBox()
+  await page.mouse.move((box?.x ?? 0) + (box?.width ?? 0) / 2, 300)
+  await page.mouse.down()
+  await page.mouse.move(420, 300, { steps: 8 })
+  await page.mouse.up()
+  await page.waitForTimeout(300)
+
+  await page.locator(TRIGGER).click()
+  await page.waitForTimeout(250)
+  expect((await page.locator(POPUP).boundingBox())?.width).toBeCloseTo(320, 0)
 })
 
 test('opens the settings window from the identity row and switches sections', async ({ page }) => {

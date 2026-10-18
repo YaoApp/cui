@@ -126,7 +126,6 @@ export function AppLayout() {
 	})
 	const menuLinks = accountLinks(i18n.language)
 	const menuShortcut = client.os === 'macos' ? '⌘,' : 'Ctrl+,'
-	const menuWidth = navCollapsed ? 264 : (navWidth ?? 280) - 16
 
 	/* 设置是标准入口：菜单里显示快捷键，这里让它真的可用；输入控件里不拦截 */
 	useEffect(() => {
@@ -168,10 +167,8 @@ export function AppLayout() {
 		onSignIn: () => navigate('/login'),
 		onRetry: accountMenu.retry
 	}
-	const userMenu = <UserMenu {...accountMenuProps} width={menuWidth} variant='footer' />
-	const headUserMenu = navCollapsed ? (
-		<UserMenu {...accountMenuProps} width={264} variant='icon' />
-	) : undefined
+	const userMenu = <UserMenu {...accountMenuProps} variant='footer' />
+	const headUserMenu = navCollapsed ? <UserMenu {...accountMenuProps} variant='icon' /> : undefined
 	const tabs = useTabsStore((state) => state.tabs)
 	const activeKey = useTabsStore((state) => state.activeKey)
 	const openBlankTab = useTabsStore((state) => state.openBlank)
