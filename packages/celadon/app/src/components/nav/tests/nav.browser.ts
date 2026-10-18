@@ -46,18 +46,17 @@ test.describe('导航列的交互', () => {
 		await expect(main).not.toHaveCSS('height', '0px')
 	})
 
-	test('用户区与条目图标、展开键按同一内距对齐，快捷图标间留一档 8', async ({ page }) => {
+	test('用户区头像中线与品牌标志对齐，右侧图标与展开键对齐，快捷图标间留一档 8', async ({ page }) => {
 		const box = async (selector: string) => (await page.locator(selector).first().boundingBox())!
 		const footer = await box('.nav__footer')
 		const avatar = await box('.user-menu__trigger .avatar')
-		const navIcon = await box('.nav__link svg')
 		const shortcuts = page.locator('.nav__shortcut')
 		const workspace = (await shortcuts.nth(0).boundingBox())!
 		const computer = (await shortcuts.nth(1).boundingBox())!
 
-		/* 头像左缘与条目图标左缘对齐；两侧留白都取 12 */
-		expect(avatar.x).toBeCloseTo(navIcon.x, 0)
-		expect(avatar.x - footer.x).toBeCloseTo(12, 0)
+		/* 品牌标志 24 宽、左缘 16（列内 8 + 品牌行内距 8），中线 28；头像 32 宽，中线也应落在 28 */
+		expect(avatar.x + avatar.width / 2).toBeCloseTo(28, 0)
+		expect(avatar.x - footer.x).toBeCloseTo(4, 0)
 		expect(footer.x + footer.width - (computer.x + computer.width)).toBeCloseTo(12, 0)
 		expect(computer.x - (workspace.x + workspace.width)).toBeCloseTo(8, 0)
 
