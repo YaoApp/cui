@@ -23,7 +23,7 @@
 | `parts/brand/` | 品牌行：标志与产品名，两端在 `controls` 不为 `none` 时画在头部下方一行。 |
 | `parts/main/` | 上区主导航：内块（分区名与折叠键）与六项列表。折叠时整段不占高度，列表仍在结构里由动画收起。 |
 | `parts/scene/` | 下区：二级导航插槽；上区折叠时这一区顶上「当前」那一行与展开键。 |
-| `parts/footer/` | 底部一行：头像与名字在左，快捷图标在右；`margin-block-start: auto` 钉在列底。 |
+| `parts/footer/` | 底部一行：账户菜单在左，24 见方的快捷图标在右；`margin-block-start: auto` 钉在列底。 |
 | `parts/list/` | 上区列表容器，逐项渲染。 |
 | `parts/list/parts/item/` | 一个条目：图标、文字、未读角标、当前态。渲染真链接。 |
 | `parts/menu/` | 折叠态的找回菜单，用上游 `@base-ui/react` 的 `Menu` 部件。 |
@@ -39,7 +39,7 @@
 | `shortcuts` | `NavItem[]` | 无 | 底部一行的快捷图标，与主导航里对应条目是同一份内容。 |
 | `scene` | `I18nKey` | 无 | 「当前 · 场景」里的场景名。没有场景时传 `shell.navigation.scene.none`。 |
 | `sceneIcon` | `IconId` | 无 | 场景图标，画在「当前」那一行的最前。 |
-| `accountName` | `string` | 无 | 底部一行的名字，取不到会话用户时由装配层给占位词。 |
+| `userMenu` | `ReactNode` | 无 | 底部一行的账户菜单（触发按钮与弹层都由装配层给）；不传时只画快捷图标。 |
 | `navWidth` | `number \| null` | `null` | 存下来的列宽；`null` 表示用缺省值。 |
 | `onNavWidth` | `(width: number \| null) => void` | 无 | 拖动结束或键盘调整后的列宽写回。 |
 | `collapsed` | `boolean` | 无 | 整列是否收起。取值由调用方持有，组件不自己存偏好。 |
@@ -51,7 +51,7 @@
 
 部件级 props：`NavHeader` 取 `mainFolded` · `onToggle` · `onToggleMain`；`NavMain` 取 `items` · `folded` · `onSelect`；
 `NavScene` 取 `items` · `currentLabel` · `sceneIcon` · `folded` · `columnWidth` · `onSelect` · `onUnfold` · `children`；
-`NavFooter` 取 `name` · `shortcuts` · `onSelect`；`NavList` 取 `items` · `label` · `onSelect`；
+`NavFooter` 取 `menu` · `shortcuts` · `onSelect`；`NavList` 取 `items` · `label` · `onSelect`；
 `NavItemRow` 取 `item` · `onSelect`；`NavMenu` 取 `items` · `currentLabel` · `sceneIcon` · `columnWidth` · `onSelect`。
 
 `NavItem` 的字段：

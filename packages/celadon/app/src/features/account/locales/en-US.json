@@ -1,0 +1,9 @@
+{
+  "account.settings.title": "Settings",
+  "account.settings.close": "Close settings",
+  "account.settings.menu": "Settings sections",
+  "account.settings.section.profile": "Profile",
+  "account.settings.section.team": "Team",
+  "account.settings.section.usage": "Usage & plan",
+  "account.settings.placeholder": "Content follows in the next round."
+}

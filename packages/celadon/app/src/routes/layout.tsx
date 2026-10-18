@@ -4,10 +4,18 @@ import { Outlet, useLocation, useNavigate } from 'react-router'
 import { Browser, TabPage, type BrowserTab } from '@/components/browser'
 import { Content, type HeadKey } from '@/components/content'
 import { Nav, type NavItem } from '@/components/nav'
-import { useAuthStore } from '@/features/auth/auth.store'
+import { UserMenu, type UserMenuSection } from '@/components/user-menu'
+import { useAccountMenu } from '@/features/account/hooks/use-account-menu'
+import { accountLinks } from '@/features/account/links'
+import { SettingsShell } from '@/features/account/settings-shell'
+import { useSignOut } from '@/features/auth/hooks/use-sign-out'
+import { useAuthMode, withMode } from '@/features/auth/hooks/use-auth-mode'
+import { signedIn } from '@/features/auth/session-marker'
+import { clearLocalSession } from '@/features/auth/sign-out'
+import { accountMockEnabled } from '@/data/user/mock'
 import { useLandingRecord } from '@/features/auth/hooks/use-landing-record'
 import { InboxNav } from '@/features/inbox'
-import { client, useWindowChrome } from '@/platform/client'
+import { client, openUrl, useWindowChrome } from '@/platform/client'
 import { useMediaQuery } from '@/platform/client/use-media-query'
 import type { I18nKey } from '@/platform/i18n/i18n-types'
 import type { IconId } from '@/platform/icons'
@@ -45,7 +53,7 @@ function sideWidthReading(): number {
 /* 三栏外壳：导航栏 | 内容区 | 标签浏览器。三栏的布局事实与标签集都在 `stores/`，
    这一层是唯一读它们的地方 —— 组件只收 props（见 architecture/03-boundaries.md §2）。 */
 export function AppLayout() {
-	const { t } = useTranslation()
+	const { t, i18n } = useTranslation()
 	const location = useLocation()
 	const navigate = useNavigate()
 	useLandingRecord(location.pathname, location.search)
@@ -109,7 +117,60 @@ export function AppLayout() {
 	const browserWidthShown = Math.min(browserWidth ?? sideWidthReading(), sideRoom)
 	const setNavWidth = useColumnsStore((state) => state.setNavWidth)
 
-	const account = useAuthStore((state) => state.user)
+	const accountMenu = useAccountMenu(signedIn())
+	const { signOut: signOutSession } = useSignOut()
+	const authMode = useAuthMode()
+	const [settings, setSettings] = useState<{ open: boolean; section: UserMenuSection }>({
+		open: false,
+		section: 'profile',
+	})
+	const menuLinks = accountLinks(i18n.language)
+	const menuShortcut = client.os === 'macos' ? '⌘,' : 'Ctrl+,'
+	const menuWidth = navCollapsed ? 264 : (navWidth ?? 280) - 16
+
+	/* 设置是标准入口：菜单里显示快捷键，这里让它真的可用；输入控件里不拦截 */
+	useEffect(() => {
+		const onKeyDown = (event: KeyboardEvent) => {
+			if (!(event.metaKey || event.ctrlKey) || event.key !== ',') return
+			const target = event.target as HTMLElement | null
+			const tag = target?.tagName
+			if (target?.isContentEditable || tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return
+			event.preventDefault()
+			setSettings({ open: true, section: 'profile' })
+		}
+		window.addEventListener('keydown', onKeyDown)
+		return () => window.removeEventListener('keydown', onKeyDown)
+	}, [])
+
+	const openAccountSettings = (section: UserMenuSection) => setSettings({ open: true, section })
+
+	const signOutAccount = async () => {
+		const done = await signOutSession()
+		if (done) return
+		/* mock 打开时本机没有真实会话，服务端退出必然失败；收拾本机记录后回登录页 */
+		if (!accountMockEnabled()) return
+		clearLocalSession()
+		navigate(withMode('/login', authMode), { replace: true })
+	}
+
+	const accountMenuProps = {
+		status: accountMenu.status,
+		name: accountMenu.name,
+		plan: accountMenu.plan,
+		avatar: accountMenu.avatar,
+		teamName: accountMenu.teamName,
+		usage: accountMenu.usage,
+		shortcut: menuShortcut,
+		links: menuLinks,
+		onOpenSettings: openAccountSettings,
+		onOpenExternal: openUrl,
+		onSignOut: () => void signOutAccount(),
+		onSignIn: () => navigate('/login')
+	}
+	const userMenu = <UserMenu {...accountMenuProps} width={menuWidth} variant='footer' />
+	const headUserMenu = navCollapsed ? (
+		<UserMenu {...accountMenuProps} width={264} variant='icon' />
+	) : undefined
 	const tabs = useTabsStore((state) => state.tabs)
 	const activeKey = useTabsStore((state) => state.activeKey)
 	const openBlankTab = useTabsStore((state) => state.openBlank)
@@ -301,7 +362,7 @@ export function AppLayout() {
 				shortcuts={SHORTCUTS.map(mark)}
 				scene={scene}
 				sceneIcon={current?.icon ?? 'i-apps'}
-				accountName={account?.name ?? account?.account ?? t('shell.navigation.account.placeholder')}
+				userMenu={userMenu}
 				collapsed={collapsed || narrow}
 				onToggle={toggleNav}
 				mainFolded={mainFolded}
@@ -317,6 +378,7 @@ export function AppLayout() {
 				navCollapsed={navCollapsed}
 				lead={contentLead}
 				trail={contentTrail}
+				trailing={headUserMenu}
 				hidden={contentHidden}
 			>
 				<Outlet />
@@ -410,6 +472,12 @@ export function AppLayout() {
 			>
 				{renderTab(active)}
 			</Browser>
+			<SettingsShell
+				open={settings.open}
+				section={settings.section}
+				onOpenChange={(open) => setSettings((prev) => ({ ...prev, open }))}
+				onSection={(section) => setSettings((prev) => ({ ...prev, section }))}
+			/>
 		</div>
 	)
 }

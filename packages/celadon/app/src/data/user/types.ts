@@ -252,3 +252,29 @@ export type JsonWebKey = {
 export type Jwks = {
   keys: JsonWebKey[]
 }
+
+/* ===== 账户菜单（资料 · 用量）===== */
+
+/** 当前账号在界面上的展示资料。字段取引擎 `GET /user/profile` 的常用子集，缺的按 mock 补。 */
+export type AccountProfile = {
+  user_id: string
+  name: string
+  email?: string
+  avatar?: string
+  /** 团队账号才有；个人账号为空。 */
+  team?: {
+    team_id?: string
+    name: string
+    plan?: string
+  }
+}
+
+/** 账号的套餐与余量。 */
+export type AccountUsage = {
+  /** 套餐名，展示原样（如 Free、Team、体验版）。 */
+  plan: string
+  /** 剩余额度；取不到时为 null。 */
+  remaining: number | null
+  /** 升级或购买页地址；没有时菜单不画升级按钮。 */
+  upgradeUrl?: string
+}

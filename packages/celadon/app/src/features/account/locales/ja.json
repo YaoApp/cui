@@ -1,0 +1,9 @@
+{
+  "account.settings.title": "設定",
+  "account.settings.close": "設定を閉じる",
+  "account.settings.menu": "設定セクション",
+  "account.settings.section.profile": "プロフィール",
+  "account.settings.section.team": "チーム",
+  "account.settings.section.usage": "使用量とプラン",
+  "account.settings.placeholder": "内容は次のラウンドで追加します。"
+}
