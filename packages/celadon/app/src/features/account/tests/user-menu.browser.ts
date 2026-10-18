@@ -78,13 +78,13 @@ test('opens the settings window from the identity row and switches sections', as
   await expect(dialog.getByRole('heading', { name: '个人资料' })).toBeVisible()
   await page.waitForTimeout(300)
 
-  /* full 档：四周留 24，面板吃满窗口其余空间 */
+  /* full 档：四周留 48，面板吃满窗口其余空间 */
   const viewport = page.viewportSize()!
   const dialogBox = await dialog.boundingBox()
-  expect(dialogBox?.x).toBeCloseTo(24, 0)
-  expect(dialogBox?.y).toBeCloseTo(24, 0)
-  expect(dialogBox?.width).toBeCloseTo(viewport.width - 48, 0)
-  expect(dialogBox?.height).toBeCloseTo(viewport.height - 48, 0)
+  expect(dialogBox?.x).toBeCloseTo(48, 0)
+  expect(dialogBox?.y).toBeCloseTo(48, 0)
+  expect(dialogBox?.width).toBeCloseTo(viewport.width - 96, 0)
+  expect(dialogBox?.height).toBeCloseTo(viewport.height - 96, 0)
 
   await dialog.getByRole('button', { name: '团队管理' }).click()
   await expect(dialog.getByRole('heading', { name: '团队管理' })).toBeVisible()
