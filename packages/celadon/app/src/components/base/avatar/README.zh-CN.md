@@ -43,6 +43,7 @@
 
 - 颜色只取 token：`--brand`、`--brand-text`、`--brand-soft`、`--brand-ink`。
 - 徽标外圈取两个 `--border-width` 的 `--background-surface`，让两层圆分开。
+- 首字母与徽标字取 `--line-height-none`（1）；沿用 20px 行高时，16 的徽标里字形会低 4px，拉丁与中日文都一样。
 - 不写字面尺寸：三档用 `--spacing-24`、`--spacing-32` 与两倍 `--spacing-32`。
 
 ## 验证方式

@@ -44,6 +44,7 @@ It is presentational only: it knows nothing about accounts, teams or requests.
 
 - Colours come from tokens only: `--brand`, `--brand-text`, `--brand-soft`, `--brand-ink`.
 - The badge ring is two border widths of `--background-surface`, so the two circles stay visually separate.
+- The initial and the badge letter use `--line-height-none` (1); with a 20px line box the glyph sits 4px low in a 16px badge, for Latin and CJK alike.
 - No literal sizes: the three steps use `--spacing-24`, `--spacing-32` and twice `--spacing-32`.
 
 ## Verification
