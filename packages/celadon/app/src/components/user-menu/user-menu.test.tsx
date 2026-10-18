@@ -9,7 +9,7 @@ function setup(props: Partial<UserMenuProps> = {}) {
   const handlers = {
     onOpenSettings: vi.fn(),
     onOpenExternal: vi.fn(),
-    onSignOut: vi.fn(),
+    onSignOut: vi.fn().mockResolvedValue(true),
     onSignIn: vi.fn(),
     onRetry: vi.fn(),
   }
@@ -32,7 +32,7 @@ function setup(props: Partial<UserMenuProps> = {}) {
 describe('UserMenu', () => {
   it('shows the identity, plan, usage and team after opening', async () => {
     setup()
-    await userEvent.click(screen.getByRole('button', { name: '账户菜单' }))
+    await userEvent.click(screen.getByRole('button', { name: /账户菜单/ }))
 
     expect(await screen.findByText('体验版')).toBeVisible()
     expect(screen.getByText('902,467 积分')).toBeVisible()
@@ -42,21 +42,21 @@ describe('UserMenu', () => {
 
   it('opens settings at the section chosen', async () => {
     const handlers = setup()
-    await userEvent.click(screen.getByRole('button', { name: '账户菜单' }))
+    await userEvent.click(screen.getByRole('button', { name: /账户菜单/ }))
     await userEvent.click(await screen.findByText('团队'))
     expect(handlers.onOpenSettings).toHaveBeenCalledWith('team')
   })
 
   it('hands external links to the opener', async () => {
     const handlers = setup()
-    await userEvent.click(screen.getByRole('button', { name: '账户菜单' }))
+    await userEvent.click(screen.getByRole('button', { name: /账户菜单/ }))
     await userEvent.click(await screen.findByText('首页'))
     expect(handlers.onOpenExternal).toHaveBeenCalledWith(links.home)
   })
 
   it('opens the upgrade url from the inverted small button', async () => {
     const handlers = setup()
-    await userEvent.click(screen.getByRole('button', { name: '账户菜单' }))
+    await userEvent.click(screen.getByRole('button', { name: /账户菜单/ }))
     const upgrade = await screen.findByText('升级')
     expect(upgrade.closest('button')).toHaveClass('button--inverse', 'button--small')
 
@@ -66,7 +66,7 @@ describe('UserMenu', () => {
 
   it('asks before signing out and only then calls the handler', async () => {
     const handlers = setup()
-    await userEvent.click(screen.getByRole('button', { name: '账户菜单' }))
+    await userEvent.click(screen.getByRole('button', { name: /账户菜单/ }))
     await userEvent.click(await screen.findByText('退出登录'))
 
     expect(await screen.findByText('退出登录？')).toBeVisible()
@@ -76,33 +76,48 @@ describe('UserMenu', () => {
     await userEvent.click(within(dialog).getByRole('button', { name: '取消' }))
     expect(handlers.onSignOut).not.toHaveBeenCalled()
 
-    await userEvent.click(screen.getByRole('button', { name: '账户菜单' }))
+    await userEvent.click(screen.getByRole('button', { name: /账户菜单/ }))
     await userEvent.click(await screen.findByText('退出登录'))
     await userEvent.click(within(screen.getByRole('alertdialog')).getByRole('button', { name: '退出登录' }))
     expect(handlers.onSignOut).toHaveBeenCalled()
   })
 
+  it('keeps the confirmation open and reports a failed sign-out', async () => {
+    const onSignOut = vi.fn().mockResolvedValue(false)
+    setup({ onSignOut })
+    await userEvent.click(screen.getByRole('button', { name: /账户菜单/ }))
+    await userEvent.click(await screen.findByText('退出登录'))
+    await userEvent.click(within(screen.getByRole('alertdialog')).getByRole('button', { name: '退出登录' }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('退出失败，请重试。')
+    expect(screen.getByRole('alertdialog')).toBeVisible()
+    expect(onSignOut).toHaveBeenCalled()
+  })
+
   it('shows a skeleton while loading', async () => {
     setup({ status: 'loading', name: '', plan: '' })
-    await userEvent.click(screen.getByRole('button', { name: '账户菜单' }))
+    await userEvent.click(screen.getByRole('button', { name: /账户菜单/ }))
     expect(await screen.findByText('用量')).toBeVisible()
     expect(screen.queryByText('Mock OAuth User')).toBeNull()
   })
 
   it('keeps the links when the account is unavailable and retries from the identity row', async () => {
     const handlers = setup({ status: 'unavailable' })
-    await userEvent.click(screen.getByRole('button', { name: '账户菜单' }))
-    expect(await screen.findByText('账户不可用')).toBeVisible()
-    expect(screen.getByText('首页')).toBeVisible()
-    expect(screen.queryByText('设置')).toBeNull()
+    await userEvent.click(screen.getByRole('button', { name: /账户菜单/ }))
+    const menu = await screen.findByRole('menu')
+    expect(within(menu).getByText('账户不可用')).toBeVisible()
+    expect(within(menu).getByText('重试')).toBeVisible()
+    expect(within(menu).getByText('首页')).toBeVisible()
+    expect(within(menu).getByText('设置')).toBeVisible()
+    expect(within(menu).getByText('退出登录')).toBeVisible()
 
-    await userEvent.click(screen.getByText('账户不可用'))
+    await userEvent.click(within(menu).getByText('账户不可用'))
     expect(handlers.onRetry).toHaveBeenCalled()
   })
 
   it('goes straight to sign in when signed out', async () => {
     const handlers = setup({ status: 'signedOut', name: '' })
-    const button = screen.getByRole('button', { name: '登录' })
+    const button = screen.getByRole('button', { name: '未登录，去登录' })
     expect(button).toHaveTextContent('未登录')
     await userEvent.click(button)
     expect(handlers.onSignIn).toHaveBeenCalled()

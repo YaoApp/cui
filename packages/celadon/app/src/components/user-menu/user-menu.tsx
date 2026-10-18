@@ -28,10 +28,14 @@ export type UserMenuProps = {
   variant?: 'footer' | 'icon'
   /** 设置窗按 Esc 关闭后，触发按钮承接焦点但不画焦点环，等下一次操作恢复 */
   silentFocus?: boolean
+  /** 受控开合：装配层在设置窗打开或导航收起时把它关掉；不传则组件自管 */
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
   links: UserMenuLinks
   onOpenSettings: (section: UserMenuSection) => void
   onOpenExternal: (url: string) => void
-  onSignOut: () => void
+  /** 返回 true 表示服务端已吊销并可以离开；false 时确认框留在原地显示失败 */
+  onSignOut: () => Promise<boolean>
   onSignIn: () => void
   /** 资料取失败时身份段变成「重试」入口 */
   onRetry?: () => void
@@ -51,6 +55,8 @@ export function UserMenu({
   shortcut,
   variant = 'footer',
   silentFocus = false,
+  open,
+  onOpenChange,
   links,
   onOpenSettings,
   onOpenExternal,
@@ -60,6 +66,8 @@ export function UserMenu({
 }: UserMenuProps) {
   const { t, i18n } = useTranslation()
   const [confirming, setConfirming] = useState(false)
+  const [signingOut, setSigningOut] = useState(false)
+  const [signOutFailed, setSignOutFailed] = useState(false)
 
   const signedOut = status === 'signedOut'
   const loading = status === 'loading'
@@ -69,7 +77,11 @@ export function UserMenu({
       ? null
       : `${new Intl.NumberFormat(i18n.language).format(usage.remaining)} ${t('userMenu.unit')}`
 
-  const triggerLabel = signedOut ? t('userMenu.signIn') : t('userMenu.label')
+  const triggerLabel = signedOut
+    ? t('userMenu.signInLabel')
+    : name
+      ? `${t('userMenu.label')}, ${name}`
+      : t('userMenu.label')
 
   if (signedOut) {
     return (
@@ -88,7 +100,7 @@ export function UserMenu({
 
   return (
     <>
-      <BaseMenu.Root>
+      <BaseMenu.Root {...(open === undefined ? {} : { open, onOpenChange })}>
         <BaseMenu.Trigger
           className={`user-menu__trigger user-menu__trigger--${variant}${silentFocus ? ' user-menu__trigger--silent-focus' : ''}`}
           aria-label={triggerLabel}
@@ -99,7 +111,12 @@ export function UserMenu({
             loading ? (
               <span className='user-menu__skeleton user-menu__skeleton--name' aria-hidden='true' />
             ) : (
-              <span className='user-menu__trigger-name'>{name}</span>
+              <span
+                className='user-menu__trigger-name'
+                title={status === 'unavailable' ? t('userMenu.unavailable') : name || undefined}
+              >
+                {status === 'unavailable' ? t('userMenu.unavailable') : name}
+              </span>
             )
           ) : null}
         </BaseMenu.Trigger>
@@ -115,15 +132,31 @@ export function UserMenu({
                 <>
                   <UserMenuIdentity
                     name={t('userMenu.unavailable')}
-                    plan=''
+                    plan={t('userMenu.retry')}
                     team={team}
                     label={t('userMenu.retry')}
                     onSelect={() => onRetry?.()}
                   />
                   <UserMenuSeparator />
+                  <UserMenuItem
+                    icon='i-nav-settings'
+                    label={t('userMenu.settings')}
+                    trailing={shortcut}
+                    onSelect={() => onOpenSettings('profile')}
+                  />
+                  <UserMenuSeparator />
                   <UserMenuItem icon='i-home' label={t('userMenu.home')} external onSelect={() => onOpenExternal(links.home)} />
                   <UserMenuItem icon='i-nav-help' label={t('userMenu.help')} external onSelect={() => onOpenExternal(links.help)} />
                   <UserMenuItem icon='i-book' label={t('userMenu.docs')} external onSelect={() => onOpenExternal(links.docs)} />
+                  <UserMenuSeparator />
+                  <UserMenuItem
+                    icon='i-nav-logout'
+                    label={t('userMenu.signOut')}
+                    onSelect={() => {
+                      setSignOutFailed(false)
+                      setConfirming(true)
+                    }}
+                  />
                 </>
               ) : (
                 <>
@@ -155,7 +188,7 @@ export function UserMenu({
                   <UserMenuItem
                     icon='i-nav-team'
                     label={t('userMenu.team')}
-                    trailing={teamName}
+                    trailing={teamName ? <span title={teamName}>{teamName}</span> : undefined}
                     onSelect={() => onOpenSettings('team')}
                   />
                   <UserMenuSeparator />
@@ -163,7 +196,14 @@ export function UserMenu({
                   <UserMenuItem icon='i-nav-help' label={t('userMenu.help')} external onSelect={() => onOpenExternal(links.help)} />
                   <UserMenuItem icon='i-book' label={t('userMenu.docs')} external onSelect={() => onOpenExternal(links.docs)} />
                   <UserMenuSeparator />
-                  <UserMenuItem icon='i-nav-logout' label={t('userMenu.signOut')} onSelect={() => setConfirming(true)} />
+                  <UserMenuItem
+                    icon='i-nav-logout'
+                    label={t('userMenu.signOut')}
+                    onSelect={() => {
+                      setSignOutFailed(false)
+                      setConfirming(true)
+                    }}
+                  />
                 </>
               )}
             </BaseMenu.Popup>
@@ -177,12 +217,25 @@ export function UserMenu({
         title={t('userMenu.signOutTitle')}
         description={t('userMenu.signOutDescription')}
         cancel={t('userMenu.cancel')}
-        confirm={t('userMenu.signOut')}
+        confirm={signingOut ? t('userMenu.signingOut') : t('userMenu.signOut')}
+        closeOnConfirm={false}
+        confirmDisabled={signingOut}
         onConfirm={() => {
-          setConfirming(false)
-          onSignOut()
+          setSigningOut(true)
+          setSignOutFailed(false)
+          void onSignOut().then((done) => {
+            setSigningOut(false)
+            if (done) setConfirming(false)
+            else setSignOutFailed(true)
+          })
         }}
-      />
+      >
+        {signOutFailed ? (
+          <p className='user-menu__sign-out-error' role='alert'>
+            {t('userMenu.signOutFailed')}
+          </p>
+        ) : null}
+      </AlertDialog>
     </>
   )
 }

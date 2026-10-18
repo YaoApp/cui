@@ -19,6 +19,8 @@ import * as api from './api'
 import * as domain from './index'
 import { userKeys } from './keys'
 import {
+  accountProfileQuery,
+  accountUsageQuery,
   deviceAuthorizeQuery,
   deviceFlowStartQuery,
   deviceFlowTokenQuery,
@@ -36,6 +38,10 @@ import {
 } from './queries'
 
 beforeEach(() => {
+  vi.unstubAllEnvs()
+  /* 本机 .env.local 可能开着账户 mock；单测默认走真实分支，需要 mock 的用例自己打开 */
+  vi.stubEnv('VITE_ACCOUNT_MOCK', '0')
+  vi.stubEnv('VITE_ACCOUNT_MOCK_ERROR', '')
   sendMock.mockReset()
   signOutMock.mockReset()
 })
@@ -217,6 +223,48 @@ describe('logout clears the server side first, then the local credential', () =>
     const failure = { ok: false, code: 'credential.clear_failed', params: {}, message: 'no' }
     signOutMock.mockResolvedValue(failure)
     expect(await logoutQuery().operation()).toBe(failure)
+  })
+})
+
+describe('the account queries', () => {
+  it('declares the account endpoints and gives them distinct keys', () => {
+    expect(api.accountProfile).toEqual({ method: 'GET', path: '/user/profile?team=true' })
+    expect(api.accountUsage).toEqual({ method: 'GET', path: '/user/usage' })
+    expect(userKeys.accountProfile()).not.toEqual(userKeys.accountUsage())
+  })
+
+  it('uses the fixture for profile and usage when the mock switch is on', async () => {
+    vi.stubEnv('VITE_ACCOUNT_MOCK', '1')
+    const profile = await accountProfileQuery().operation()
+    const usage = await accountUsageQuery().operation()
+    expect(profile.ok && profile.value.name).toBe('Mock OAuth User')
+    expect(usage.ok && usage.value.remaining).toBe(902467)
+    expect(sendMock).not.toHaveBeenCalled()
+  })
+
+  it('reports a mock failure when the error switch is on', async () => {
+    vi.stubEnv('VITE_ACCOUNT_MOCK', '1')
+    vi.stubEnv('VITE_ACCOUNT_MOCK_ERROR', '1')
+    const profile = await accountProfileQuery().operation()
+    const usage = await accountUsageQuery().operation()
+    expect(profile.ok).toBe(false)
+    expect(usage.ok).toBe(false)
+  })
+
+  it('sends the real requests when the mock switch is off', async () => {
+    vi.stubEnv('VITE_ACCOUNT_MOCK', '0')
+    sendMock.mockResolvedValue({ ok: true, value: {} })
+    await accountProfileQuery().operation()
+    await accountUsageQuery().operation()
+    expect(sendMock).toHaveBeenCalledWith(api.accountProfile)
+    expect(sendMock).toHaveBeenCalledWith(api.accountUsage)
+  })
+
+  it('uses a successful mock logout without calling the server', async () => {
+    vi.stubEnv('VITE_ACCOUNT_MOCK', '1')
+    expect(await logoutQuery().operation()).toEqual({ ok: true, value: { message: 'mock' } })
+    expect(sendMock).not.toHaveBeenCalled()
+    expect(signOutMock).not.toHaveBeenCalled()
   })
 })
 

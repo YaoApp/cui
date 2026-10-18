@@ -69,6 +69,53 @@ test('keeps a fixed width when the navigation column grows', async ({ page }) =>
   expect((await page.locator(POPUP).boundingBox())?.width).toBeCloseTo(320, 0)
 })
 
+test('keeps a long name inside the footer trigger', async ({ page }) => {
+  const trigger = page.locator(TRIGGER).first()
+  const name = page.locator('.user-menu__trigger-name').first()
+  await expect(name).toContainText('Mock OAuth User')
+  await name.evaluate((el) => {
+    el.textContent = 'Alexandria-Cassandra Montgomery-Worthington the Third'
+    el.setAttribute('title', el.textContent)
+  })
+  const avatar = page.locator(`${TRIGGER} .avatar`).first()
+  const triggerBox = (await trigger.boundingBox())!
+  const avatarBox = (await avatar.boundingBox())!
+  const nameBox = (await name.boundingBox())!
+
+  expect(avatarBox.x).toBeCloseTo(12, 0)
+  expect(triggerBox.x + triggerBox.width - (nameBox.x + nameBox.width)).toBeCloseTo(4, 0)
+  expect(await name.evaluate((el) => getComputedStyle(el).textOverflow)).toBe('ellipsis')
+  expect(await name.evaluate((el) => el.scrollWidth > el.clientWidth)).toBe(true)
+  expect(await name.getAttribute('title')).toContain('Alexandria-Cassandra')
+})
+
+test('puts the collapsed navigation entry at the right edge of the content head', async ({ page }) => {
+  await page.mouse.move(140, 20)
+  await page.locator('.nav__toggle').first().click()
+  await page.waitForTimeout(400)
+
+  const head = page.locator('.content__head')
+  const trigger = page.locator('.content__head-trailing .user-menu__trigger')
+  await expect(trigger).toBeVisible()
+  const headBox = (await head.boundingBox())!
+  const triggerBox = (await trigger.boundingBox())!
+  expect(headBox.x + headBox.width - (triggerBox.x + triggerBox.width)).toBeCloseTo(12, 0)
+})
+
+test('switches the settings sections to a top picker on a narrow window', async ({ page }) => {
+  await page.setViewportSize({ width: 520, height: 600 })
+  await page.waitForTimeout(300)
+  await page.locator('.content__head-trailing .user-menu__trigger').click()
+  await page.locator(POPUP).getByText('Mock OAuth User').click()
+
+  const dialog = page.getByRole('dialog')
+  await expect(dialog).toBeVisible()
+  await expect(page.locator('.settings-shell__picker')).toBeVisible()
+  await expect(page.locator('.settings-shell__menu')).toBeHidden()
+  const contentBox = await page.locator('.settings-shell__content').boundingBox()
+  expect(contentBox?.width ?? 0).toBeGreaterThan(300)
+})
+
 test('opens the settings window from the identity row and switches sections', async ({ page }) => {
   await page.locator(TRIGGER).click()
   await page.locator(POPUP).getByText('Mock OAuth User').click()
@@ -92,7 +139,7 @@ test('opens the settings window from the identity row and switches sections', as
 
   await dialog.getByRole('button', { name: '团队管理' }).click()
   await expect(dialog.getByRole('heading', { name: '团队管理' })).toBeVisible()
-  await expect(dialog.getByText('内容随后接入。')).toBeVisible()
+  await expect(dialog.getByText('暂无设置项。')).toBeVisible()
 
   await dialog.getByRole('button', { name: '关闭设置' }).click()
   await expect(dialog).toBeHidden()
@@ -122,11 +169,16 @@ test('closes the settings window on Escape and gives focus back to the account t
 
 test('opens the settings window with the platform shortcut', async ({ page }) => {
   const modifier = process.platform === 'darwin' ? 'Meta' : 'Control'
+  const trigger = page.locator('.nav__footer .user-menu__trigger')
   await page.keyboard.press(`${modifier}+,`)
   await expect(page.getByRole('dialog')).toBeVisible()
+  await expect(page.locator('.settings-shell__item[aria-current="page"]')).toBeFocused()
 
   await page.keyboard.press('Escape')
   await expect(page.getByRole('dialog')).toBeHidden()
+  await expect(trigger).toBeFocused()
+  await page.waitForTimeout(150)
+  expect(await trigger.evaluate((el) => getComputedStyle(el).boxShadow)).toBe('none')
 })
 
 test('opens external links in a new page', async ({ page, context }) => {

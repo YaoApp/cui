@@ -10,9 +10,8 @@ import { accountLinks } from '@/features/account/links'
 import { SettingsShell } from '@/features/account/settings-shell'
 import { useSignOut } from '@/features/auth/hooks/use-sign-out'
 import { useAuthMode, withMode } from '@/features/auth/hooks/use-auth-mode'
+import { withNext } from '@/features/auth/next'
 import { signedIn } from '@/features/auth/session-marker'
-import { clearLocalSession } from '@/features/auth/sign-out'
-import { accountMockEnabled } from '@/data/user/mock'
 import { useLandingRecord } from '@/features/auth/hooks/use-landing-record'
 import { InboxNav } from '@/features/inbox'
 import { client, openUrl, useWindowChrome } from '@/platform/client'
@@ -126,6 +125,11 @@ export function AppLayout() {
 	})
 	/* Esc 关闭设置窗后焦点回到账户入口，但不画焦点环；下一次键盘或指针操作恢复常规样式 */
 	const [silentFocus, setSilentFocus] = useState(false)
+	const [accountMenuOpen, setAccountMenuOpen] = useState(false)
+	/* 浮层互斥：设置窗打开或导航列收起时，账户菜单不能还留在原地 */
+	useEffect(() => {
+		if (settings.open || navCollapsed) setAccountMenuOpen(false)
+	}, [settings.open, navCollapsed])
 	const menuLinks = accountLinks(i18n.language)
 	const menuShortcut = client.os === 'macos' ? '⌘,' : 'Ctrl+,'
 
@@ -137,12 +141,19 @@ export function AppLayout() {
 			const tag = target?.tagName
 			if (target?.isContentEditable || tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return
 			event.preventDefault()
+			if (settings.open) return
+			/* 先让账户入口成为“打开前的最后焦点”，关闭时上游才能把焦点还回来 */
+			const trigger = document.querySelector<HTMLElement>(
+				navCollapsed ? '.content__head-trailing .user-menu__trigger' : '.nav__footer .user-menu__trigger'
+			)
+			trigger?.focus()
 			setSilentFocus(false)
+			setAccountMenuOpen(false)
 			setSettings({ open: true, section: 'profile' })
 		}
 		window.addEventListener('keydown', onKeyDown)
 		return () => window.removeEventListener('keydown', onKeyDown)
-	}, [])
+	}, [navCollapsed, settings.open])
 
 	/* 静默焦点保留到下一次键盘或指针操作：再按 Esc 不算，Tab、回车或点击才撤掉并恢复焦点环 */
 	useEffect(() => {
@@ -162,6 +173,7 @@ export function AppLayout() {
 
 	const openAccountSettings = (section: UserMenuSection) => {
 		setSilentFocus(false)
+		setAccountMenuOpen(false)
 		setSettings({ open: true, section })
 	}
 
@@ -170,14 +182,7 @@ export function AppLayout() {
 		if (!open && reason === 'escape-key') setSilentFocus(true)
 	}
 
-	const signOutAccount = async () => {
-		const done = await signOutSession()
-		if (done) return
-		/* mock 打开时本机没有真实会话，服务端退出必然失败；收拾本机记录后回登录页 */
-		if (!accountMockEnabled()) return
-		clearLocalSession()
-		navigate(withMode('/login', authMode), { replace: true })
-	}
+	const signOutAccount = async (): Promise<boolean> => signOutSession()
 
 	const accountMenuProps = {
 		status: accountMenu.status,
@@ -190,13 +195,28 @@ export function AppLayout() {
 		links: menuLinks,
 		onOpenSettings: openAccountSettings,
 		onOpenExternal: openUrl,
-		onSignOut: () => void signOutAccount(),
-		onSignIn: () => navigate('/login'),
+		onSignOut: signOutAccount,
+		onSignIn: () =>
+			navigate(withMode(withNext('/login', `${location.pathname}${location.search}`), authMode)),
 		onRetry: accountMenu.retry
 	}
-	const userMenu = <UserMenu {...accountMenuProps} silentFocus={silentFocus} variant='footer' />
+	const userMenu = (
+		<UserMenu
+			{...accountMenuProps}
+			silentFocus={silentFocus}
+			open={navCollapsed ? false : accountMenuOpen}
+			onOpenChange={navCollapsed ? undefined : setAccountMenuOpen}
+			variant='footer'
+		/>
+	)
 	const headUserMenu = navCollapsed ? (
-		<UserMenu {...accountMenuProps} silentFocus={silentFocus} variant='icon' />
+		<UserMenu
+			{...accountMenuProps}
+			silentFocus={silentFocus}
+			open={accountMenuOpen}
+			onOpenChange={setAccountMenuOpen}
+			variant='icon'
+		/>
 	) : undefined
 	const tabs = useTabsStore((state) => state.tabs)
 	const activeKey = useTabsStore((state) => state.activeKey)

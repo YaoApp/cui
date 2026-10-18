@@ -25,7 +25,9 @@ export function UserMenuUsage({ label, value, loading, upgradeLabel, upgradeUrl,
         {loading ? (
           <span className='user-menu__skeleton' aria-hidden='true' />
         ) : (
-          <span className='user-menu__trailing'>{value ?? '—'}</span>
+          <span className='user-menu__trailing user-menu__trailing--primary' title={value ?? undefined}>
+            {value ?? '—'}
+          </span>
         )}
       </BaseMenu.Item>
       {upgradeUrl && !loading ? (

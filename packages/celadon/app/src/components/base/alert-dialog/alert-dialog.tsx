@@ -19,6 +19,10 @@ export type AlertDialogProps = {
   onConfirm?: () => void
   /** 取消时执行的动作；不传则只关闭。 */
   onCancel?: () => void
+  /** 确认后是否立即关闭；异步动作要等结果时传 `false`，由调用方决定何时关闭。 */
+  closeOnConfirm?: boolean
+  /** 确认键置灰（异步动作进行中）。 */
+  confirmDisabled?: boolean
   className?: string
   children?: ReactNode
 }
@@ -38,6 +42,8 @@ export function AlertDialog({
   cancel,
   onConfirm,
   onCancel,
+  closeOnConfirm = true,
+  confirmDisabled = false,
   className,
   children,
 }: AlertDialogProps) {
@@ -60,13 +66,26 @@ export function AlertDialog({
               >
                 {cancel}
               </BaseAlertDialog.Close>
-              {/* 主操作也走上游的 Close：关闭原因与焦点归位由上游按同一条路处理，
-                  自己在 onClick 里翻 open 会绕过它，finalFocus 一类回调读不到关闭原因 */}
-              <BaseAlertDialog.Close
-                render={<Button type="button" variant="inverse" onClick={onConfirm} />}
-              >
-                {confirm}
-              </BaseAlertDialog.Close>
+              {/* 主操作默认走上游的 Close：关闭原因与焦点归位由上游按同一条路处理。
+                  异步动作传 `closeOnConfirm={false}`，等结果回来再关，按钮不提前消失。 */}
+              {closeOnConfirm ? (
+                <BaseAlertDialog.Close
+                  render={
+                    <Button
+                      type="button"
+                      variant="inverse"
+                      onClick={onConfirm}
+                      disabled={confirmDisabled}
+                    />
+                  }
+                >
+                  {confirm}
+                </BaseAlertDialog.Close>
+              ) : (
+                <Button type="button" variant="inverse" onClick={onConfirm} disabled={confirmDisabled}>
+                  {confirm}
+                </Button>
+              )}
             </footer>
           </BaseAlertDialog.Popup>
         </BaseAlertDialog.Viewport>

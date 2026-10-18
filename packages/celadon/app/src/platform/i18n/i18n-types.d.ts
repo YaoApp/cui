@@ -266,10 +266,13 @@ export type I18nKey =
   | 'userMenu.retry'
   | 'userMenu.settings'
   | 'userMenu.signIn'
+  | 'userMenu.signInLabel'
   | 'userMenu.signOut'
   | 'userMenu.signOutDescription'
+  | 'userMenu.signOutFailed'
   | 'userMenu.signOutTitle'
   | 'userMenu.signedOut'
+  | 'userMenu.signingOut'
   | 'userMenu.team'
   | 'userMenu.unavailable'
   | 'userMenu.unit'
@@ -546,10 +549,13 @@ declare module 'i18next' {
         'userMenu.retry': string
         'userMenu.settings': string
         'userMenu.signIn': string
+        'userMenu.signInLabel': string
         'userMenu.signOut': string
         'userMenu.signOutDescription': string
+        'userMenu.signOutFailed': string
         'userMenu.signOutTitle': string
         'userMenu.signedOut': string
+        'userMenu.signingOut': string
         'userMenu.team': string
         'userMenu.unavailable': string
         'userMenu.unit': string

@@ -172,6 +172,8 @@ export const deviceFlowTokenQuery = (providerId: string, input: Omit<DeviceFlowT
 export const logoutQuery = (): { key: readonly unknown[]; operation: () => Promise<Result<LogoutResult>> } => ({
   key: userKeys.logout(),
   operation: async () => {
+    /* mock 账户没有真实服务端会话：退出按成功处理，由调用方清本机标记 */
+    if (accountMockEnabled()) return { ok: true, value: { message: 'mock' } }
     const result = await send(logout)
     if (!result.ok) return result
     const cleared = await signOut()

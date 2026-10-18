@@ -3,6 +3,7 @@
   "userMenu.profile": "打开个人资料",
   "userMenu.signedOut": "未登录",
   "userMenu.signIn": "登录",
+  "userMenu.signInLabel": "未登录，去登录",
   "userMenu.retry": "重试",
   "userMenu.unavailable": "账户不可用",
   "userMenu.usage": "用量",
@@ -16,5 +17,7 @@
   "userMenu.signOut": "退出登录",
   "userMenu.signOutTitle": "退出登录？",
   "userMenu.signOutDescription": "退出后需要重新登录才能继续使用。",
+  "userMenu.signingOut": "正在退出…",
+  "userMenu.signOutFailed": "退出失败，请重试。",
   "userMenu.cancel": "取消"
 }

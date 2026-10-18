@@ -42,7 +42,7 @@ not call any API.
 
 ## Behaviour
 
-- Opens upward with an 8 pixel gap; a viewport shorter than 560 pixels flips it downward.
+- Opens upward with an 8 pixel gap; the positioner flips it downward when the space above is too small for the panel.
 - The popup has a fixed `--menu-width` (320) and does not follow the navigation column; it only clamps to the viewport on very narrow screens.
 - Entrance follows the `dropdown` scene: 200ms decelerate, opacity plus a 0.98 scale from the `--transform-origin` the positioner provides; the exit only fades, 120ms accelerate.
 - The trigger does not scale on press; it opens the menu in the same frame, so a press effect would read as a second action.

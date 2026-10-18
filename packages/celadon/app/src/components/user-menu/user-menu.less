@@ -13,6 +13,27 @@
 	color: var(--text-secondary);
 }
 
+/* 底部一行的触发按钮吃满剩余宽度：长名字只在名字格里省略，不会把头像推出导航列，
+   名字右内距与左边一样留 4 */
+.user-menu__trigger--footer {
+	inline-size: 100%;
+	max-inline-size: 100%;
+	overflow: hidden;
+	justify-content: flex-start;
+}
+
+.user-menu__trigger--footer .button__label {
+	flex: 1 1 auto;
+	min-inline-size: 0;
+	max-inline-size: 100%;
+	justify-content: flex-start;
+	gap: var(--spacing-8);
+}
+
+.user-menu__trigger--footer .avatar {
+	flex: none;
+}
+
 .user-menu__trigger:hover {
 	background: var(--nav-hover);
 }
@@ -25,7 +46,7 @@
 }
 
 .user-menu__trigger-name {
-	flex: 0 1 auto;
+	flex: 1 1 auto;
 	min-inline-size: 0;
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -162,6 +183,10 @@
 	color: var(--text-secondary);
 }
 
+.user-menu__trailing--primary {
+	color: var(--text-primary);
+}
+
 .user-menu__trailing-icon {
 	flex: none;
 	color: var(--text-secondary);
@@ -216,10 +241,18 @@
 	}
 }
 
+.user-menu__sign-out-error {
+	margin: 0;
+	padding: var(--spacing-8) var(--spacing-12);
+	border-radius: var(--radius-small);
+	background: var(--danger-soft);
+	color: var(--danger-ink);
+	font-size: var(--font-size-body);
+}
+
 .user-menu__trigger:focus-visible,
 .user-menu__item:focus-visible,
-.user-menu__identity:focus-visible,
-.user-menu__upgrade:focus-visible {
+.user-menu__identity:focus-visible {
 	outline: none;
 	box-shadow: var(--focus-ring);
 }

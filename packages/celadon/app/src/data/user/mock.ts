@@ -30,7 +30,7 @@ const USAGE: AccountUsage = {
 
 /* 开关直接读 `import.meta.env.VITE_*`，不要加可选链：Vite 只替换这种静态写法，
    写成 `import.meta.env?.X` 会留到运行时，开关永远不生效。
-   再加 `DEV` 门：生产构建即使本机留着 `.env.local` 也不会把 mock 打进产品。 */
+   再加 `DEV` 门：生产构建不启用 mock；fixture 仍随模块进入包，只有开发构建会用到。 */
 export const accountMockEnabled = (): boolean =>
   import.meta.env.DEV && import.meta.env.VITE_ACCOUNT_MOCK === '1'
 

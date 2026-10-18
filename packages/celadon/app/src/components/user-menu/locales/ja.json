@@ -3,6 +3,7 @@
   "userMenu.profile": "プロフィールを開く",
   "userMenu.signedOut": "未サインイン",
   "userMenu.signIn": "サインイン",
+  "userMenu.signInLabel": "未サインイン、サインイン",
   "userMenu.retry": "再試行",
   "userMenu.unavailable": "アカウントを利用できません",
   "userMenu.usage": "使用量",
@@ -16,5 +17,7 @@
   "userMenu.signOut": "サインアウト",
   "userMenu.signOutTitle": "サインアウトしますか？",
   "userMenu.signOutDescription": "続けるには再度サインインが必要です。",
+  "userMenu.signingOut": "サインアウトしています…",
+  "userMenu.signOutFailed": "サインアウトできませんでした。もう一度お試しください。",
   "userMenu.cancel": "キャンセル"
 }

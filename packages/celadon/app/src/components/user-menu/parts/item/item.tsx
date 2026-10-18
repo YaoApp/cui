@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { Menu as BaseMenu } from '@base-ui/react/menu'
 import { Icon } from '@/components/base/icon'
 import type { IconId } from '@/platform/icons'
@@ -6,7 +7,7 @@ export type UserMenuItemProps = {
   icon: IconId
   label: string
   /** 右侧的说明或动作提示：快捷键、团队名、箭头 */
-  trailing?: string
+  trailing?: ReactNode
   /** 右侧是否画外链箭头 */
   external?: boolean
   onSelect: () => void
