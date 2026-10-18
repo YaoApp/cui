@@ -102,6 +102,19 @@ test('puts the collapsed navigation entry at the right edge of the content head'
   expect(headBox.x + headBox.width - (triggerBox.x + triggerBox.width)).toBeCloseTo(12, 0)
 })
 
+test('keeps the settings sidebar at the normal window size', async ({ page }) => {
+  await page.setViewportSize({ width: 1080, height: 664 })
+  await page.keyboard.press(`${process.platform === 'darwin' ? 'Meta' : 'Control'}+,`)
+
+  await expect(page.getByRole('dialog')).toBeVisible()
+  await page.waitForTimeout(300)
+  await expect(page.locator('.settings-shell__picker')).toBeHidden()
+  const menu = page.locator('.settings-shell__menu')
+  await expect(menu).toBeVisible()
+  expect((await menu.boundingBox())?.width).toBeCloseTo(208, 0)
+  expect((await page.locator('.settings-shell__content').boundingBox())?.width ?? 0).toBeGreaterThan(600)
+})
+
 test('switches the settings sections to a top picker on a narrow window', async ({ page }) => {
   await page.setViewportSize({ width: 520, height: 600 })
   await page.waitForTimeout(300)

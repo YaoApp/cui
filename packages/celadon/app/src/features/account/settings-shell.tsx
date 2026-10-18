@@ -36,13 +36,14 @@ export function SettingsShell({ open, section, onOpenChange, onSection }: Settin
       initialFocus={() => document.querySelector('.settings-shell__item[aria-current="page"]')}
     >
       <div className='settings-shell__body'>
-        <Select
-          className='settings-shell__picker'
-          aria-label={t('account.settings.menu')}
-          value={section}
-          onValueChange={(value) => onSection(value as UserMenuSection)}
-          options={SECTIONS.map((item) => ({ value: item, label: t(SECTION_KEYS[item]) }))}
-        />
+        <div className='settings-shell__picker'>
+          <Select
+            aria-label={t('account.settings.menu')}
+            value={section}
+            onValueChange={(value) => onSection(value as UserMenuSection)}
+            options={SECTIONS.map((item) => ({ value: item, label: t(SECTION_KEYS[item]) }))}
+          />
+        </div>
         <nav
           className='settings-shell__menu'
           aria-label={t('account.settings.menu')}
