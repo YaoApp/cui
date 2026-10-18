@@ -12,6 +12,11 @@
 	min-block-size: 0;
 }
 
+/* 窄窗口用顶部分区选择器替代左栏；宽窗口不画 */
+.settings-shell__picker {
+	display: none;
+}
+
 .settings-shell__menu {
 	display: flex;
 	flex: none;
@@ -54,4 +59,25 @@
 	margin: 0;
 	font-size: var(--font-size-body);
 	color: var(--text-secondary);
+}
+
+/* 窄窗口：左侧分区收成顶部下拉，正文吃满整行；阈值与计划一致（880 × 620） */
+@media (width <= 879px), (height <= 619px) {
+	.settings-shell__body {
+		flex-direction: column;
+	}
+
+	.settings-shell__picker {
+		display: block;
+		flex: none;
+		margin: var(--spacing-8) var(--spacing-12) 0;
+	}
+
+	.settings-shell__menu {
+		display: none;
+	}
+
+	.settings-shell__content {
+		padding: var(--spacing-16);
+	}
 }

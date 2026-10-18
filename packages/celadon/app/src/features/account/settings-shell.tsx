@@ -1,6 +1,7 @@
 import './settings-shell.less'
 import { DialogPage } from '@/components/base/dialog'
 import { Button } from '@/components/base/button'
+import { Select } from '@/components/base/select'
 import { useTranslation } from '@/platform/i18n'
 import type { I18nKey } from '@/platform/i18n/i18n-types'
 import type { UserMenuSection } from '@/components/user-menu'
@@ -32,9 +33,31 @@ export function SettingsShell({ open, section, onOpenChange, onSection }: Settin
       closeLabel={t('account.settings.close')}
       size='full'
       className='settings-shell'
+      initialFocus={() => document.querySelector('.settings-shell__item[aria-current="page"]')}
     >
       <div className='settings-shell__body'>
-        <nav className='settings-shell__menu' aria-label={t('account.settings.menu')}>
+        <Select
+          className='settings-shell__picker'
+          aria-label={t('account.settings.menu')}
+          value={section}
+          onValueChange={(value) => onSection(value as UserMenuSection)}
+          options={SECTIONS.map((item) => ({ value: item, label: t(SECTION_KEYS[item]) }))}
+        />
+        <nav
+          className='settings-shell__menu'
+          aria-label={t('account.settings.menu')}
+          onKeyDown={(event) => {
+            if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return
+            event.preventDefault()
+            const buttons = Array.from(event.currentTarget.querySelectorAll('button'))
+            const current = buttons.indexOf(document.activeElement as HTMLButtonElement)
+            if (current < 0) return
+            const step = event.key === 'ArrowDown' ? 1 : -1
+            const next = (current + step + buttons.length) % buttons.length
+            buttons[next]?.focus()
+            onSection(SECTIONS[next])
+          }}
+        >
           {SECTIONS.map((item) => (
             <Button
               key={item}
