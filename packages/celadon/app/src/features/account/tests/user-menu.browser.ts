@@ -111,10 +111,16 @@ test('puts the collapsed navigation entry at the right edge of the content head'
 
   const head = page.locator('.content__head')
   const trigger = page.locator('.content__head-trailing .user-menu__trigger')
+  const avatar = trigger.locator('.avatar')
   await expect(trigger).toBeVisible()
+  await expect(trigger.locator('.user-menu__trigger-name')).toHaveText('Mock OAuth User')
   const headBox = (await head.boundingBox())!
   const triggerBox = (await trigger.boundingBox())!
+  const avatarBox = (await avatar.boundingBox())!
   expect(headBox.x + headBox.width - (triggerBox.x + triggerBox.width)).toBeCloseTo(12, 0)
+  expect(triggerBox.height).toBeCloseTo(24, 0)
+  expect(avatarBox.width).toBeCloseTo(24, 0)
+  expect(avatarBox.height).toBeCloseTo(24, 0)
 })
 
 test('keeps the settings sidebar at the normal window size', async ({ page }) => {

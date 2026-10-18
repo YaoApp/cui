@@ -31,7 +31,7 @@ not call any API.
 | `teamName` | `string` | none | Draws the team badge and fills the right side of the Team row. |
 | `usage` | `{ remaining: number \| null; upgradeUrl?: string }` | none | Remaining credits are formatted with `Intl.NumberFormat` plus the localised unit. |
 | `shortcut` | `string` | none | Shown on the Settings row, e.g. `⌘,` or `Ctrl+,`. |
-| `variant` | `'footer' \| 'icon'` | `'footer'` | Footer shows the name; the head trigger shows the avatar only. |
+| `variant` | `'footer' \| 'icon'` | `'footer'` | The footer uses a 32 avatar with the name; the head uses a 24 avatar with the name in a 24-high button, matching the head actions. |
 | `silentFocus` | `boolean` | `false` | After Escape closes settings the trigger takes focus without a visible ring until the next key or pointer action. |
 | `links` | `{ home, help, docs }` | required | External addresses. |
 | `onOpenSettings` | `(section) => void` | required | `profile` · `team` · `usage`. |
