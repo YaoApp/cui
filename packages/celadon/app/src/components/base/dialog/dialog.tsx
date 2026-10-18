@@ -5,8 +5,9 @@ import { Button } from '@/components/base/button'
 import { Icon } from '@/components/base/icon'
 import './dialog.less'
 
-/** 面板宽度档：`form` 给表单与步骤（480），`page` 用来打开一整页内容（中栏可读宽）。 */
-export type DialogSize = 'form' | 'page'
+/** 面板宽度档：`form` 给表单与步骤（480），`page` 用来打开一整页内容（中栏可读宽），
+    `full` 用来装内容多的设置或工作台（四周留 12，面板占满其余空间）。 */
+export type DialogSize = 'form' | 'page' | 'full'
 
 /** 打开弹窗的交互方式，取值与上游一致（上游该类型在它自己的工具包里，未随组件导出，这里照抄语义；
  *  上游还带一个空串取值，程序化打开时是它）。 */
@@ -79,11 +80,20 @@ export function DialogPage({
     >
       <BaseDialog.Portal>
         <BaseDialog.Backdrop className="dialog__scrim" />
-        <BaseDialog.Viewport className="dialog__viewport">
+        <BaseDialog.Viewport
+          className={['dialog__viewport', size === 'full' ? 'dialog__viewport--full' : null].filter(Boolean).join(' ')}
+        >
           <BaseDialog.Popup
             ref={popupRef}
             tabIndex={-1}
-            className={['dialog', size === 'page' ? 'dialog--page' : null, className].filter(Boolean).join(' ')}
+            className={[
+              'dialog',
+              size === 'page' ? 'dialog--page' : null,
+              size === 'full' ? 'dialog--full' : null,
+              className,
+            ]
+              .filter(Boolean)
+              .join(' ')}
             /* 默认把焦点交给面板本身，而不是第一个可聚焦元素：上游默认会落在头部的关闭钮上，
                打开弹窗即选中一个次要动作，读屏会先念「关闭」。面板自己可聚焦（tabIndex=-1），
                于是焦点进入弹窗内部（模态要求），Tab 才走到关闭钮与内容。调用方传 initialFocus 即以它为准。 */

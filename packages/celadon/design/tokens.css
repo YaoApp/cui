@@ -1499,6 +1499,14 @@
 .dialog--page {
   inline-size: min(100%, var(--dialog-width-wide));
 }
+/* 大尺寸档：四周只留 12，面板吃满其余空间；设置这类分区多、正文长的内容用它 */
+.dialog__viewport--full {
+  padding: var(--spacing-12);
+}
+.dialog--full {
+  inline-size: 100%;
+  block-size: 100%;
+}
 /* 面板自己拿到焦点时不画环（见 .dialog 的注释） */
 .dialog:focus,
 .dialog:focus-visible {

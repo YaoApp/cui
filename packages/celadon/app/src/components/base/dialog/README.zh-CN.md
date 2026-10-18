@@ -25,7 +25,7 @@
 | `description` | `ReactNode` | 无 | 说明文字。 |
 | `closeLabel` | `string` | 无 | 关闭键的无障碍名，调用方从语言包取。 |
 | `footer` | `ReactNode` | 无 | 底部操作区。 |
-| `size` | `'form' \| 'page'` | `'form'` | 宽度档：表单档 480，页面档取内容区可读上限。 |
+| `size` | `'form' \| 'page' \| 'full'` | `'form'` | 宽度档：表单档 480，页面档取内容区可读上限，大档吃满窗口并四周留 12。 |
 | `disablePointerDismissal` | `boolean` | `false` | 为真时点遮罩不关闭，用于不能误关的流程。 |
 | `initialFocus` | `boolean \| RefObject \| ((openType) => …)` | 无 | 打开后焦点落点；人机验证这类第三方控件要显式不动焦点。 |
 | `className` | `string` | 无 | 追加类名。 |

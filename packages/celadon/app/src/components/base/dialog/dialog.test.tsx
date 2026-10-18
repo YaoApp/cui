@@ -87,6 +87,17 @@ describe('the dialog page', () => {
     expect(dialog.classList.contains('dialog--page')).toBe(true)
   })
 
+  it('renders the full size with its tighter viewport when asked', async () => {
+    render(
+      <DialogPage open onOpenChange={() => undefined} title="标题" closeLabel="关闭" size="full">
+        <p>正文</p>
+      </DialogPage>,
+    )
+    const dialog = await screen.findByRole('dialog')
+    expect(dialog.classList.contains('dialog--full')).toBe(true)
+    expect(document.querySelector('.dialog__viewport--full')).toBeTruthy()
+  })
+
   it('renders without a description or a footer', async () => {
     render(
       <DialogPage open onOpenChange={() => undefined} title="标题" closeLabel="关闭">

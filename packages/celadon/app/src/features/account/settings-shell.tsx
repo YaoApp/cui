@@ -30,7 +30,7 @@ export function SettingsShell({ open, section, onOpenChange, onSection }: Settin
       onOpenChange={onOpenChange}
       title={t('account.settings.title')}
       closeLabel={t('account.settings.close')}
-      size='page'
+      size='full'
       className='settings-shell'
     >
       <div className='settings-shell__body'>
