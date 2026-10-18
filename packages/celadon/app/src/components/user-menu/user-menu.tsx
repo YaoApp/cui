@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { AlertDialog } from '@/components/base/alert-dialog'
 import { Avatar } from '@/components/base/avatar'
 import { Button } from '@/components/base/button'
+import { Icon } from '@/components/base/icon'
 import { useTranslation } from '@/platform/i18n'
 import { UserMenuIdentity } from './parts/identity/identity'
 import { UserMenuItem } from './parts/item/item'
@@ -92,7 +93,7 @@ export function UserMenu({
         aria-label={triggerLabel}
         onClick={onSignIn}
       >
-        <Avatar name={name} size={variant === 'footer' ? 32 : 24} />
+        <Avatar name={name} size={variant === 'footer' ? 32 : 16} />
         <span className={`user-menu__trigger-name user-menu__trigger-name--${variant}`}>
           {t('userMenu.signedOut')}
         </span>
@@ -111,8 +112,8 @@ export function UserMenu({
           <Avatar
             name={name}
             src={avatar}
-            team={team}
-            size={variant === 'footer' ? 32 : 24}
+            team={variant === 'footer' ? team : undefined}
+            size={variant === 'footer' ? 32 : 16}
             loading={loading}
           />
           {loading ? (
@@ -125,6 +126,9 @@ export function UserMenu({
               {status === 'unavailable' ? t('userMenu.unavailable') : name}
             </span>
           )}
+          {variant === 'icon' ? (
+            <Icon className='user-menu__trigger-chevron' name='i-down' size={14} />
+          ) : null}
         </BaseMenu.Trigger>
         <BaseMenu.Portal>
           <BaseMenu.Positioner

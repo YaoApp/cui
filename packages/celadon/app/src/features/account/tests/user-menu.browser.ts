@@ -117,10 +117,13 @@ test('puts the collapsed navigation entry at the right edge of the content head'
   const headBox = (await head.boundingBox())!
   const triggerBox = (await trigger.boundingBox())!
   const avatarBox = (await avatar.boundingBox())!
+  const chevronBox = (await trigger.locator('.user-menu__trigger-chevron').boundingBox())!
   expect(headBox.x + headBox.width - (triggerBox.x + triggerBox.width)).toBeCloseTo(12, 0)
   expect(triggerBox.height).toBeCloseTo(24, 0)
-  expect(avatarBox.width).toBeCloseTo(24, 0)
-  expect(avatarBox.height).toBeCloseTo(24, 0)
+  expect(avatarBox.width).toBeCloseTo(16, 0)
+  expect(avatarBox.height).toBeCloseTo(16, 0)
+  expect(chevronBox.width).toBeCloseTo(14, 0)
+  expect(await trigger.locator('.avatar__team').count()).toBe(0)
 })
 
 test('keeps the settings sidebar at the normal window size', async ({ page }) => {

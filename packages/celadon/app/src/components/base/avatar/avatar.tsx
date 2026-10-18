@@ -1,7 +1,7 @@
 import './avatar.less'
 import { useEffect, useState } from 'react'
 
-export type AvatarSize = 24 | 32 | 64
+export type AvatarSize = 16 | 24 | 32 | 64
 
 export type AvatarTeam = {
   /** 团队名，只取首字做徽标 */
@@ -68,7 +68,7 @@ export function Avatar({ name, src, size = 32, team, loading = false, label, cla
           {initialOf(name)}
         </span>
       )}
-      {team ? (
+      {team && size !== 16 ? (
         <span className='avatar__team' aria-hidden='true'>
           {initialOf(team.name)}
         </span>

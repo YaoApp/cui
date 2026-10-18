@@ -42,6 +42,14 @@ describe('Avatar', () => {
     expect(container.querySelector('.avatar__team')?.textContent).toBe('A')
   })
 
+  it('keeps the 16 inline size free of the team badge', () => {
+    const { container } = render(
+      <Avatar name="Mock" size={16} team={{ name: 'Administrator Team' }} />,
+    )
+    expect(container.querySelector('.avatar')?.getAttribute('data-size')).toBe('16')
+    expect(container.querySelector('.avatar__team')).toBeNull()
+  })
+
   it('renders a skeleton while loading and no initial', () => {
     const { container } = render(<Avatar name="Mock" loading />)
     expect(container.querySelector('.avatar')).toHaveClass('avatar--loading')
