@@ -20,7 +20,7 @@ function renderRail() {
         shortcuts={[]}
         scene="shell.navigation.scene.none"
         sceneIcon="i-inbox"
-        accountName="Wren"
+        userMenu={<span>Wren</span>}
         collapsed={false}
         onToggle={vi.fn()}
         mainFolded={false}

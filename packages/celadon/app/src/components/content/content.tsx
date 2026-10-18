@@ -13,6 +13,8 @@ export type ContentProps = {
 	lead?: HeadKey
 	/** 列头右端槽位的键；不传则留空 */
 	trail?: HeadKey
+	/** 列头右侧的业务插槽，排在次栏操作键之前（导航列收起时的账户入口） */
+	trailing?: ReactNode
 	/** 本栏收掉了（换边后次栏是内容区）：内容不再可达，也从无障碍树里摘掉 */
 	hidden?: boolean
 }
@@ -27,11 +29,14 @@ export function Content({
 	navCollapsed = false,
 	lead,
 	trail,
+	trailing,
 	hidden = false
 }: ContentProps) {
 	return (
 		<main className='content' aria-hidden={hidden || undefined} inert={hidden || undefined}>
-			{title ? <ContentHead title={title} navCollapsed={navCollapsed} lead={lead} trail={trail} /> : null}
+			{title ? (
+				<ContentHead title={title} navCollapsed={navCollapsed} lead={lead} trail={trail} trailing={trailing} />
+			) : null}
 			<ScrollArea className='content__scroll' size='medium' persistent>
 				{children}
 			</ScrollArea>

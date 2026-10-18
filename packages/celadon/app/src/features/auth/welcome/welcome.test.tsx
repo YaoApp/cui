@@ -222,6 +222,7 @@ describe('the welcome page', () => {
 
 describe('signing out from the welcome page', () => {
   beforeEach(() => {
+    vi.stubEnv('VITE_ACCOUNT_MOCK', '0')
     vi.mocked(transportFetch).mockReset()
     useAuthStore.getState().reset()
     globalThis.localStorage.clear()

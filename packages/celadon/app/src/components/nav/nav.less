@@ -153,8 +153,8 @@
    这里把它抵消掉：标题因此严格落在上区展开时「开始」那一行的位置。下区位置由它自己负责，
    折起的上区不再占位。 */
 
-/* 折叠态的那一行压在列表下方：上面补一条分割线，左内距与条目一致，
-   右边放展开键，与左侧的场景名一头一尾对齐。 */
+/* 折叠态的那一行压在列表下方：上面补一条分割线，左右内距都与条目一致，
+   右边放展开键；展开键的右缘与用户区快捷图标的右缘落在同一条竖线上。 */
 .nav__scene-head {
 	flex: none;
 	display: flex;
@@ -163,7 +163,6 @@
 	/* 与条目行同高：标题行与它下面的行左边缘对齐 */
 	min-block-size: var(--spacing-32);
 	padding-inline: var(--spacing-12);
-	padding-inline-end: 0;
 	/* 上下边距一致：上边距是行自己的 8，下边距由导航列的 gap 给 8，两侧看起来一样 */
 	margin-block-start: 0;
 	/* 只留上内距，下边距由导航列的 gap 给，两侧看起来一样 */
@@ -296,12 +295,14 @@
 	color: var(--text-primary);
 }
 
-/* 用户区的两个快捷图标只用图标：方形、无底，悬停与收起展开键同一套反馈 */
+/* 用户区的两个快捷图标只用图标：方形、无底，悬停与收起展开键同一套反馈。
+   命中区 24 见方、图标 16 居中；高度不再跟条目行那 32 走，悬停底不会比图标高出一截 */
 .nav__shortcut {
 	flex: none;
 	justify-content: center;
 	box-sizing: border-box;
 	inline-size: var(--spacing-24);
+	min-block-size: var(--spacing-24);
 	block-size: var(--spacing-24);
 	padding: 0;
 }
@@ -339,38 +340,28 @@
 	/* 钉在列底：场景区收起时用户区靠这条落到最下面 */
 	margin-block-start: auto;
 	/* 用户区自带一条上分割线，与上面的导航区隔开；整行高 48（比条目行高一档），
-     上下不留内距，折叠行的上下边距因此都是 8 */
+	   上下不留内距，折叠行的上下边距因此都是 8。左内距为 0，4 像素留给触发按钮自己的内距：
+	   头像 32 宽，左缘落在 12、中线 28，与品牌标志（24 宽、左缘 16）的中线对齐，
+	   触发按钮左右内距相同，焦点环与悬停底两侧对称；右内距取 12，
+	   右侧快捷图标的右缘与折叠行展开键对齐 */
 	box-sizing: border-box;
 	block-size: var(--spacing-48);
-	padding-inline: var(--spacing-12);
+	padding-inline: 0 var(--spacing-12);
 	border-block-start: var(--border-width) solid var(--border-subtle);
 }
 
-.nav__avatar {
-	flex: none;
-	display: grid;
-	place-items: center;
-	inline-size: var(--spacing-32);
-	block-size: var(--spacing-32);
-	border-radius: var(--radius-pill);
-	background: var(--brand-soft);
-	color: var(--brand-ink);
-	font-size: var(--font-size-body);
-}
-
-.nav__name {
+/* 账户入口占满剩余宽度，名字先省略；弹层不在这一格里，宽高由触发器自己定 */
+.nav__user {
+	display: flex;
 	flex: 1;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-	font-size: var(--font-size-body);
-	color: var(--text-secondary);
+	min-inline-size: 0;
 }
 
 .nav__shortcuts {
 	display: flex;
 	align-items: center;
-	gap: var(--spacing-4);
+	/* 两个快捷图标之间留一档 8：命中区 24 见方，间距与条目图标到文字的间距同档 */
+	gap: var(--spacing-8);
 }
 
 .nav__menu-positioner {

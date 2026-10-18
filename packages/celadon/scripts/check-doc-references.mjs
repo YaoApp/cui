@@ -21,7 +21,6 @@ const ALLOW = new Map([
   ['app/src/platform/client/', '规划中未建：15-platform.md 描述的 platform 子目录，尚未落地'],
   ['app/src/platform/manifest.json', '规划中未建：15-platform.md §5.3 的构建清单，由打包写入'],
   ['app/src/components/base/tabs/', '规划中未建：08-layout-implemented.md 里的基础件，尚未开工'],
-  ['app/src/components/base/avatar/', '规划中未建：08-layout-implemented.md 里的基础件，尚未开工'],
   ['app/src/components/nav/list/parts/menu/', '规划中未建：08-layout-base.md 第一阶段折叠态的菜单，尚未开工'],
   ['app/src/components/window/', '规划中未建：08-layout-implemented.md 里的独占窗口，尚未开工'],
   ['app/src/components/dock/', '规划中未建：08-layout-implemented.md 里的悬浮入口，尚未开工'],

@@ -5,6 +5,13 @@ import 'i18next'
 
 /** 基准语言里存在的全部 key —— `t('…')` 只接受这些。 */
 export type I18nKey =
+  | 'account.settings.close'
+  | 'account.settings.menu'
+  | 'account.settings.placeholder'
+  | 'account.settings.section.profile'
+  | 'account.settings.section.team'
+  | 'account.settings.section.usage'
+  | 'account.settings.title'
   | 'app.name'
   | 'auth.action.backToServers'
   | 'auth.action.cancel'
@@ -250,6 +257,27 @@ export type I18nKey =
   | 'surface.main'
   | 'themeToggle.switchToDark'
   | 'themeToggle.switchToLight'
+  | 'userMenu.cancel'
+  | 'userMenu.docs'
+  | 'userMenu.help'
+  | 'userMenu.home'
+  | 'userMenu.label'
+  | 'userMenu.profile'
+  | 'userMenu.retry'
+  | 'userMenu.settings'
+  | 'userMenu.signIn'
+  | 'userMenu.signInLabel'
+  | 'userMenu.signOut'
+  | 'userMenu.signOutDescription'
+  | 'userMenu.signOutFailed'
+  | 'userMenu.signOutTitle'
+  | 'userMenu.signedOut'
+  | 'userMenu.signingOut'
+  | 'userMenu.team'
+  | 'userMenu.unavailable'
+  | 'userMenu.unit'
+  | 'userMenu.upgrade'
+  | 'userMenu.usage'
 
 /* 语言包是**平铺 + 点号分组**（`nav.hello`），运行时 keySeparator:false，类型也必须一致，
    否则 `t('nav.hello')` 会被当成嵌套查找。resources 只列 key 不列值：值随语言变，key 不随。 */
@@ -260,6 +288,13 @@ declare module 'i18next' {
     nsSeparator: false
     resources: {
       translation: {
+        'account.settings.close': string
+        'account.settings.menu': string
+        'account.settings.placeholder': string
+        'account.settings.section.profile': string
+        'account.settings.section.team': string
+        'account.settings.section.usage': string
+        'account.settings.title': string
         'app.name': string
         'auth.action.backToServers': string
         'auth.action.cancel': string
@@ -505,6 +540,27 @@ declare module 'i18next' {
         'surface.main': string
         'themeToggle.switchToDark': string
         'themeToggle.switchToLight': string
+        'userMenu.cancel': string
+        'userMenu.docs': string
+        'userMenu.help': string
+        'userMenu.home': string
+        'userMenu.label': string
+        'userMenu.profile': string
+        'userMenu.retry': string
+        'userMenu.settings': string
+        'userMenu.signIn': string
+        'userMenu.signInLabel': string
+        'userMenu.signOut': string
+        'userMenu.signOutDescription': string
+        'userMenu.signOutFailed': string
+        'userMenu.signOutTitle': string
+        'userMenu.signedOut': string
+        'userMenu.signingOut': string
+        'userMenu.team': string
+        'userMenu.unavailable': string
+        'userMenu.unit': string
+        'userMenu.upgrade': string
+        'userMenu.usage': string
       }
     }
   }

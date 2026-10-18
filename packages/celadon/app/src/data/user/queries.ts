@@ -29,7 +29,10 @@ import {
   oauthCallback,
   oidcKeys,
   userProfile,
+  accountProfile,
+  accountUsage,
 } from './api'
+import { accountMockEnabled, mockAccountProfile, mockAccountUsage } from './mock'
 import { userKeys } from './keys'
 import type {
   DeviceAuthorizeRequest,
@@ -46,6 +49,8 @@ import type {
   LogoutResult,
   OAuthCallbackRequest,
   UserProfile,
+  AccountProfile,
+  AccountUsage,
 } from './types'
 
 /* **具体接口的对接都在这层**：按业务的**参数组合**（语言只是其中一例，比如"中文 foo=123、日语 foo=678、
@@ -167,6 +172,11 @@ export const deviceFlowTokenQuery = (providerId: string, input: Omit<DeviceFlowT
 export const logoutQuery = (): { key: readonly unknown[]; operation: () => Promise<Result<LogoutResult>> } => ({
   key: userKeys.logout(),
   operation: async () => {
+    /* mock 账户没有真实服务端会话：跳过服务端吊销，但仍清平台凭据，不能留下仍生效的会话 */
+    if (accountMockEnabled()) {
+      const cleared = await signOut()
+      return cleared.ok ? { ok: true, value: { message: 'mock' } } : cleared
+    }
     const result = await send(logout)
     if (!result.ok) return result
     const cleared = await signOut()
@@ -178,5 +188,23 @@ export const logoutQuery = (): { key: readonly unknown[]; operation: () => Promi
 export const userProfileQuery = (): { key: readonly unknown[]; operation: () => Promise<Result<UserProfile>> } => ({
   key: userKeys.profile(),
   operation: () => send(userProfile),
+})
+
+/** 账户菜单的资料（带团队）；打开 mock 开关时走 fixture。 */
+export const accountProfileQuery = (): {
+  key: readonly unknown[]
+  operation: () => Promise<Result<AccountProfile>>
+} => ({
+  key: userKeys.accountProfile(),
+  operation: () => (accountMockEnabled() ? mockAccountProfile() : send(accountProfile)),
+})
+
+/** 账户菜单的套餐与余量；打开 mock 开关时走 fixture。 */
+export const accountUsageQuery = (): {
+  key: readonly unknown[]
+  operation: () => Promise<Result<AccountUsage>>
+} => ({
+  key: userKeys.accountUsage(),
+  operation: () => (accountMockEnabled() ? mockAccountUsage() : send(accountUsage)),
 })
 

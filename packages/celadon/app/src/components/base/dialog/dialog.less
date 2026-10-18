@@ -7,7 +7,9 @@
 .dialog__scrim {
   position: fixed;
   inset: 0;
+  /* 毛玻璃蒙版：遮罩色挡光，背景模糊把底下的界面压成一层质感，避免弹窗与背景文字抢注意力 */
   background: var(--scrim);
+  backdrop-filter: blur(var(--backdrop-blur));
   transition: opacity var(--duration-base) var(--easing-decelerate);
 }
 
@@ -48,6 +50,19 @@
 
 .dialog--page {
   inline-size: min(100%, var(--dialog-width-wide));
+}
+
+/* 大尺寸档：四周留 48，面板吃满其余空间；设置这类分区多、正文长的内容用它。
+   48 是间距刻度里最大的一档，窗口四边与面板之间因此有明显的一圈呼吸空间。 */
+.dialog__viewport--full {
+  padding: var(--spacing-48);
+}
+
+.dialog--full {
+  /* 宽度在 720 与 1120 之间取视口可用宽；视口更窄时让位给视口，不横向撑出窗口 */
+  inline-size: min(100%, var(--dialog-width-full));
+  min-inline-size: min(100%, var(--dialog-width-full-min));
+  block-size: 100%;
 }
 
 /* 面板自己拿到焦点时不画环（见 .dialog 的注释） */

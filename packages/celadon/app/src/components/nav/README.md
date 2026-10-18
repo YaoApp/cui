@@ -27,10 +27,10 @@ the product; entries, the current area and the account name all come from the as
 | `parts/brand/` | The brand row: mark and product name, drawn under the head on the two ends where `controls` is not `none`. |
 | `parts/main/` | The upper main navigation: an inner block (area name and fold key) and the six entries. When folded the whole part takes no height, and the list stays in the tree while the animation closes it. |
 | `parts/scene/` | The lower area: the secondary navigation slot; when the upper area is folded this area gains the current row and the expand key at its top. |
-| `parts/footer/` | The foot row: avatar and name on the left, shortcut icons on the right, pinned to the foot with `margin-block-start: auto`. |
+| `parts/footer/` | The foot row: the account menu on the left, 24 pixel shortcut icons on the right, pinned to the foot with `margin-block-start: auto`. |
 | `parts/list/` | The upper area's list container, rendering one row per entry. |
 | `parts/list/parts/item/` | One entry: icon, text, unread badge, current state. Renders a real link. |
-| `parts/menu/` | The find-back menu in the folded state, built on Base UI's `Menu` part. |
+| `parts/menu/` | The find-back menu in the folded state, built on Base UI's `Menu` part; it opens on click or keyboard activation, not on hover. |
 | `index.ts` | The module's public surface: `Nav`, `NavProps` and `NavItem`. |
 
 The four parts each have an `index.ts` that exports only their component and props type. There is **one**
@@ -45,7 +45,7 @@ rules sit in the same file under its own heading.
 | `shortcuts` | `NavItem[]` | none | The shortcut icons in the foot row, the same content as the matching main entries. |
 | `scene` | `I18nKey` | none | The scene name in the current-scene row. Pass `shell.navigation.scene.none` when there is no scene. |
 | `sceneIcon` | `IconId` | none | The scene icon, drawn first in the current row. |
-| `accountName` | `string` | none | The name in the foot row; the assembly layer passes a placeholder when no session user is available. |
+| `userMenu` | `ReactNode` | none | The account menu for the foot row (trigger and popup both come from the assembly layer); without it only the shortcut icons render. |
 | `navWidth` | `number \| null` | `null` | The stored column width; `null` means the default. |
 | `onNavWidth` | `(width: number \| null) => void` | none | Writes the width back after a drag or a keyboard adjustment. |
 | `collapsed` | `boolean` | none | Whether the whole column is collapsed. The caller holds the value; the component stores no preference. |
@@ -58,7 +58,7 @@ rules sit in the same file under its own heading.
 Part-level props: `NavHeader` takes `mainFolded`, `onToggle` and `onToggleMain`;
 `NavMain` takes `items`, `folded` and `onSelect`;
 `NavScene` takes `items`, `currentLabel`, `sceneIcon`, `folded`, `columnWidth`, `onSelect`, `onUnfold` and
-`children`; `NavFooter` takes `name`, `shortcuts` and `onSelect`; `NavList` takes `items`, `label` and
+`children`; `NavFooter` takes `menu`, `shortcuts` and `onSelect`; `NavList` takes `items`, `label` and
 `onSelect`; `NavItemRow` takes `item` and `onSelect`; `NavMenu` takes `items`, `currentLabel`,
 `sceneIcon`, `columnWidth` and `onSelect`.
 
@@ -87,7 +87,7 @@ const items: NavItem[] = [
   shortcuts={items.filter((item) => item.key === 'workspace')}
   scene="inbox.title"
   sceneIcon="i-inbox"
-  accountName={account?.name ?? t('shell.navigation.account.placeholder')}
+  userMenu={<UserMenu {...accountMenuProps} />}
   navWidth={navWidth}
   onNavWidth={setNavWidth}
   collapsed={collapsed}

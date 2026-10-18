@@ -1,0 +1,259 @@
+/* 账户菜单：底部一行的触发按钮与向上弹出的面板。
+   行高 32，身份段 56，弹层宽度取 `--menu-width`。 */
+
+.user-menu__trigger {
+	box-sizing: border-box;
+	gap: var(--spacing-8);
+	min-inline-size: 0;
+	min-block-size: var(--spacing-32);
+	/* 左右内距相同：外层左内距为 0，头像左缘因此落在 12、中线 28，与品牌标志中线对齐；
+	   焦点环与悬停底在头像、名字两侧各留 4 */
+	padding: 0 var(--spacing-4);
+	border-radius: var(--radius-small);
+	color: var(--text-secondary);
+}
+
+/* 底部一行的触发按钮吃满剩余宽度：长名字只在名字格里省略，不会把头像推出导航列，
+   名字右内距与左边一样留 4 */
+.user-menu__trigger--footer {
+	inline-size: 100%;
+	max-inline-size: 100%;
+	overflow: hidden;
+	justify-content: flex-start;
+}
+
+.user-menu__trigger--footer .button__label {
+	flex: 1 1 auto;
+	min-inline-size: 0;
+	max-inline-size: 100%;
+	justify-content: flex-start;
+	gap: var(--spacing-8);
+}
+
+.user-menu__trigger--footer .avatar {
+	flex: none;
+}
+
+.user-menu__trigger:hover {
+	background: var(--nav-hover);
+}
+
+/* 设置窗按 Esc 关闭时焦点归位到触发按钮，但不画焦点环：静默只维持到下一次键盘或指针操作。
+   选择器带上 .button，压过按钮组件后加载的同名焦点规则 */
+.button.user-menu__trigger--silent-focus:focus-visible {
+	box-shadow: none;
+	outline: none;
+}
+
+.user-menu__trigger-name {
+	flex: 1 1 auto;
+	min-inline-size: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	text-align: start;
+	font-size: var(--font-size-body);
+	color: var(--text-secondary);
+}
+
+.user-menu__trigger--icon {
+	inline-size: var(--spacing-32);
+	padding: 0;
+	justify-content: center;
+}
+
+.user-menu__layer {
+	z-index: var(--z-overlay);
+}
+
+.user-menu__popup {
+	display: flex;
+	flex-direction: column;
+	gap: var(--spacing-4);
+	box-sizing: border-box;
+	/* 固定宽，不跟随导航列：菜单不是导航的一部分，宽度按内容定 */
+	inline-size: var(--menu-width);
+	max-inline-size: calc(100vw - var(--spacing-32));
+	max-block-size: min(480px, calc(100vh - 96px));
+	overflow-y: auto;
+	padding: var(--spacing-4);
+	border: var(--border-width) solid var(--border-subtle);
+	border-radius: var(--radius-medium);
+	background: var(--background-surface);
+	box-shadow: var(--shadow-floating);
+	/* 下拉出现与收起（F4 的 dropdown 场景）：进场 200ms 减速，只动透明度与很小的缩放；
+	   退场只淡出、不做位移与缩放，时长取 120ms 加速。缩放原点取定位器给的 --transform-origin，
+	   弹层因此在触发器的对应一角展开。系统减少动态时时长在 tokens 里归零。 */
+	transform-origin: var(--transform-origin, center);
+	transition:
+		opacity var(--duration-base) var(--easing-decelerate),
+		transform var(--duration-base) var(--easing-decelerate);
+}
+
+.user-menu__popup[data-starting-style] {
+	opacity: 0;
+	transform: scale(0.98);
+}
+
+.user-menu__popup[data-ending-style] {
+	opacity: 0;
+	transform: none;
+	transition-duration: var(--duration-fast);
+	transition-timing-function: var(--easing-accelerate);
+}
+
+/* 触发按钮只负责开菜单，不做按压缩放：菜单与按下同帧出现，再缩放会像按到了另一件事 */
+.button.user-menu__trigger[aria-haspopup='menu']:active {
+	transform: none;
+	will-change: auto;
+}
+
+.user-menu__identity {
+	display: flex;
+	box-sizing: border-box;
+	align-items: center;
+	gap: var(--spacing-8);
+	min-block-size: calc(var(--spacing-32) + var(--spacing-24));
+	padding: var(--spacing-8) var(--spacing-12);
+	border-radius: var(--radius-small);
+	cursor: pointer;
+	user-select: none;
+}
+
+.user-menu__identity:hover,
+.user-menu__identity[data-highlighted] {
+	background: var(--background-hover);
+}
+
+.user-menu__identity-text {
+	display: flex;
+	flex-direction: column;
+	gap: var(--spacing-4);
+	min-inline-size: 0;
+}
+
+.user-menu__name {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-size: var(--font-size-body);
+	color: var(--text-primary);
+}
+
+.user-menu__plan {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-size: var(--font-size-caption);
+	color: var(--text-secondary);
+}
+
+.user-menu__item {
+	display: flex;
+	box-sizing: border-box;
+	align-items: center;
+	gap: var(--spacing-8);
+	min-block-size: var(--spacing-32);
+	padding: var(--spacing-8) var(--spacing-12);
+	border-radius: var(--radius-small);
+	font-size: var(--font-size-body);
+	color: var(--text-primary);
+	cursor: pointer;
+	user-select: none;
+}
+
+.user-menu__item:hover,
+.user-menu__item[data-highlighted] {
+	background: var(--background-hover);
+}
+
+.user-menu__label {
+	flex: 1;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.user-menu__trailing {
+	flex: 0 0 auto;
+	max-inline-size: 45%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-size: var(--font-size-caption);
+	color: var(--text-secondary);
+}
+
+.user-menu__trailing--primary {
+	color: var(--text-primary);
+}
+
+.user-menu__trailing-icon {
+	flex: none;
+	color: var(--text-secondary);
+}
+
+/* 升级按钮的宽度与行内文字对齐：左右各让出行内距 12，
+   左缘与行首图标齐平，右缘与余量文字齐平。 */
+.user-menu__upgrade {
+	flex: none;
+	inline-size: calc(100% - var(--spacing-24));
+	margin-inline: var(--spacing-12);
+}
+
+.user-menu__upgrade[data-highlighted] {
+	background: var(--background-inverse-hover);
+}
+
+.user-menu__separator {
+	flex: none;
+	block-size: var(--border-width);
+	margin: var(--spacing-4) var(--spacing-8);
+	background: var(--border-subtle);
+}
+
+.user-menu__skeleton {
+	display: inline-block;
+	inline-size: var(--spacing-48);
+	block-size: var(--spacing-8);
+	border-radius: var(--radius-pill);
+	background: var(--background-hover);
+	animation: user-menu-pulse var(--duration-loop) var(--easing-standard) infinite;
+}
+
+.user-menu__skeleton--name {
+	inline-size: calc(var(--spacing-32) * 2);
+}
+
+@keyframes user-menu-pulse {
+	0%,
+	100% {
+		opacity: 1;
+	}
+
+	50% {
+		opacity: 0.55;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.user-menu__skeleton {
+		animation: none;
+	}
+}
+
+.user-menu__sign-out-error {
+	margin: 0;
+	padding: var(--spacing-8) var(--spacing-12);
+	border-radius: var(--radius-small);
+	background: var(--danger-soft);
+	color: var(--danger-ink);
+	font-size: var(--font-size-body);
+}
+
+.user-menu__trigger:focus-visible,
+.user-menu__item:focus-visible,
+.user-menu__identity:focus-visible {
+	outline: none;
+	box-shadow: var(--focus-ring);
+}

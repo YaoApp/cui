@@ -117,3 +117,14 @@
 	gap: var(--spacing-4);
 	margin-inline-start: auto;
 }
+
+/* 业务插槽在场时由它把右侧整组推到列头右缘：次栏操作键不再另吃一份 auto 外边距，
+   否则两份 auto 会平分剩余空间，账户入口落在列头中部 */
+.content__head-trailing ~ .content__head-slot--browser {
+	margin-inline-start: 0;
+}
+
+/* 次栏键隐藏时槽宽为 0，但 flex gap 仍留一档；用负外边距抵掉，业务插槽的右缘才是列头内缘 */
+.content__head-trailing ~ .content__head-slot--browser[data-hidden='true'] {
+	margin-inline-start: calc(-1 * var(--spacing-8));
+}

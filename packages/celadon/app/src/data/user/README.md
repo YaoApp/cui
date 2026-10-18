@@ -12,6 +12,7 @@ registration and account screens reach the service through this module.
 | `api.ts` | Interface declarations only, namely method, path and in/out types. Base URL, authentication and error normalisation live in `platform/transport/`. |
 | `keys.ts` | One cache key per declaration, derived with `keyOf`, so subscription and invalidation share one algorithm. |
 | `queries.ts` | The `{ key, ... }` sources consumed by `useRequest`. Reads provide `request` or `build(ctx)`; writes provide `operation`. `logoutQuery` is also here. |
+| `mock.ts` | Development fixtures for the two account-menu queries, active only in development mode with `VITE_ACCOUNT_MOCK=1`. |
 | `index.ts` | The module's public surface. Callers import from `@/data` and do not reference the files above directly. |
 | `entry-fields.test.ts` | Field-level contract tests. The fixtures are response bodies captured from the development backend, typed and then asserted. |
 | `tests/entry.contract.browser.ts` | A live walk over every declaration, reaching the running service through the development server's same-origin proxy. |
@@ -34,10 +35,18 @@ registration and account screens reach the service through this module.
 | `deviceFlowStart` | `POST /user/oauth/:providerId/device/authorize` |
 | `deviceFlowToken` | `POST /user/oauth/:providerId/device/token` |
 | `oidcKeys` | `GET /oauth/jwks` |
+| `accountProfile` | `GET /user/profile?team=true` |
+| `accountUsage` | `GET /user/usage` |
 
 Registration, sign-in, invitation and one-time-code delivery carry a **temporary token**. The token is placed in
 the `Authorization` header through `RequestOptions.headers`; it is not written to the credential store and is
 discarded once the call returns.
+
+The two account-menu queries can be answered from fixtures before the engine endpoints exist. In
+development, set `VITE_ACCOUNT_MOCK=1` in `.env.local` under the Vite root (`app/`) and `mock.ts`
+returns a fixed profile and usage after 200 milliseconds; set `VITE_ACCOUNT_MOCK_ERROR=1` to return a
+failure and exercise the "account unavailable" state. The flag also requires development mode, so
+production builds never turn the mock on.
 
 ## Language handling
 

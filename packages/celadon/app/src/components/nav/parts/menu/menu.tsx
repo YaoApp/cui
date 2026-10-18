@@ -1,13 +1,10 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { Menu as BaseMenu } from '@base-ui/react/menu'
 import { Icon } from '@/components/base/icon'
 import { ScrollArea } from '@/components/base/scroll-area'
 import { useTranslation } from '@/platform/i18n'
 import type { IconId } from '@/platform/icons'
 import type { NavItem } from '../../nav.types'
-
-/* 指针移开后延迟收起的时长，取 design/foundations.md F4 的 hover 档（--duration-base 200ms） */
-const CLOSE_DELAY_MS = 200
 
 export type NavMenuProps = {
 	/* 导航列的宽度：弹层按它减去两侧内距取宽，保证左右内距相等 */
@@ -20,26 +17,11 @@ export type NavMenuProps = {
 	onSelect: (item: NavItem) => void
 }
 
-/* 折叠态的找回：一整块封装在这里 —— 触发元素（场景图标 + 场景名 + 向上的箭头）、
-   悬停进出的延时、菜单面板与条目状态，都在这一件里。指针进入触发元素或菜单才算"在里面"，
-   移开 200 毫秒后收起；键盘与 `Esc` 交给上游 Menu。菜单弹在触发元素的上方、对齐它的左边，
-   宽度不超过导航列本身（design/main-shell.md §三）。 */
+/* 折叠态的找回：触发元素（场景图标 + 场景名 + 向上的箭头）、菜单面板与条目状态都在这一件里。
+   只在点击或键盘激活时弹出，指针经过不弹：这一行紧挨底部账户入口，悬停弹出容易误触。
+   菜单弹在触发元素的上方、对齐它的左边，宽度不超过导航列本身（design/main-shell.md §三）。 */
 export function NavMenu({ columnWidth, items, currentLabel, sceneIcon, onSelect }: NavMenuProps) {
 	const { t } = useTranslation()
-	const [open, setOpen] = useState(false)
-	const closeTimer = useRef<number | null>(null)
-
-	const cancelClose = () => {
-		if (closeTimer.current !== null) {
-			window.clearTimeout(closeTimer.current)
-			closeTimer.current = null
-		}
-	}
-	const scheduleClose = () => {
-		cancelClose()
-		closeTimer.current = window.setTimeout(() => setOpen(false), CLOSE_DELAY_MS)
-	}
-	useEffect(() => cancelClose, [])
 
 	const trigger: ReactNode = (
 		<>
@@ -50,17 +32,11 @@ export function NavMenu({ columnWidth, items, currentLabel, sceneIcon, onSelect 
 	)
 
 	return (
-		<BaseMenu.Root open={open} onOpenChange={setOpen}>
+		<BaseMenu.Root>
 			<BaseMenu.Trigger
 				nativeButton={false}
 				render={<span className='nav__current' />}
 				aria-label={currentLabel}
-				onPointerEnter={() => {
-					cancelClose()
-					setOpen(true)
-				}}
-				onPointerLeave={scheduleClose}
-				onClick={() => setOpen(!open)}
 			>
 				{trigger}
 			</BaseMenu.Trigger>
@@ -76,8 +52,6 @@ export function NavMenu({ columnWidth, items, currentLabel, sceneIcon, onSelect 
 						className='nav__menu'
 						style={{ inlineSize: `calc(${columnWidth}px - var(--spacing-8) * 2)` }}
 						aria-label={t('shell.navigation.main')}
-						onPointerEnter={cancelClose}
-						onPointerLeave={scheduleClose}
 					>
 						<ScrollArea size='small' className='nav__menu-scroll'>
 							{items.map((item) => (

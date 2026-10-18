@@ -11,6 +11,7 @@
 | `api.ts` | 只包含接口声明，即方法、路径与进出类型。基址、鉴权与错误归一不在这里，它们位于 `platform/transport/`。 |
 | `keys.ts` | 每条声明对应一个缓存键，由 `keyOf` 推导，因此订阅与失效共用同一套算法。 |
 | `queries.ts` | 供 `useRequest` 使用的 `{ key, ... }` 取数对象。读取接口提供 `request` 或 `build(ctx)`，提交接口提供 `operation`；此外还有 `logoutQuery`。 |
+| `mock.ts` | 账户菜单两条查询的开发期 fixture，只在开发模式且 `VITE_ACCOUNT_MOCK=1` 时生效。 |
 | `index.ts` | 本模块对外的出口。调用方从 `@/data` 引入，不直接引用上述文件。 |
 | `entry-fields.test.ts` | 字段级契约测试。测试数据是从开发后端真实抓取的响应体，标注成类型后断言。 |
 | `tests/entry.contract.browser.ts` | 覆盖全部接口声明的活体走查，经由开发服务器的同源代理访问真实服务。 |
@@ -33,9 +34,15 @@
 | `deviceFlowStart` | `POST /user/oauth/:providerId/device/authorize` |
 | `deviceFlowToken` | `POST /user/oauth/:providerId/device/token` |
 | `oidcKeys` | `GET /oauth/jwks` |
+| `accountProfile` | `GET /user/profile?team=true` |
+| `accountUsage` | `GET /user/usage` |
 
 注册、登录、邀请与重发一次性口令这四个接口需要携带**临时令牌**。令牌由 `RequestOptions.headers`
 放入 `Authorization` 请求头，不写入凭据库，调用结束后立即丢弃。
+
+账户菜单的两条查询在接口就绪之前可以用 fixture 回答：开发模式下，在 Vite root（`app/`）的
+`.env.local` 里写 `VITE_ACCOUNT_MOCK=1`，`mock.ts` 即在 200 毫秒后返回固定的资料与用量；
+写 `VITE_ACCOUNT_MOCK_ERROR=1` 则返回失败，用来验「账户不可用」。开关同时要求开发模式，生产构建不会打开。
 
 ## 语言处理约定
 

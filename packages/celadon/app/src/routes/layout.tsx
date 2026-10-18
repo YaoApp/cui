@@ -4,10 +4,17 @@ import { Outlet, useLocation, useNavigate } from 'react-router'
 import { Browser, TabPage, type BrowserTab } from '@/components/browser'
 import { Content, type HeadKey } from '@/components/content'
 import { Nav, type NavItem } from '@/components/nav'
-import { useAuthStore } from '@/features/auth/auth.store'
+import { UserMenu, type UserMenuSection } from '@/components/user-menu'
+import { useAccountMenu } from '@/features/account/hooks/use-account-menu'
+import { accountLinks } from '@/features/account/links'
+import { SettingsShell } from '@/features/account/settings-shell'
+import { useSignOut } from '@/features/auth/hooks/use-sign-out'
+import { useAuthMode, withMode } from '@/features/auth/hooks/use-auth-mode'
+import { withNext } from '@/features/auth/next'
+import { signedIn } from '@/features/auth/session-marker'
 import { useLandingRecord } from '@/features/auth/hooks/use-landing-record'
 import { InboxNav } from '@/features/inbox'
-import { client, useWindowChrome } from '@/platform/client'
+import { client, openUrl, useWindowChrome } from '@/platform/client'
 import { useMediaQuery } from '@/platform/client/use-media-query'
 import type { I18nKey } from '@/platform/i18n/i18n-types'
 import type { IconId } from '@/platform/icons'
@@ -45,7 +52,7 @@ function sideWidthReading(): number {
 /* 三栏外壳：导航栏 | 内容区 | 标签浏览器。三栏的布局事实与标签集都在 `stores/`，
    这一层是唯一读它们的地方 —— 组件只收 props（见 architecture/03-boundaries.md §2）。 */
 export function AppLayout() {
-	const { t } = useTranslation()
+	const { t, i18n } = useTranslation()
 	const location = useLocation()
 	const navigate = useNavigate()
 	useLandingRecord(location.pathname, location.search)
@@ -109,7 +116,108 @@ export function AppLayout() {
 	const browserWidthShown = Math.min(browserWidth ?? sideWidthReading(), sideRoom)
 	const setNavWidth = useColumnsStore((state) => state.setNavWidth)
 
-	const account = useAuthStore((state) => state.user)
+	const accountMenu = useAccountMenu(signedIn())
+	const { signOut: signOutSession } = useSignOut()
+	const authMode = useAuthMode()
+	const [settings, setSettings] = useState<{ open: boolean; section: UserMenuSection }>({
+		open: false,
+		section: 'profile',
+	})
+	/* Esc 关闭设置窗后焦点回到账户入口，但不画焦点环；下一次键盘或指针操作恢复常规样式 */
+	const [silentFocus, setSilentFocus] = useState(false)
+	const [accountMenuOpen, setAccountMenuOpen] = useState(false)
+	/* 浮层互斥：设置窗打开或导航列收起时，账户菜单不能还留在原地 */
+	useEffect(() => {
+		if (settings.open || navCollapsed) setAccountMenuOpen(false)
+	}, [settings.open, navCollapsed])
+	const menuLinks = accountLinks(i18n.language)
+	const menuShortcut = client.os === 'macos' ? '⌘,' : 'Ctrl+,'
+
+	/* 设置是标准入口：菜单里显示快捷键，这里让它真的可用；输入控件里不拦截 */
+	useEffect(() => {
+		const onKeyDown = (event: KeyboardEvent) => {
+			if (!(event.metaKey || event.ctrlKey) || event.key !== ',') return
+			const target = event.target as HTMLElement | null
+			const tag = target?.tagName
+			if (target?.isContentEditable || tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return
+			event.preventDefault()
+			if (settings.open) return
+			/* 先让账户入口成为“打开前的最后焦点”，关闭时上游才能把焦点还回来 */
+			const trigger = document.querySelector<HTMLElement>(
+				navCollapsed ? '.content__head-trailing .user-menu__trigger' : '.nav__footer .user-menu__trigger'
+			)
+			trigger?.focus()
+			setSilentFocus(false)
+			setAccountMenuOpen(false)
+			setSettings({ open: true, section: 'profile' })
+		}
+		window.addEventListener('keydown', onKeyDown)
+		return () => window.removeEventListener('keydown', onKeyDown)
+	}, [navCollapsed, settings.open])
+
+	/* 静默焦点保留到下一次键盘或指针操作：再按 Esc 不算，Tab、回车或点击才撤掉并恢复焦点环 */
+	useEffect(() => {
+		if (!silentFocus) return
+		const clear = () => setSilentFocus(false)
+		const clearOnKey = (event: KeyboardEvent) => {
+			if (event.key === 'Escape') return
+			setSilentFocus(false)
+		}
+		window.addEventListener('pointerdown', clear, { capture: true, once: true })
+		window.addEventListener('keydown', clearOnKey, true)
+		return () => {
+			window.removeEventListener('pointerdown', clear, { capture: true })
+			window.removeEventListener('keydown', clearOnKey, true)
+		}
+	}, [silentFocus])
+
+	const openAccountSettings = (section: UserMenuSection) => {
+		setSilentFocus(false)
+		setAccountMenuOpen(false)
+		setSettings({ open: true, section })
+	}
+
+	const changeSettings = (open: boolean, reason?: string) => {
+		setSettings((prev) => ({ ...prev, open }))
+		if (!open && reason === 'escape-key') setSilentFocus(true)
+	}
+
+	const signOutAccount = async (): Promise<boolean> => signOutSession()
+
+	const accountMenuProps = {
+		status: accountMenu.status,
+		name: accountMenu.name,
+		plan: accountMenu.plan,
+		avatar: accountMenu.avatar,
+		teamName: accountMenu.teamName,
+		usage: accountMenu.usage,
+		shortcut: menuShortcut,
+		links: menuLinks,
+		onOpenSettings: openAccountSettings,
+		onOpenExternal: openUrl,
+		onSignOut: signOutAccount,
+		onSignIn: () =>
+			navigate(withMode(withNext('/login', `${location.pathname}${location.search}`), authMode)),
+		onRetry: accountMenu.retry
+	}
+	const userMenu = (
+		<UserMenu
+			{...accountMenuProps}
+			silentFocus={silentFocus}
+			open={navCollapsed ? false : accountMenuOpen}
+			onOpenChange={navCollapsed ? undefined : setAccountMenuOpen}
+			variant='footer'
+		/>
+	)
+	const headUserMenu = navCollapsed ? (
+		<UserMenu
+			{...accountMenuProps}
+			silentFocus={silentFocus}
+			open={accountMenuOpen}
+			onOpenChange={setAccountMenuOpen}
+			variant='icon'
+		/>
+	) : undefined
 	const tabs = useTabsStore((state) => state.tabs)
 	const activeKey = useTabsStore((state) => state.activeKey)
 	const openBlankTab = useTabsStore((state) => state.openBlank)
@@ -301,7 +409,7 @@ export function AppLayout() {
 				shortcuts={SHORTCUTS.map(mark)}
 				scene={scene}
 				sceneIcon={current?.icon ?? 'i-apps'}
-				accountName={account?.name ?? account?.account ?? t('shell.navigation.account.placeholder')}
+				userMenu={userMenu}
 				collapsed={collapsed || narrow}
 				onToggle={toggleNav}
 				mainFolded={mainFolded}
@@ -317,6 +425,7 @@ export function AppLayout() {
 				navCollapsed={navCollapsed}
 				lead={contentLead}
 				trail={contentTrail}
+				trailing={headUserMenu}
 				hidden={contentHidden}
 			>
 				<Outlet />
@@ -410,6 +519,12 @@ export function AppLayout() {
 			>
 				{renderTab(active)}
 			</Browser>
+			<SettingsShell
+				open={settings.open}
+				section={settings.section}
+				onOpenChange={changeSettings}
+				onSection={(section) => setSettings((prev) => ({ ...prev, section }))}
+			/>
 		</div>
 	)
 }

@@ -1,0 +1,100 @@
+/* 头像：实心品牌底加反色字，团队账号右下叠团队徽标。
+   尺寸三档（24 导航、32 菜单与底部一行、64 资料页）；团队徽标 32 配 16、64 配 24。
+   颜色与描边全部取 token，不写字面色值。 */
+
+.avatar {
+	position: relative;
+	display: inline-grid;
+	flex: none;
+	place-items: center;
+	box-sizing: border-box;
+	border-radius: var(--radius-pill);
+	background: var(--brand);
+	color: var(--brand-text);
+}
+
+.avatar[data-size='24'] {
+	inline-size: var(--spacing-24);
+	block-size: var(--spacing-24);
+	font-size: var(--font-size-caption);
+}
+
+.avatar[data-size='32'] {
+	inline-size: var(--spacing-32);
+	block-size: var(--spacing-32);
+	font-size: var(--font-size-body);
+}
+
+.avatar[data-size='64'] {
+	inline-size: calc(var(--spacing-32) * 2);
+	block-size: calc(var(--spacing-32) * 2);
+	font-size: var(--font-size-title);
+}
+
+.avatar__image {
+	inline-size: 100%;
+	block-size: 100%;
+	border-radius: inherit;
+	object-fit: cover;
+}
+
+.avatar__initial {
+	display: grid;
+	place-items: center;
+	inline-size: 100%;
+	block-size: 100%;
+	line-height: var(--line-height-none);
+	user-select: none;
+}
+
+/* 团队徽标：底取品牌浅底，字取品牌墨色，外圈两像素表面色把两层分开 */
+.avatar__team {
+	position: absolute;
+	inset-inline-end: calc(-1 * var(--border-width) * 2);
+	inset-block-end: calc(-1 * var(--border-width) * 2);
+	display: grid;
+	place-items: center;
+	box-sizing: border-box;
+	border: calc(var(--border-width) * 2) solid var(--background-surface);
+	border-radius: var(--radius-pill);
+	background: var(--brand-soft);
+	color: var(--brand-ink);
+	line-height: var(--line-height-none);
+	user-select: none;
+}
+
+.avatar[data-size='24'] .avatar__team,
+.avatar[data-size='32'] .avatar__team {
+	inline-size: var(--spacing-16);
+	block-size: var(--spacing-16);
+	font-size: var(--font-size-caption);
+}
+
+.avatar[data-size='64'] .avatar__team {
+	inline-size: var(--spacing-24);
+	block-size: var(--spacing-24);
+	font-size: var(--font-size-body);
+}
+
+/* 加载骨架：与头像同尺寸的圆，只做轻微明暗呼吸 */
+.avatar--loading {
+	background: var(--background-hover);
+	animation: avatar-pulse var(--duration-loop) var(--easing-standard) infinite;
+}
+
+@keyframes avatar-pulse {
+	0%,
+	100% {
+		opacity: 1;
+	}
+
+	50% {
+		opacity: 0.55;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.avatar--loading {
+		animation: none;
+	}
+}

@@ -1,0 +1,87 @@
+/* 设置窗外壳：左侧分区、右侧内容。面板用 full 档吃满窗口，四周留 48，内容区自己滚。 */
+
+.settings-shell .dialog__body {
+	flex: 1;
+	min-block-size: 0;
+	padding: 0;
+}
+
+.settings-shell__body {
+	display: flex;
+	block-size: 100%;
+	min-block-size: 0;
+}
+
+/* 窄窗口用顶部分区选择器替代左栏；宽窗口不画 */
+.settings-shell__picker {
+	display: none;
+}
+
+.settings-shell__menu {
+	display: flex;
+	flex: none;
+	flex-direction: column;
+	gap: var(--spacing-4);
+	box-sizing: border-box;
+	inline-size: 208px;
+	padding: var(--spacing-12);
+	border-inline-end: var(--border-width) solid var(--border-subtle);
+	overflow-y: auto;
+}
+
+.settings-shell__item {
+	justify-content: flex-start;
+	min-block-size: var(--spacing-32);
+	padding-inline: var(--spacing-12);
+	font-size: var(--font-size-body);
+	color: var(--text-secondary);
+}
+
+.settings-shell__item[aria-current='page'] {
+	background: var(--background-selected);
+	color: var(--text-primary);
+}
+
+.settings-shell__content {
+	flex: 1;
+	min-inline-size: 0;
+	padding: var(--spacing-24);
+	overflow-y: auto;
+}
+
+.settings-shell__title {
+	margin: 0 0 var(--spacing-8);
+	font-size: var(--font-size-subtitle);
+	color: var(--text-primary);
+}
+
+.settings-shell__hint {
+	margin: 0;
+	font-size: var(--font-size-body);
+	color: var(--text-secondary);
+}
+
+/* 窄窗口：左侧分区收成顶部下拉，正文吃满整行；阈值与计划一致（880 × 620） */
+@media (width <= 879px), (height <= 619px) {
+	.settings-shell__body {
+		flex-direction: column;
+	}
+
+	.settings-shell__picker {
+		display: block;
+		flex: none;
+		margin: var(--spacing-8) var(--spacing-12) 0;
+	}
+
+	.settings-shell__picker .select-trigger {
+		inline-size: 100%;
+	}
+
+	.settings-shell__menu {
+		display: none;
+	}
+
+	.settings-shell__content {
+		padding: var(--spacing-16);
+	}
+}

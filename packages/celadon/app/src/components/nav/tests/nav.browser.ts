@@ -46,7 +46,34 @@ test.describe('导航列的交互', () => {
 		await expect(main).not.toHaveCSS('height', '0px')
 	})
 
-	test('折叠行的找回菜单：悬停可弹出，Esc 关闭；键盘进入时焦点交回触发元素', async ({ page }) => {
+	test('用户区头像中线与品牌标志对齐，触发按钮两侧内距相同，右侧图标与展开键对齐', async ({ page }) => {
+		const box = async (selector: string) => (await page.locator(selector).first().boundingBox())!
+		const footer = await box('.nav__footer')
+		const trigger = await box('.user-menu__trigger')
+		const avatar = await box('.user-menu__trigger .avatar')
+		const name = await box('.user-menu__trigger-name')
+		const shortcuts = page.locator('.nav__shortcut')
+		const workspace = (await shortcuts.nth(0).boundingBox())!
+		const computer = (await shortcuts.nth(1).boundingBox())!
+
+		/* 品牌标志 24 宽、左缘 16（列内 8 + 品牌行内距 8），中线 28；头像 32 宽，中线也应落在 28 */
+		expect(avatar.x + avatar.width / 2).toBeCloseTo(28, 0)
+		expect(avatar.x - footer.x).toBeCloseTo(4, 0)
+		expect(trigger.x).toBeCloseTo(footer.x, 0)
+		expect(avatar.x - trigger.x).toBeCloseTo(4, 0)
+		expect(trigger.x + trigger.width - (name.x + name.width)).toBeCloseTo(4, 0)
+		expect(footer.x + footer.width - (computer.x + computer.width)).toBeCloseTo(12, 0)
+		expect(computer.x - (workspace.x + workspace.width)).toBeCloseTo(8, 0)
+
+		/* 折叠态下电脑图标仍与展开键右缘对齐 */
+		await page.mouse.move(140, 20)
+		await page.locator(FOLD).first().click()
+		await page.waitForTimeout(300)
+		const unfold = await box('.nav__unfold')
+		expect(computer.x + computer.width).toBeCloseTo(unfold.x + unfold.width, 0)
+	})
+
+	test('折叠行的找回菜单：点击弹出、悬停不弹，Esc 关闭；键盘进入时焦点交回触发元素', async ({ page }) => {
 		await page.mouse.move(140, 20)
 		await expect(page.locator(FOLD).first()).toHaveCSS('opacity', '1')
 		await page.locator(FOLD).first().click()
@@ -54,9 +81,12 @@ test.describe('导航列的交互', () => {
 		const trigger = page.locator('.nav__current').first()
 		await expect(trigger).toBeVisible()
 
-		/* 路径一：悬停弹出，Esc 关闭（这条路径下焦点从未进入菜单，不做焦点断言） */
-		await trigger.hover({ force: true })
+		/* 路径一：指针经过不弹（避免紧挨底部账户入口时误触），点击才弹，Esc 关闭 */
 		const menu = page.locator('.nav__menu')
+		await trigger.hover({ force: true })
+		await page.waitForTimeout(300)
+		await expect(menu).toBeHidden()
+		await trigger.click()
 		await expect(menu).toBeVisible({ timeout: 15000 })
 		await page.keyboard.press('Escape')
 		await expect(menu).toBeHidden()

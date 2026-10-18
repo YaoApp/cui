@@ -20,7 +20,8 @@ export type NavProps = {
 	scene: I18nKey
 	/** 当前场景的图标 */
 	sceneIcon: IconId
-	accountName: string
+	/** 底部一行的账户菜单（触发按钮与弹层都在里面），由装配层给 */
+	userMenu?: ReactNode
 	/** 整列收起（视口驱动的那一档由样式按视口给，这里是用户偏好） */
 	collapsed: boolean
 	onToggle: () => void
@@ -43,7 +44,7 @@ export function Nav({
 	shortcuts,
 	scene,
 	sceneIcon,
-	accountName,
+	userMenu,
 	collapsed,
 	onToggle,
 	mainFolded,
@@ -95,7 +96,7 @@ export function Nav({
 			>
 				{children}
 			</NavScene>
-			<NavFooter name={accountName} shortcuts={shortcuts} onSelect={select} />
+			<NavFooter menu={userMenu} shortcuts={shortcuts} onSelect={select} />
 			<>
 				<span className='nav__grip' aria-hidden='true' />
 				<div

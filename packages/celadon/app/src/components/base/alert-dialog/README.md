@@ -23,8 +23,13 @@ unsaved page.
 | `onOpenChange` | `(open: boolean) => void` | none | Called when the open state changes; cancel and `Esc` both go through it. |
 | `title` | `ReactNode` | none | The title, tied to `role="alertdialog"`. |
 | `description` | `ReactNode` | none | The body: state the consequence and what cannot be undone. |
-| `confirm` | `ReactNode` | none | The primary action, usually a danger or brand solid button. |
-| `cancel` | `ReactNode` | none | The secondary action. |
+| `confirm` | `ReactNode` | none | The primary action's label; the dialog already supplies the button. |
+| `cancel` | `ReactNode` | none | The secondary action's label; the dialog already supplies the button. |
+| `onConfirm` | `() => void` | none | Runs when the primary action is chosen; by default the dialog then closes and returns focus. |
+| `onCancel` | `() => void` | none | Runs when the secondary action is chosen; without it the dialog only closes. |
+| `closeOnConfirm` | `boolean` | `true` | Whether to close after the primary action; pass `false` for an async action. |
+| `confirmDisabled` | `boolean` | `false` | Greys out the primary action while it runs. |
+| `cancelDisabled` | `boolean` | `false` | Greys out the secondary action while an async action runs. |
 | `className` | `string` | none | Extra class names. |
 | `children` | `ReactNode` | none | Anything extra to show. |
 
@@ -36,8 +41,9 @@ unsaved page.
   onOpenChange={setOpen}
   title={t('…title')}
   description={t('…description')}
-  confirm={<Button variant="danger" onClick={confirm}>{t('auth.action.confirm')}</Button>}
-  cancel={<Button variant="ghost" onClick={() => setOpen(false)}>{t('auth.action.cancel')}</Button>}
+  confirm={t('auth.action.confirm')}
+  cancel={t('auth.action.cancel')}
+  onConfirm={confirm}
 />
 ```
 

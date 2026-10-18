@@ -27,6 +27,8 @@ import type {
   OAuthAuthorizeQuery,
   OAuthCallbackRequest,
   UserProfile,
+  AccountProfile,
+  AccountUsage,
 } from './types'
 
 /** 把域查询并进路径（`useRequest` 的选项里没有 `query`，参数化在域层收口 —— 与 `test` 域同一做法）。 */
@@ -118,3 +120,12 @@ export const logout: Request<void, LogoutResult> = { method: 'POST', path: '/use
 
 /** `GET /user/profile`：当前会话的用户资料（欢迎页在内存里没有用户信息时用它）。 */
 export const userProfile: Request<void, UserProfile> = { method: 'GET', path: '/user/profile' }
+
+/** `GET /user/profile?team=true`：账户菜单用的资料，带团队信息。 */
+export const accountProfile: Request<void, AccountProfile> = {
+  method: 'GET',
+  path: '/user/profile?team=true',
+}
+
+/** `GET /user/usage`：套餐与剩余额度。 */
+export const accountUsage: Request<void, AccountUsage> = { method: 'GET', path: '/user/usage' }

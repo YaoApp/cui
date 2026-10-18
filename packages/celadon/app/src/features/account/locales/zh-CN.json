@@ -1,0 +1,9 @@
+{
+  "account.settings.title": "设置",
+  "account.settings.close": "关闭设置",
+  "account.settings.menu": "设置分区",
+  "account.settings.section.profile": "个人资料",
+  "account.settings.section.team": "团队管理",
+  "account.settings.section.usage": "用量与套餐",
+  "account.settings.placeholder": "暂无设置项。"
+}

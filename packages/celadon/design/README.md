@@ -92,7 +92,7 @@
 - 真实伪类（`:hover` `:focus` `:read-only` `:disabled`）与 **`.is-*` 静态类一一对应** —— 后者用于设计稿/静态页**同时展示多态**；
 - 「危险」色分两档：`--danger` **只做填充**（文字仅 3.96:1），文字/图标用 `--danger-ink`（软底 5.57:1 ✓）。
 - **链接**：品牌墨色加下划线常驻，悬停补品牌软底而不换色（换色要再造一个链接色 token），键盘聚焦取 `--focus-ring`；站外地址由组件补 `target` 与 `rel`，访问过的链接不做区分。
-- **弹窗**：L3 档（`--shadow-overlay` 与 `--z-modal`）配 `--scrim` 遮罩；面板取 `--background-surface` 加 `--border-default` 边界、`--radius-large` 圆角与 `--shadow-overlay`，四边内距 `--spacing-24`，正文与底部之间 `--spacing-16`；宽度两档（`--dialog-width` 480 给表单与步骤，`--dialog-width-wide` 取中栏可读宽给整页内容），窄屏用 `min(100% - var(--spacing-32), …)` 收回来；头部与底部固定、正文滚动；成组操作只按右对齐一种。动效取 F4 的 `modal` 场景（进场 200ms 减速淡入加极小缩放，退场 120ms 加速只淡出）。确认框与抽屉共用同一套面板取值，抽屉另取 `drawer` 场景。
+- **弹窗**：L3 档（`--shadow-overlay` 与 `--z-modal`）配毛玻璃蒙版（`--scrim` 遮罩色叠 `--backdrop-blur` 12 的背景模糊）；面板取 `--background-surface` 加 `--border-default` 边界、`--radius-large` 圆角与 `--shadow-overlay`，四边内距 `--spacing-24`，正文与底部之间 `--spacing-16`；宽度三档（`--dialog-width` 480 给表单与步骤，`--dialog-width-wide` 取中栏可读宽给整页内容，大档在 `--dialog-width-full-min` 720 与 `--dialog-width-full` 1120 之间取视口可用宽并四周留 `--spacing-48`），窄屏按视口让位；头部与底部固定、正文滚动；成组操作只按右对齐一种。动效取 F4 的 `modal` 场景（进场 200ms 减速淡入加极小缩放，退场 120ms 加速只淡出）。确认框与抽屉共用同一套面板取值，抽屉另取 `drawer` 场景。
 
 ## 给 Agent 的配套文档
 

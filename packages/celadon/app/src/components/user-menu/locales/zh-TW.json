@@ -1,0 +1,23 @@
+{
+  "userMenu.label": "帳戶選單",
+  "userMenu.profile": "開啟個人資料",
+  "userMenu.signedOut": "未登入",
+  "userMenu.signIn": "登入",
+  "userMenu.signInLabel": "未登入，去登入",
+  "userMenu.retry": "重試",
+  "userMenu.unavailable": "帳戶無法使用",
+  "userMenu.usage": "用量",
+  "userMenu.unit": "積分",
+  "userMenu.upgrade": "升級",
+  "userMenu.settings": "設定",
+  "userMenu.team": "團隊",
+  "userMenu.home": "首頁",
+  "userMenu.help": "幫助",
+  "userMenu.docs": "文件",
+  "userMenu.signOut": "登出",
+  "userMenu.signOutTitle": "要登出嗎？",
+  "userMenu.signOutDescription": "登出後需要重新登入才能繼續使用。",
+  "userMenu.signingOut": "正在登出…",
+  "userMenu.signOutFailed": "登出失敗，請重試。",
+  "userMenu.cancel": "取消"
+}

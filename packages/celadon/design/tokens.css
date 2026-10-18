@@ -141,6 +141,8 @@
   --border-disabled: #e3e1da;
   --scrim: rgba(18, 17, 16, 0.32);
   /* 弹窗/抽屉遮罩（暖墨，与暗面同源） */
+  --backdrop-blur: 12px;
+  /* 蒙版的毛玻璃：遮罩背后的界面做高斯模糊，与遮罩一起挡住底下的内容 */
   /* ===== 警示 · 淡琥珀（不像 error）===== */
   --warm: #8b6214;
   /* 实心底（白字 5.45:1） */
@@ -201,6 +203,8 @@
   /* 界面里的紧凑行高（数值与卡片）*/
   --line-height-title: 1.6;
   /* 大标题行高（多行标题用，比正文松、比 tight 透气）*/
+  --line-height-none: 1;
+  /* 角标与单字形块：文字盒与字号同高，圆内居中不偏 */
   /* 控件行高取**整数像素**：倍率行高（1.7 × 14px = 23.8px）会把文字盒放在小数位置，
      重绘或 transform 时字形会被重新吸附到整像素，观感是文字跳位。控件高度本就由间距刻度定，
      行高整数不改变版面。小档用于 24 高的按钮，标准档用于 32 与 40。 */
@@ -357,6 +361,11 @@
   /* 弹窗面板的两档宽度：表单与步骤用窄档（与入口页卡片同宽），打开一整页内容用宽档（中栏可读宽） */
   --dialog-width: 480px;
   --dialog-width-wide: var(--content-max-wide);
+  /* 大尺寸弹窗的宽度区间：最宽 1120，最窄 720；视口更窄时按视口让位，不撑出窗口 */
+  --dialog-width-full: 1120px;
+  --dialog-width-full-min: 720px;
+  /* 账户菜单的固定宽度：与导航列无关，按名字、余量、团队名与快捷键的内容取，320 是四档 8 的倍数 */
+  --menu-width: 320px;
   /* ===== 边框 Border：强边界档（WCAG 1.4.11 达标值）=====
      默认态用 --border-control（观感轻）；高对比偏好下由下方 @media 自动切到强边界。
      达标实测：内容底 3.31 / 字段底 3.14 */
@@ -1460,7 +1469,9 @@
 .dialog__scrim {
   position: fixed;
   inset: 0;
+  /* 毛玻璃蒙版：遮罩色挡光，背景模糊把底下的界面压成一层质感，避免弹窗与背景文字抢注意力 */
   background: var(--scrim);
+  backdrop-filter: blur(var(--backdrop-blur));
   transition: opacity var(--duration-base) var(--easing-decelerate);
 }
 .dialog__viewport {
@@ -1496,6 +1507,17 @@
 }
 .dialog--page {
   inline-size: min(100%, var(--dialog-width-wide));
+}
+/* 大尺寸档：四周留 48，面板吃满其余空间；设置这类分区多、正文长的内容用它。
+   48 是间距刻度里最大的一档，窗口四边与面板之间因此有明显的一圈呼吸空间。 */
+.dialog__viewport--full {
+  padding: var(--spacing-48);
+}
+.dialog--full {
+  /* 宽度在 720 与 1120 之间取视口可用宽；视口更窄时让位给视口，不横向撑出窗口 */
+  inline-size: min(100%, var(--dialog-width-full));
+  min-inline-size: min(100%, var(--dialog-width-full-min));
+  block-size: 100%;
 }
 /* 面板自己拿到焦点时不画环（见 .dialog 的注释） */
 .dialog:focus,
