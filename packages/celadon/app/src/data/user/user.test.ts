@@ -262,9 +262,10 @@ describe('the account queries', () => {
 
   it('uses a successful mock logout without calling the server', async () => {
     vi.stubEnv('VITE_ACCOUNT_MOCK', '1')
+    signOutMock.mockResolvedValue({ ok: true })
     expect(await logoutQuery().operation()).toEqual({ ok: true, value: { message: 'mock' } })
     expect(sendMock).not.toHaveBeenCalled()
-    expect(signOutMock).not.toHaveBeenCalled()
+    expect(signOutMock).toHaveBeenCalled()
   })
 })
 
