@@ -23,8 +23,10 @@
 | `description` | `ReactNode` | 无 | 正文：说清后果与不可撤回之处。 |
 | `confirm` | `ReactNode` | 无 | 主操作的文案；按钮由弹窗自带。 |
 | `cancel` | `ReactNode` | 无 | 次操作的文案；按钮由弹窗自带。 |
-| `onConfirm` | `() => void` | 无 | 选主操作时执行；关闭与焦点归位仍由弹窗负责。 |
+| `onConfirm` | `() => void` | 无 | 选主操作时执行；默认随后关闭并把焦点还回去。 |
 | `onCancel` | `() => void` | 无 | 选次操作时执行；不传则只关闭。 |
+| `closeOnConfirm` | `boolean` | `true` | 主操作后是否立即关闭；异步动作传 `false`，结果回来再关。 |
+| `confirmDisabled` | `boolean` | `false` | 主操作置灰，用于动作进行中。 |
 | `className` | `string` | 无 | 追加类名。 |
 | `children` | `ReactNode` | 无 | 需要额外展示的内容。 |
 
