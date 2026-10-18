@@ -13,6 +13,7 @@ caller in the product needs it, and check for an upstream part before writing be
 | Component | Purpose |
 | --- | --- |
 | [`alert-dialog/`](alert-dialog/README.md) | A confirmation overlay that cannot be dismissed by accident. |
+| [`avatar/`](avatar/README.md) | Account avatar: photo or initial, with an optional team badge. |
 | [`brand-mark/`](brand-mark/README.md) | Brand graphics, a set separate from interface icons. |
 | [`button/`](button/README.md) | Buttons, eight variants and three size steps. |
 | [`captcha-field/`](captcha-field/README.md) | The image captcha control. |

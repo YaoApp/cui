@@ -3,6 +3,8 @@
 
 export { AlertDialog } from './alert-dialog'
 export type { AlertDialogProps } from './alert-dialog'
+export { Avatar } from './avatar'
+export type { AvatarProps, AvatarSize, AvatarTeam } from './avatar'
 export { BrandMark } from './brand-mark'
 export type { BrandMarkProps, BrandId } from './brand-mark'
 export { Button } from './button'

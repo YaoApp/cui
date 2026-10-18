@@ -11,6 +11,7 @@
 | 组件 | 用途 |
 | --- | --- |
 | [`alert-dialog/`](alert-dialog/README.zh-CN.md) | 不可误关的确认弹层。 |
+| [`avatar/`](avatar/README.zh-CN.md) | 账号头像：照片或首字母，可叠团队徽标。 |
 | [`brand-mark/`](brand-mark/README.zh-CN.md) | 品牌图形标识，与界面图标分属两套。 |
 | [`button/`](button/README.zh-CN.md) | 按钮，八个变体与三个尺寸档。 |
 | [`captcha-field/`](captcha-field/README.zh-CN.md) | 图形验证码控件。 |
