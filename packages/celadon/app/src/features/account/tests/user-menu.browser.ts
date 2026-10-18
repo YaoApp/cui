@@ -126,6 +126,25 @@ test('puts the collapsed navigation entry at the right edge of the content head'
   expect(await trigger.locator('.avatar__team').count()).toBe(0)
 })
 
+test('keeps a long name inside the collapsed entry', async ({ page }) => {
+  await page.mouse.move(140, 20)
+  await page.locator('.nav__toggle').first().click()
+  await page.waitForTimeout(400)
+
+  const name = page.locator('.content__head-trailing .user-menu__trigger-name')
+  await name.evaluate((el) => {
+    el.textContent = 'Alexandria-Cassandra Montgomery-Worthington the Third'
+  })
+  const trigger = page.locator('.content__head-trailing .user-menu__trigger')
+  const box = (await trigger.boundingBox())!
+  expect(box.width).toBeLessThanOrEqual(192)
+  expect(await name.evaluate((el) => el.scrollWidth > el.clientWidth)).toBe(true)
+  await expect(trigger.locator('.user-menu__trigger-chevron')).toBeVisible()
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(
+    await page.evaluate(() => innerWidth),
+  )
+})
+
 test('keeps the settings sidebar at the normal window size', async ({ page }) => {
   await page.setViewportSize({ width: 1080, height: 664 })
   await page.keyboard.press(`${process.platform === 'darwin' ? 'Meta' : 'Control'}+,`)
