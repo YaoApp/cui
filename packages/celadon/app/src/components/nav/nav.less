@@ -296,12 +296,14 @@
 	color: var(--text-primary);
 }
 
-/* 用户区的两个快捷图标只用图标：方形、无底，悬停与收起展开键同一套反馈 */
+/* 用户区的两个快捷图标只用图标：方形、无底，悬停与收起展开键同一套反馈。
+   命中区 24 见方、图标 16 居中；高度不再跟条目行那 32 走，悬停底不会比图标高出一截 */
 .nav__shortcut {
 	flex: none;
 	justify-content: center;
 	box-sizing: border-box;
 	inline-size: var(--spacing-24);
+	min-block-size: var(--spacing-24);
 	block-size: var(--spacing-24);
 	padding: 0;
 }
@@ -339,10 +341,11 @@
 	/* 钉在列底：场景区收起时用户区靠这条落到最下面 */
 	margin-block-start: auto;
 	/* 用户区自带一条上分割线，与上面的导航区隔开；整行高 48（比条目行高一档），
-     上下不留内距，折叠行的上下边距因此都是 8 */
+     上下不留内距，折叠行的上下边距因此都是 8。右侧不留内距：快捷图标与上方收放键对齐 */
 	box-sizing: border-box;
 	block-size: var(--spacing-48);
 	padding-inline: var(--spacing-12);
+	padding-inline-end: 0;
 	border-block-start: var(--border-width) solid var(--border-subtle);
 }
 
