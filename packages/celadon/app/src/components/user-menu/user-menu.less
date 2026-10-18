@@ -155,11 +155,12 @@
 	color: var(--text-secondary);
 }
 
-/* 升级是菜单里的整宽反色按钮，尺寸与配色由 Button 的 inverse 小档给；
-   这里只把整行压到菜单内容宽，与用量行对齐。 */
+/* 升级按钮的宽度与行内文字对齐：左右各让出行内距 12，
+   左缘与行首图标齐平，右缘与余量文字齐平。 */
 .user-menu__upgrade {
 	flex: none;
-	inline-size: 100%;
+	inline-size: calc(100% - var(--spacing-24));
+	margin-inline: var(--spacing-12);
 }
 
 .user-menu__upgrade[data-highlighted] {

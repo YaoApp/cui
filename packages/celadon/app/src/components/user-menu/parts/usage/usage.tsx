@@ -31,7 +31,7 @@ export function UserMenuUsage({ label, value, loading, upgradeLabel, upgradeUrl,
       {upgradeUrl && !loading ? (
         <BaseMenu.Item
           className='user-menu__upgrade'
-          render={<Button variant='inverse' size='small' block type='button' />}
+          render={<Button variant='inverse' size='small' type='button' />}
           onClick={onUpgrade}
         >
           {upgradeLabel}

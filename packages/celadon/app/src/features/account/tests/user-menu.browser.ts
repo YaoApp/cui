@@ -36,7 +36,12 @@ test('opens from the footer, shows the mock account and closes on Escape', async
   const upgrade = popup.getByRole('menuitem', { name: '升级' })
   await expect(upgrade).toHaveClass(/button--inverse/)
   await expect(upgrade).toHaveClass(/button--small/)
-  expect((await upgrade.boundingBox())?.height).toBeCloseTo(24, 0)
+  const upgradeBox = await upgrade.boundingBox()
+  const usageBox = await popup.locator('.user-menu__item').first().boundingBox()
+  expect(upgradeBox?.height).toBeCloseTo(24, 0)
+  /* 左右各让出行内距 12，与行首图标、行尾余量对齐 */
+  expect(upgradeBox?.x).toBeCloseTo((usageBox?.x ?? 0) + 12, 0)
+  expect((upgradeBox?.x ?? 0) + (upgradeBox?.width ?? 0)).toBeCloseTo((usageBox?.x ?? 0) + (usageBox?.width ?? 0) - 12, 0)
 
   await page.keyboard.press('Escape')
   await expect(popup).toBeHidden()
