@@ -36,6 +36,7 @@
 | `onOpenExternal` | `(url) => void` | 必填 | 升级与三个外链。 |
 | `onSignOut` | `() => void` | 必填 | 确认之后才调用。 |
 | `onSignIn` | `() => void` | 必填 | 未登录时使用。 |
+| `onRetry` | `() => void` | 无 | 账户不可用时，点身份段执行重试。 |
 
 ## 行为
 

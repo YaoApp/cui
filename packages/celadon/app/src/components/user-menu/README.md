@@ -38,6 +38,7 @@ not call any API.
 | `onOpenExternal` | `(url) => void` | required | Upgrade and the three links. |
 | `onSignOut` | `() => void` | required | Called after the confirmation. |
 | `onSignIn` | `() => void` | required | Used when signed out. |
+| `onRetry` | `() => void` | none | Runs when the identity row of the unavailable state is chosen. |
 
 ## Behaviour
 

@@ -165,7 +165,8 @@ export function AppLayout() {
 		onOpenSettings: openAccountSettings,
 		onOpenExternal: openUrl,
 		onSignOut: () => void signOutAccount(),
-		onSignIn: () => navigate('/login')
+		onSignIn: () => navigate('/login'),
+		onRetry: accountMenu.retry
 	}
 	const userMenu = <UserMenu {...accountMenuProps} width={menuWidth} variant='footer' />
 	const headUserMenu = navCollapsed ? (

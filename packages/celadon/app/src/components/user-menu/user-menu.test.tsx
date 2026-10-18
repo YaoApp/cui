@@ -11,6 +11,7 @@ function setup(props: Partial<UserMenuProps> = {}) {
     onOpenExternal: vi.fn(),
     onSignOut: vi.fn(),
     onSignIn: vi.fn(),
+    onRetry: vi.fn(),
   }
   render(
     <UserMenu
@@ -85,12 +86,15 @@ describe('UserMenu', () => {
     expect(screen.queryByText('Mock OAuth User')).toBeNull()
   })
 
-  it('keeps the links when the account is unavailable', async () => {
-    setup({ status: 'unavailable' })
+  it('keeps the links when the account is unavailable and retries from the identity row', async () => {
+    const handlers = setup({ status: 'unavailable' })
     await userEvent.click(screen.getByRole('button', { name: '账户菜单' }))
     expect(await screen.findByText('账户不可用')).toBeVisible()
     expect(screen.getByText('首页')).toBeVisible()
     expect(screen.queryByText('设置')).toBeNull()
+
+    await userEvent.click(screen.getByText('账户不可用'))
+    expect(handlers.onRetry).toHaveBeenCalled()
   })
 
   it('goes straight to sign in when signed out', async () => {

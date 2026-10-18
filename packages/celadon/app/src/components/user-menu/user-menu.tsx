@@ -33,6 +33,8 @@ export type UserMenuProps = {
   onOpenExternal: (url: string) => void
   onSignOut: () => void
   onSignIn: () => void
+  /** 资料取失败时身份段变成「重试」入口 */
+  onRetry?: () => void
 }
 
 const isUrl = (value?: string): value is string => Boolean(value)
@@ -53,7 +55,8 @@ export function UserMenu({
   onOpenSettings,
   onOpenExternal,
   onSignOut,
-  onSignIn
+  onSignIn,
+  onRetry
 }: UserMenuProps) {
   const { t, i18n } = useTranslation()
   const [confirming, setConfirming] = useState(false)
@@ -119,7 +122,7 @@ export function UserMenu({
                     plan=''
                     team={team}
                     label={t('userMenu.retry')}
-                    onSelect={() => onOpenSettings('profile')}
+                    onSelect={() => onRetry?.()}
                   />
                   <UserMenuSeparator />
                   <UserMenuItem icon='i-home' label={t('userMenu.home')} external onSelect={() => onOpenExternal(links.home)} />
