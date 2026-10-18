@@ -7,7 +7,9 @@
 .dialog__scrim {
   position: fixed;
   inset: 0;
+  /* 毛玻璃蒙版：遮罩色挡光，背景模糊把底下的界面压成一层质感，避免弹窗与背景文字抢注意力 */
   background: var(--scrim);
+  backdrop-filter: blur(var(--backdrop-blur));
   transition: opacity var(--duration-base) var(--easing-decelerate);
 }
 
@@ -57,7 +59,9 @@
 }
 
 .dialog--full {
-  inline-size: 100%;
+  /* 宽度在 720 与 1120 之间取视口可用宽；视口更窄时让位给视口，不横向撑出窗口 */
+  inline-size: min(100%, var(--dialog-width-full));
+  min-inline-size: min(100%, var(--dialog-width-full-min));
   block-size: 100%;
 }
 

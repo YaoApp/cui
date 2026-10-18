@@ -1,7 +1,7 @@
 # components/base/dialog
 
 `components/base/dialog` 是弹层页面：把一页内容放进浮层里。它基于上游的 `@base-ui/react` 的 Dialog，
-焦点陷阱、`Esc` 关闭、点遮罩关闭与滚动锁定都由上游负责；本组件给两档宽度与一套头部与底部的结构。
+焦点陷阱、`Esc` 关闭、点遮罩关闭与滚动锁定都由上游负责；本组件给三档宽度与一套头部与底部的结构。
 
 按 `design/main-shell.md` §六，导航入口在这类浮层里呈现（大弹窗形态），会话里的引用则在第三栏开一页。
 
@@ -10,7 +10,7 @@
 | 文件 | 内容 |
 | --- | --- |
 | `dialog.tsx` | `DialogPage` 组件、`DialogProps`、`DialogSize` 与 `DialogOpenType`，并再导出上游的部件。 |
-| `dialog.less` | 两档宽度、高度上限、头部、正文与底部的布局。 |
+| `dialog.less` | 三档宽度、高度上限、蒙版、头部、正文与底部的布局。 |
 | `dialog.test.tsx` | 单元用例：打开与关闭、尺寸档、焦点与关闭键。 |
 | `index.ts` | 对外出口：`DialogPage` 与 `DialogParts`。 |
 
@@ -25,7 +25,7 @@
 | `description` | `ReactNode` | 无 | 说明文字。 |
 | `closeLabel` | `string` | 无 | 关闭键的无障碍名，调用方从语言包取。 |
 | `footer` | `ReactNode` | 无 | 底部操作区。 |
-| `size` | `'form' \| 'page' \| 'full'` | `'form'` | 宽度档：表单档 480，页面档取内容区可读上限，大档吃满窗口并四周留 48。 |
+| `size` | `'form' \| 'page' \| 'full'` | `'form'` | 宽度档：表单档 480，页面档取内容区可读上限，大档在 720 到 1120 之间取视口可用宽并四周留 48。 |
 | `disablePointerDismissal` | `boolean` | `false` | 为真时点遮罩不关闭，用于不能误关的流程。 |
 | `initialFocus` | `boolean \| RefObject \| ((openType) => …)` | 无 | 打开后焦点落点；人机验证这类第三方控件要显式不动焦点。 |
 | `className` | `string` | 无 | 追加类名。 |
@@ -46,6 +46,11 @@
 </DialogPage>
 ```
 
+## 外观
+
+- 蒙版是毛玻璃：`--scrim` 提供遮罩色，`--backdrop-blur`（12px）把背后的界面模糊，底下内容不会与弹窗文字抢注意力。
+- 面板取 `--background-surface`、`--border-default`、`--radius-large` 与 `--shadow-overlay`；头部与底部固定，正文自己滚。
+
 ## 无障碍
 
 - 标题与说明接到上游的 `aria-labelledby` 与 `aria-describedby` 上；关闭键必须给 `aria-label`。
@@ -57,4 +62,4 @@
 
 ## 已知限制
 
-- 宽度只有两档（480 与内容区可读上限）。`design/main-shell.md` §六 写的 880 × 620 还没有对应的档位。
+- 大档高度仍随视口（上下各留 48），没有独立的高度上限；宽度在 720 到 1120 之间，视口更窄时按视口让位。

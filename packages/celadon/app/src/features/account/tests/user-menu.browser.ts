@@ -78,13 +78,17 @@ test('opens the settings window from the identity row and switches sections', as
   await expect(dialog.getByRole('heading', { name: '个人资料' })).toBeVisible()
   await page.waitForTimeout(300)
 
-  /* full 档：四周留 48，面板吃满窗口其余空间 */
+  /* full 档：四周留 48，宽度在 720 与 1120 之间取视口可用宽 */
   const viewport = page.viewportSize()!
+  const expectedWidth = Math.min(viewport.width - 96, 1120)
   const dialogBox = await dialog.boundingBox()
-  expect(dialogBox?.x).toBeCloseTo(48, 0)
+  expect(dialogBox?.x).toBeCloseTo((viewport.width - expectedWidth) / 2, 0)
   expect(dialogBox?.y).toBeCloseTo(48, 0)
-  expect(dialogBox?.width).toBeCloseTo(viewport.width - 96, 0)
+  expect(dialogBox?.width).toBeCloseTo(expectedWidth, 0)
   expect(dialogBox?.height).toBeCloseTo(viewport.height - 96, 0)
+
+  const blur = await page.locator('.dialog__scrim').evaluate((el) => getComputedStyle(el).backdropFilter)
+  expect(blur).toContain('blur')
 
   await dialog.getByRole('button', { name: '团队管理' }).click()
   await expect(dialog.getByRole('heading', { name: '团队管理' })).toBeVisible()

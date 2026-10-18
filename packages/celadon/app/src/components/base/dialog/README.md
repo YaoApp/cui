@@ -2,7 +2,7 @@
 
 `components/base/dialog` is the overlay page: a whole page placed in a floating layer. It builds on Base UI's
 Dialog, so the focus trap, closing on `Esc`, closing on an overlay click and scroll locking are handled
-upstream; this component adds two width steps and one head-and-foot structure.
+upstream; this component adds three width steps and one head-and-foot structure.
 
 Per `design/main-shell.md` section six, navigation entries appear in such an overlay (the large dialog form),
 while a reference from a conversation opens a page in the third column.
@@ -12,7 +12,7 @@ while a reference from a conversation opens a page in the third column.
 | File | Contents |
 | --- | --- |
 | `dialog.tsx` | The `DialogPage` component, `DialogProps`, `DialogSize` and `DialogOpenType`, plus re-exports of the upstream parts. |
-| `dialog.less` | The two width steps, the height cap, and the layout of head, body and foot. |
+| `dialog.less` | The three width steps, the height cap, the scrim, and the layout of head, body and foot. |
 | `dialog.test.tsx` | Unit tests: opening and closing, size steps, focus and the close key. |
 | `index.ts` | The module's public surface: `DialogPage` and `DialogParts`. |
 
@@ -27,7 +27,7 @@ while a reference from a conversation opens a page in the third column.
 | `description` | `ReactNode` | none | Supporting text. |
 | `closeLabel` | `string` | none | Accessible name of the close key; the caller reads it from the language bundle. |
 | `footer` | `ReactNode` | none | The action area at the foot. |
-| `size` | `'form' \| 'page' \| 'full'` | `'form'` | Width step: the form step is 480, the page step takes the content column's readable cap, the full step fills the window with a 48 pixel margin. |
+| `size` | `'form' \| 'page' \| 'full'` | `'form'` | Width step: the form step is 480, the page step takes the content column's readable cap, the full step takes the viewport width between 720 and 1120 with a 48 pixel margin. |
 | `disablePointerDismissal` | `boolean` | `false` | When true an overlay click does not close it, for flows that must not be dismissed by accident. |
 | `initialFocus` | `boolean \| RefObject \| ((openType) => …)` | none | Where focus lands after opening; third-party controls such as human verification keep focus untouched. |
 | `className` | `string` | none | Extra class names. |
@@ -48,6 +48,11 @@ while a reference from a conversation opens a page in the third column.
 </DialogPage>
 ```
 
+## Appearance
+
+- The scrim is frosted glass: `--scrim` supplies the overlay colour and `--backdrop-blur` (12px) blurs the interface behind it, so background text does not compete with the dialog.
+- The panel uses `--background-surface`, `--border-default`, `--radius-large` and `--shadow-overlay`; head and foot stay fixed while the body scrolls.
+
 ## Accessibility
 
 - Title and description are wired to the upstream `aria-labelledby` and `aria-describedby`; the close key must
@@ -61,5 +66,4 @@ Unit tests sit next to the component: `dialog.test.tsx`.
 
 ## Known limits
 
-- Two width steps only (480 and the content column's readable cap). The 880 by 620 form in
-  `design/main-shell.md` section six has no matching step yet.
+- The full step still takes its height from the viewport (48 above and below); it has no separate height cap. Its width sits between 720 and 1120 and yields to narrower viewports.

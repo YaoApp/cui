@@ -141,6 +141,8 @@
   --border-disabled: #e3e1da;
   --scrim: rgba(18, 17, 16, 0.32);
   /* 弹窗/抽屉遮罩（暖墨，与暗面同源） */
+  --backdrop-blur: 12px;
+  /* 蒙版的毛玻璃：遮罩背后的界面做高斯模糊，与遮罩一起挡住底下的内容 */
   /* ===== 警示 · 淡琥珀（不像 error）===== */
   --warm: #8b6214;
   /* 实心底（白字 5.45:1） */
@@ -359,6 +361,9 @@
   /* 弹窗面板的两档宽度：表单与步骤用窄档（与入口页卡片同宽），打开一整页内容用宽档（中栏可读宽） */
   --dialog-width: 480px;
   --dialog-width-wide: var(--content-max-wide);
+  /* 大尺寸弹窗的宽度区间：最宽 1120，最窄 720；视口更窄时按视口让位，不撑出窗口 */
+  --dialog-width-full: 1120px;
+  --dialog-width-full-min: 720px;
   /* 账户菜单的固定宽度：与导航列无关，按名字、余量、团队名与快捷键的内容取，320 是四档 8 的倍数 */
   --menu-width: 320px;
   /* ===== 边框 Border：强边界档（WCAG 1.4.11 达标值）=====
@@ -1464,7 +1469,9 @@
 .dialog__scrim {
   position: fixed;
   inset: 0;
+  /* 毛玻璃蒙版：遮罩色挡光，背景模糊把底下的界面压成一层质感，避免弹窗与背景文字抢注意力 */
   background: var(--scrim);
+  backdrop-filter: blur(var(--backdrop-blur));
   transition: opacity var(--duration-base) var(--easing-decelerate);
 }
 .dialog__viewport {
@@ -1507,7 +1514,9 @@
   padding: var(--spacing-48);
 }
 .dialog--full {
-  inline-size: 100%;
+  /* 宽度在 720 与 1120 之间取视口可用宽；视口更窄时让位给视口，不横向撑出窗口 */
+  inline-size: min(100%, var(--dialog-width-full));
+  min-inline-size: min(100%, var(--dialog-width-full-min));
   block-size: 100%;
 }
 /* 面板自己拿到焦点时不画环（见 .dialog 的注释） */
