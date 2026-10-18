@@ -15,6 +15,10 @@ export type AlertDialogProps = {
   confirm: ReactNode
   /** 次操作：取消。 */
   cancel: ReactNode
+  /** 确认时执行的动作；关闭与焦点归位仍由上游处理，这里只挂业务。 */
+  onConfirm?: () => void
+  /** 取消时执行的动作；不传则只关闭。 */
+  onCancel?: () => void
   className?: string
   children?: ReactNode
 }
@@ -32,6 +36,8 @@ export function AlertDialog({
   description,
   confirm,
   cancel,
+  onConfirm,
+  onCancel,
   className,
   children,
 }: AlertDialogProps) {
@@ -49,10 +55,18 @@ export function AlertDialog({
             ) : null}
             {children ? <div className="dialog__body">{children}</div> : null}
             <footer className="dialog__foot">
-              <BaseAlertDialog.Close render={<Button type="button" variant="ghost" />}>{cancel}</BaseAlertDialog.Close>
+              <BaseAlertDialog.Close
+                render={<Button type="button" variant="ghost" onClick={onCancel} />}
+              >
+                {cancel}
+              </BaseAlertDialog.Close>
               {/* 主操作也走上游的 Close：关闭原因与焦点归位由上游按同一条路处理，
                   自己在 onClick 里翻 open 会绕过它，finalFocus 一类回调读不到关闭原因 */}
-              <BaseAlertDialog.Close render={<Button type="button" variant="inverse" />}>{confirm}</BaseAlertDialog.Close>
+              <BaseAlertDialog.Close
+                render={<Button type="button" variant="inverse" onClick={onConfirm} />}
+              >
+                {confirm}
+              </BaseAlertDialog.Close>
             </footer>
           </BaseAlertDialog.Popup>
         </BaseAlertDialog.Viewport>

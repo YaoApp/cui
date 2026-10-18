@@ -21,8 +21,10 @@
 | `onOpenChange` | `(open: boolean) => void` | 无 | 打开状态变化；取消与 `Esc` 都走它。 |
 | `title` | `ReactNode` | 无 | 标题，与 `role="alertdialog"` 关联。 |
 | `description` | `ReactNode` | 无 | 正文：说清后果与不可撤回之处。 |
-| `confirm` | `ReactNode` | 无 | 主操作，通常是危险或品牌实心按钮。 |
-| `cancel` | `ReactNode` | 无 | 次操作。 |
+| `confirm` | `ReactNode` | 无 | 主操作的文案；按钮由弹窗自带。 |
+| `cancel` | `ReactNode` | 无 | 次操作的文案；按钮由弹窗自带。 |
+| `onConfirm` | `() => void` | 无 | 选主操作时执行；关闭与焦点归位仍由弹窗负责。 |
+| `onCancel` | `() => void` | 无 | 选次操作时执行；不传则只关闭。 |
 | `className` | `string` | 无 | 追加类名。 |
 | `children` | `ReactNode` | 无 | 需要额外展示的内容。 |
 
@@ -34,8 +36,9 @@
   onOpenChange={setOpen}
   title={t('…title')}
   description={t('…description')}
-  confirm={<Button variant="danger" onClick={confirm}>{t('auth.action.confirm')}</Button>}
-  cancel={<Button variant="ghost" onClick={() => setOpen(false)}>{t('auth.action.cancel')}</Button>}
+  confirm={t('auth.action.confirm')}
+  cancel={t('auth.action.cancel')}
+  onConfirm={confirm}
 />
 ```
 
