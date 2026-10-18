@@ -99,6 +99,17 @@ test('opens the settings window from the identity row and switches sections', as
   await expect(page.locator(POPUP)).toBeHidden()
 })
 
+test('closes the settings window on Escape and gives focus back to the account trigger', async ({ page }) => {
+  await page.locator(TRIGGER).click()
+  await page.locator(POPUP).getByText('Mock OAuth User').click()
+  const dialog = page.getByRole('dialog')
+  await expect(dialog).toBeVisible()
+
+  await page.keyboard.press('Escape')
+  await expect(dialog).toBeHidden()
+  await expect(page.locator(TRIGGER)).toBeFocused()
+})
+
 test('opens the settings window with the platform shortcut', async ({ page }) => {
   const modifier = process.platform === 'darwin' ? 'Meta' : 'Control'
   await page.keyboard.press(`${modifier}+,`)

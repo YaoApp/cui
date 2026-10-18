@@ -340,12 +340,13 @@
 	/* 钉在列底：场景区收起时用户区靠这条落到最下面 */
 	margin-block-start: auto;
 	/* 用户区自带一条上分割线，与上面的导航区隔开；整行高 48（比条目行高一档），
-	   上下不留内距，折叠行的上下边距因此都是 8。左内距取 4：头像 32 宽，左缘落在 12，
-	   中线因此是 28，与品牌标志（24 宽、左缘 16）的中线对齐；右内距取 12，
+	   上下不留内距，折叠行的上下边距因此都是 8。左内距为 0，4 像素留给触发按钮自己的内距：
+	   头像 32 宽，左缘落在 12、中线 28，与品牌标志（24 宽、左缘 16）的中线对齐，
+	   触发按钮左右内距相同，焦点环与悬停底两侧对称；右内距取 12，
 	   右侧快捷图标的右缘与折叠行展开键对齐 */
 	box-sizing: border-box;
 	block-size: var(--spacing-48);
-	padding-inline: var(--spacing-4) var(--spacing-12);
+	padding-inline: 0 var(--spacing-12);
 	border-block-start: var(--border-width) solid var(--border-subtle);
 }
 
