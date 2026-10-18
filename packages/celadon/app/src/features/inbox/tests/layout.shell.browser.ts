@@ -357,25 +357,25 @@ test('keeps the clipped shell as wide as its column after the window narrows', a
 	expect(narrow.tabLeft).toBeGreaterThanOrEqual(narrow.columnLeft)
 })
 
-test('keeps the footer shortcuts tight and flush with the column edge', async ({ page }) => {
+test('keeps the footer shortcuts square and inset from the column edge', async ({ page }) => {
 	await markSignedIn(page)
 	await page.goto('/app/inbox')
 	const nav = columns(page).nav
 	const shortcuts = nav.locator('.nav__shortcut')
 	await expect(shortcuts).toHaveCount(2)
 
-	/* 命中区 24 见方，两个图标之间留 4；最右那一格与上方整列收起键同一条竖线 */
+	/* 命中区 24 见方，两个图标之间留 8；最右一格距底行右内缘 12 */
 	const boxes = await shortcuts.evaluateAll((els) =>
 		els.map((el) => {
 			const box = el.getBoundingClientRect()
 			return { left: box.left, right: box.right, width: box.width, height: box.height }
 		})
 	)
-	const keyBox = (await nav.locator('.nav__toggle').first().boundingBox())!
+	const footer = (await nav.locator('.nav__footer').boundingBox())!
 	for (const box of boxes) {
 		expect(Math.round(box.width)).toBe(24)
 		expect(Math.round(box.height)).toBe(24)
 	}
-	expect(Math.round(keyBox.x + keyBox.width - boxes[boxes.length - 1].right)).toBe(0)
-	expect(Math.round(boxes[1].left - boxes[0].right)).toBe(4)
+	expect(Math.round(footer.x + footer.width - boxes[boxes.length - 1].right)).toBe(12)
+	expect(Math.round(boxes[1].left - boxes[0].right)).toBe(8)
 })
