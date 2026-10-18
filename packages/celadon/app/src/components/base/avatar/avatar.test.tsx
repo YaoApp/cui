@@ -1,4 +1,4 @@
-import { fireEvent, render } from '@testing-library/react'
+import { fireEvent, render, waitFor } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { Avatar } from './avatar'
 
@@ -28,7 +28,16 @@ describe('Avatar', () => {
     expect(container.querySelector('.avatar__initial')?.textContent).toBe('M')
   })
 
-  it('stacks a team badge with the team initial', () => {
+    it('retries when the image source changes after a failure', async () => {
+      const { container, rerender } = render(<Avatar name="Mock" src="https://example.com/a.png" />)
+      fireEvent.error(container.querySelector('.avatar__image')!)
+      expect(container.querySelector('.avatar__image')).toBeNull()
+
+      rerender(<Avatar name="Mock" src="https://example.com/b.png" />)
+      await waitFor(() => expect(container.querySelector('.avatar__image')).toBeTruthy())
+    })
+
+    it('stacks a team badge with the team initial', () => {
     const { container } = render(<Avatar name="Mock" team={{ name: 'Administrator Team' }} />)
     expect(container.querySelector('.avatar__team')?.textContent).toBe('A')
   })

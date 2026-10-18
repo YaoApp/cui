@@ -1,5 +1,5 @@
 import './avatar.less'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 export type AvatarSize = 24 | 32 | 64
 
@@ -37,6 +37,8 @@ function classNames(...parts: Array<string | false | undefined>): string {
     只负责展示，不认识账号与团队的业务数据（见 `architecture/03-boundaries.md`）。 */
 export function Avatar({ name, src, size = 32, team, loading = false, label, className }: AvatarProps) {
   const [failed, setFailed] = useState(false)
+  /* 换了一个头像地址就重新尝试；失败只针对当前这一张图 */
+  useEffect(() => setFailed(false), [src])
   const showImage = Boolean(src) && !failed
 
   if (loading) {
