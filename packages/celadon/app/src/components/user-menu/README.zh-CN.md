@@ -30,6 +30,7 @@
 | `usage` | `{ remaining: number \| null; upgradeUrl?: string }` | 无 | 余量用 `Intl.NumberFormat` 加本语言单位。 |
 | `shortcut` | `string` | 无 | 设置行右侧的快捷键，如 `⌘,` 或 `Ctrl+,`。 |
 | `variant` | `'footer' \| 'icon'` | `'footer'` | 底部一行带名字，列头只画头像。 |
+| `silentFocus` | `boolean` | `false` | 设置窗按 `Esc` 关闭后，按钮承接焦点但不画焦点环，直到下一次键盘或指针操作。 |
 | `links` | `{ home, help, docs }` | 必填 | 三个外链地址。 |
 | `onOpenSettings` | `(section) => void` | 必填 | `profile` · `team` · `usage`。 |
 | `onOpenExternal` | `(url) => void` | 必填 | 升级与三个外链。 |

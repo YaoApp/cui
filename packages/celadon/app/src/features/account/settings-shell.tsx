@@ -8,7 +8,7 @@ import type { UserMenuSection } from '@/components/user-menu'
 export type SettingsShellProps = {
   open: boolean
   section: UserMenuSection
-  onOpenChange: (open: boolean) => void
+  onOpenChange: (open: boolean, reason?: string) => void
   onSection: (section: UserMenuSection) => void
 }
 

@@ -124,6 +124,8 @@ export function AppLayout() {
 		open: false,
 		section: 'profile',
 	})
+	/* Esc 关闭设置窗后焦点回到账户入口，但不画焦点环；下一次键盘或指针操作恢复常规样式 */
+	const [silentFocus, setSilentFocus] = useState(false)
 	const menuLinks = accountLinks(i18n.language)
 	const menuShortcut = client.os === 'macos' ? '⌘,' : 'Ctrl+,'
 
@@ -135,13 +137,38 @@ export function AppLayout() {
 			const tag = target?.tagName
 			if (target?.isContentEditable || tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return
 			event.preventDefault()
+			setSilentFocus(false)
 			setSettings({ open: true, section: 'profile' })
 		}
 		window.addEventListener('keydown', onKeyDown)
 		return () => window.removeEventListener('keydown', onKeyDown)
 	}, [])
 
-	const openAccountSettings = (section: UserMenuSection) => setSettings({ open: true, section })
+	/* 静默焦点保留到下一次键盘或指针操作：再按 Esc 不算，Tab、回车或点击才撤掉并恢复焦点环 */
+	useEffect(() => {
+		if (!silentFocus) return
+		const clear = () => setSilentFocus(false)
+		const clearOnKey = (event: KeyboardEvent) => {
+			if (event.key === 'Escape') return
+			setSilentFocus(false)
+		}
+		window.addEventListener('pointerdown', clear, { capture: true, once: true })
+		window.addEventListener('keydown', clearOnKey, true)
+		return () => {
+			window.removeEventListener('pointerdown', clear, { capture: true })
+			window.removeEventListener('keydown', clearOnKey, true)
+		}
+	}, [silentFocus])
+
+	const openAccountSettings = (section: UserMenuSection) => {
+		setSilentFocus(false)
+		setSettings({ open: true, section })
+	}
+
+	const changeSettings = (open: boolean, reason?: string) => {
+		setSettings((prev) => ({ ...prev, open }))
+		if (!open && reason === 'escape-key') setSilentFocus(true)
+	}
 
 	const signOutAccount = async () => {
 		const done = await signOutSession()
@@ -167,8 +194,10 @@ export function AppLayout() {
 		onSignIn: () => navigate('/login'),
 		onRetry: accountMenu.retry
 	}
-	const userMenu = <UserMenu {...accountMenuProps} variant='footer' />
-	const headUserMenu = navCollapsed ? <UserMenu {...accountMenuProps} variant='icon' /> : undefined
+	const userMenu = <UserMenu {...accountMenuProps} silentFocus={silentFocus} variant='footer' />
+	const headUserMenu = navCollapsed ? (
+		<UserMenu {...accountMenuProps} silentFocus={silentFocus} variant='icon' />
+	) : undefined
 	const tabs = useTabsStore((state) => state.tabs)
 	const activeKey = useTabsStore((state) => state.activeKey)
 	const openBlankTab = useTabsStore((state) => state.openBlank)
@@ -473,7 +502,7 @@ export function AppLayout() {
 			<SettingsShell
 				open={settings.open}
 				section={settings.section}
-				onOpenChange={(open) => setSettings((prev) => ({ ...prev, open }))}
+				onOpenChange={changeSettings}
 				onSection={(section) => setSettings((prev) => ({ ...prev, section }))}
 			/>
 		</div>

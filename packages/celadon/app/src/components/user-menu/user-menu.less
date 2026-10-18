@@ -17,6 +17,13 @@
 	background: var(--nav-hover);
 }
 
+/* 设置窗按 Esc 关闭时焦点归位到触发按钮，但不画焦点环：静默只维持到下一次键盘或指针操作。
+   选择器带上 .button，压过按钮组件后加载的同名焦点规则 */
+.button.user-menu__trigger--silent-focus:focus-visible {
+	box-shadow: none;
+	outline: none;
+}
+
 .user-menu__trigger-name {
 	flex: 0 1 auto;
 	min-inline-size: 0;

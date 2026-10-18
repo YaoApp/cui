@@ -26,6 +26,8 @@ export type UserMenuProps = {
   shortcut?: string
   /** 只影响触发按钮：底部一行带名字，内容列头只有头像 */
   variant?: 'footer' | 'icon'
+  /** 设置窗按 Esc 关闭后，触发按钮承接焦点但不画焦点环，等下一次操作恢复 */
+  silentFocus?: boolean
   links: UserMenuLinks
   onOpenSettings: (section: UserMenuSection) => void
   onOpenExternal: (url: string) => void
@@ -48,6 +50,7 @@ export function UserMenu({
   usage,
   shortcut,
   variant = 'footer',
+  silentFocus = false,
   links,
   onOpenSettings,
   onOpenExternal,
@@ -87,7 +90,7 @@ export function UserMenu({
     <>
       <BaseMenu.Root>
         <BaseMenu.Trigger
-          className={`user-menu__trigger user-menu__trigger--${variant}`}
+          className={`user-menu__trigger user-menu__trigger--${variant}${silentFocus ? ' user-menu__trigger--silent-focus' : ''}`}
           aria-label={triggerLabel}
           render={<Button variant='plain' size='small' />}
         >

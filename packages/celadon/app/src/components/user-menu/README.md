@@ -32,6 +32,7 @@ not call any API.
 | `usage` | `{ remaining: number \| null; upgradeUrl?: string }` | none | Remaining credits are formatted with `Intl.NumberFormat` plus the localised unit. |
 | `shortcut` | `string` | none | Shown on the Settings row, e.g. `⌘,` or `Ctrl+,`. |
 | `variant` | `'footer' \| 'icon'` | `'footer'` | Footer shows the name; the head trigger shows the avatar only. |
+| `silentFocus` | `boolean` | `false` | After Escape closes settings the trigger takes focus without a visible ring until the next key or pointer action. |
 | `links` | `{ home, help, docs }` | required | External addresses. |
 | `onOpenSettings` | `(section) => void` | required | `profile` · `team` · `usage`. |
 | `onOpenExternal` | `(url) => void` | required | Upgrade and the three links. |

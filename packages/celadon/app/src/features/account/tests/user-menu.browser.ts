@@ -107,7 +107,17 @@ test('closes the settings window on Escape and gives focus back to the account t
 
   await page.keyboard.press('Escape')
   await expect(dialog).toBeHidden()
-  await expect(page.locator(TRIGGER)).toBeFocused()
+  const trigger = page.locator(TRIGGER)
+  await expect(trigger).toBeFocused()
+  await page.waitForTimeout(300)
+  expect(await trigger.evaluate((el) => getComputedStyle(el).boxShadow)).toBe('none')
+
+  /* 下一次键盘操作撤掉静默：Tab 离开再回来，焦点环恢复 */
+  await page.keyboard.press('Tab')
+  await page.keyboard.press('Shift+Tab')
+  await expect(trigger).toBeFocused()
+  await page.waitForTimeout(200)
+  expect(await trigger.evaluate((el) => getComputedStyle(el).boxShadow)).not.toBe('none')
 })
 
 test('opens the settings window with the platform shortcut', async ({ page }) => {

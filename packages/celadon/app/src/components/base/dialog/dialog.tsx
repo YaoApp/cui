@@ -16,7 +16,8 @@ export type DialogOpenType = '' | 'mouse' | 'touch' | 'pen' | 'keyboard'
 export type DialogProps = {
   /** 受控开关。 */
   open: boolean
-  onOpenChange: (open: boolean) => void
+  /** 开关回调；第二个参数是上游给的关闭原因（如 `escape-key`），调用方据此区分关闭路径。 */
+  onOpenChange: (open: boolean, reason?: string) => void
   /** 进场或退场动画结束（上游同名回调）：退场结束时才是真正可以卸载面板的时机。 */
   onOpenChangeComplete?: (open: boolean) => void
   /** 标题：落在 `Dialog.Title` 上，由上游与 `role="dialog"` 关联。 */
@@ -74,7 +75,7 @@ export function DialogPage({
   return (
     <BaseDialog.Root
       open={open}
-      onOpenChange={onOpenChange}
+      onOpenChange={(next, details) => onOpenChange(next, details.reason)}
       onOpenChangeComplete={onOpenChangeComplete}
       disablePointerDismissal={disablePointerDismissal}
     >
