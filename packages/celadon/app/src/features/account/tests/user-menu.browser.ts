@@ -28,9 +28,15 @@ test('opens from the footer, shows the mock account and closes on Escape', async
   await expect(popup).toBeVisible()
   await expect(popup).toContainText('Mock OAuth User')
   await expect(popup).toContainText('体验版')
+  await expect(popup).toContainText('用量')
   await expect(popup).toContainText('积分')
   await expect(popup).toContainText("Administrator's Team")
   await expect(popup).toContainText('Ctrl+,')
+
+  const upgrade = popup.getByRole('menuitem', { name: '升级' })
+  await expect(upgrade).toHaveClass(/button--inverse/)
+  await expect(upgrade).toHaveClass(/button--small/)
+  expect((await upgrade.boundingBox())?.height).toBeCloseTo(24, 0)
 
   await page.keyboard.press('Escape')
   await expect(popup).toBeHidden()

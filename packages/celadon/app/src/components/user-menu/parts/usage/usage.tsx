@@ -1,4 +1,5 @@
 import { Menu as BaseMenu } from '@base-ui/react/menu'
+import { Button } from '@/components/base/button'
 import { Icon } from '@/components/base/icon'
 
 export type UserMenuUsageProps = {
@@ -13,7 +14,8 @@ export type UserMenuUsageProps = {
   onUpgrade: () => void
 }
 
-/** 用量行与升级按钮：数据未回来时只给骨架，取不到时不再画升级入口。 */
+/** 用量行与升级按钮：数据未回来时只给骨架，取不到时不再画升级入口。
+    升级用反色小档、整宽，与用量行同宽。 */
 export function UserMenuUsage({ label, value, loading, upgradeLabel, upgradeUrl, onSelect, onUpgrade }: UserMenuUsageProps) {
   return (
     <>
@@ -27,8 +29,12 @@ export function UserMenuUsage({ label, value, loading, upgradeLabel, upgradeUrl,
         )}
       </BaseMenu.Item>
       {upgradeUrl && !loading ? (
-        <BaseMenu.Item className='user-menu__upgrade' onClick={onUpgrade}>
-          <span>{upgradeLabel}</span>
+        <BaseMenu.Item
+          className='user-menu__upgrade'
+          render={<Button variant='inverse' size='small' block type='button' />}
+          onClick={onUpgrade}
+        >
+          {upgradeLabel}
         </BaseMenu.Item>
       ) : null}
     </>

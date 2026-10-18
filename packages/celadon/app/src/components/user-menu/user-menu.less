@@ -47,23 +47,31 @@
 	border-radius: var(--radius-medium);
 	background: var(--background-surface);
 	box-shadow: var(--shadow-floating);
-	animation: user-menu-in var(--duration-fast) var(--easing-decelerate);
+	/* 下拉出现与收起（F4 的 dropdown 场景）：进场 200ms 减速，只动透明度与很小的缩放；
+	   退场只淡出、不做位移与缩放，时长取 120ms 加速。缩放原点取定位器给的 --transform-origin，
+	   弹层因此在触发器的对应一角展开。系统减少动态时时长在 tokens 里归零。 */
+	transform-origin: var(--transform-origin, center);
+	transition:
+		opacity var(--duration-base) var(--easing-decelerate),
+		transform var(--duration-base) var(--easing-decelerate);
 }
 
-@keyframes user-menu-in {
-	from {
-		opacity: 0;
-	}
-
-	to {
-		opacity: 1;
-	}
+.user-menu__popup[data-starting-style] {
+	opacity: 0;
+	transform: scale(0.98);
 }
 
-@media (prefers-reduced-motion: reduce) {
-	.user-menu__popup {
-		animation: none;
-	}
+.user-menu__popup[data-ending-style] {
+	opacity: 0;
+	transform: none;
+	transition-duration: var(--duration-fast);
+	transition-timing-function: var(--easing-accelerate);
+}
+
+/* 触发按钮只负责开菜单，不做按压缩放：菜单与按下同帧出现，再缩放会像按到了另一件事 */
+.button.user-menu__trigger[aria-haspopup='menu']:active {
+	transform: none;
+	will-change: auto;
 }
 
 .user-menu__identity {
@@ -74,7 +82,7 @@
 	min-block-size: calc(var(--spacing-32) + var(--spacing-24));
 	padding: var(--spacing-8) var(--spacing-12);
 	border-radius: var(--radius-small);
-	cursor: default;
+	cursor: pointer;
 	user-select: none;
 }
 
@@ -116,7 +124,7 @@
 	border-radius: var(--radius-small);
 	font-size: var(--font-size-body);
 	color: var(--text-primary);
-	cursor: default;
+	cursor: pointer;
 	user-select: none;
 }
 
@@ -147,24 +155,15 @@
 	color: var(--text-secondary);
 }
 
+/* 升级是菜单里的整宽反色按钮，尺寸与配色由 Button 的 inverse 小档给；
+   这里只把整行压到菜单内容宽，与用量行对齐。 */
 .user-menu__upgrade {
-	display: flex;
-	box-sizing: border-box;
-	align-items: center;
-	justify-content: center;
-	min-block-size: var(--spacing-32);
-	padding: var(--spacing-8) var(--spacing-12);
-	border-radius: var(--radius-small);
-	background: var(--brand);
-	color: var(--brand-text);
-	font-size: var(--font-size-body);
-	cursor: default;
-	user-select: none;
+	flex: none;
+	inline-size: 100%;
 }
 
-.user-menu__upgrade:hover,
 .user-menu__upgrade[data-highlighted] {
-	background: var(--brand-solid-hover);
+	background: var(--background-inverse-hover);
 }
 
 .user-menu__separator {

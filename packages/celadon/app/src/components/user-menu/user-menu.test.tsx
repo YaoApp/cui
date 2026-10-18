@@ -54,10 +54,13 @@ describe('UserMenu', () => {
     expect(handlers.onOpenExternal).toHaveBeenCalledWith(links.home)
   })
 
-  it('opens the upgrade url', async () => {
+  it('opens the upgrade url from the inverted small button', async () => {
     const handlers = setup()
     await userEvent.click(screen.getByRole('button', { name: '账户菜单' }))
-    await userEvent.click(await screen.findByText('升级'))
+    const upgrade = await screen.findByText('升级')
+    expect(upgrade.closest('button')).toHaveClass('button--inverse', 'button--small')
+
+    await userEvent.click(upgrade)
     expect(handlers.onOpenExternal).toHaveBeenCalledWith('https://yaoagents.com/pricing')
   })
 
@@ -82,7 +85,7 @@ describe('UserMenu', () => {
   it('shows a skeleton while loading', async () => {
     setup({ status: 'loading', name: '', plan: '' })
     await userEvent.click(screen.getByRole('button', { name: '账户菜单' }))
-    expect(await screen.findByText('用量与升级')).toBeVisible()
+    expect(await screen.findByText('用量')).toBeVisible()
     expect(screen.queryByText('Mock OAuth User')).toBeNull()
   })
 
