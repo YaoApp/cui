@@ -33,6 +33,8 @@ export default defineConfig({
     {
       command: `pnpm dev --host ${DEV_HOST} --port ${PORT} --strictPort`,
       url: BASE_URL,
+      /* 账户用例读 mock fixture；干净 checkout 与 CI 上没有 .env.local，这里给测试服务补上开关 */
+      env: { VITE_ACCOUNT_MOCK: '1' },
       reuseExistingServer: true, // pm2 已经在同一端口跑着 dev
       timeout: 30_000,
     },
