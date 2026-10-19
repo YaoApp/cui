@@ -140,6 +140,8 @@
 | `brand-yao` | `own:yao` |
 | `brand-yao-mono` | `own:yao-mono` |
 
+`brand-yao-agents` 的当前主标是 `app/public/brand/yao-agents-ghost.png`（442 × 509），`BrandMark` 用图片等比放入方形槽；sprite 里的旧机器人符号留作存档，不再作为当前主标。
+
 **统计**：界面图标 **81** 个（lucide）· 自建品牌符号 **4** 个（`brand-yao-agents` / `brand-yao-agents-mono` / `brand-yao` / `brand-yao-mono`）· 第三方品牌 **340** 个（`brand-*`，另存独立雪碧图，外部引用；其中 simple-icons 来源 1 个）。
 
 ## 3. 尺寸档

@@ -8,7 +8,7 @@
 | [`color-card.html`](color-card.html) | **色卡**（浏览器直接打开）：所有色值/尺寸**实时读 `tokens.css`**，零硬编码；对比度按各主题真实内容底自动实算；点击 hex 复制 |
 | [`i18n/`](i18n/) | **多语言文案**：`zh-CN.json` · `zh-TW.json` · `en.json` · `ja.json`（`ui.*` 界面文案 / `sample.*` 演示数据）+ `bundle.js`（自动生成） |
 | [`build-i18n.mjs`](../scripts/build-i18n.mjs) | 由 `i18n/*.json` 生成 `i18n/bundle.js`（**不用 fetch**，file:// 直接可用） |
-| [`logo-mark-celadon.svg`](logo-mark-celadon.svg) 等 | **Logo 设计交付物（仅设计，尚未应用到生产）**：**当前正版**标记（浅暗同版，几何取自上一版原始文件、仅换颜色）· [`reference/`](reference/) 存上一版（仅作比对） |
+| [`logo-mark-ghost.png`](logo-mark-ghost.png) · [`logo-mark-celadon.svg`](logo-mark-celadon.svg) | **Logo 设计交付物**：`logo-mark-ghost.png` 是当前 Ghost 主标（生产 `BrandMark` 使用 `app/public/brand/` 下的同名副本）；`logo-mark-celadon.svg` 与 [`reference/logo-previous.svg`](reference/logo-previous.svg) 保留旧版，用于比对与回退 |
 | [`icons/`](icons/) | **图标 PNG 七档（16–1024）**：由 `logo-mark-celadon.svg` 导出，**等比居中**（实测中心偏移 0，留白 6%，比例 1.179） |
 
 > 改色只改 `tokens.less` → 跑 `node packages/celadon/scripts/build-css.mjs` → 色卡自动跟随（**不用改 HTML**）。

@@ -8,7 +8,7 @@
 | 文件 | 内容 |
 | --- | --- |
 | `brand-mark.tsx` | `BrandMark` 组件、`BrandMarkProps` 与 `BrandId`。 |
-| `brand-mark.less` | 品牌图形的颜色，取 `--brand-graphic`，深浅主题各一套值。 |
+| `brand-mark.less` | 品牌图形的尺寸与等比放置规则；颜色由当前徽标自身携带。 |
 | `brand-mark.test.tsx` | 单元用例。 |
 | `index.ts` | 对外出口。 |
 
@@ -33,4 +33,6 @@
 
 ## 已知限制
 
-- 只支持清单里登记的品牌图形；新增图形先在 `design/icons/manifest.json` 登记再装配。
+- 当前 `brand-yao-agents` 用 `app/public/brand/yao-agents-ghost.png`（442 × 509，等比放进方形槽）；旧机器人标保留在 `design/reference/logo-previous.svg` 与 sprite 中，不再作为当前主标。
+- 当前主标是透明 PNG；矢量母版在来源规范工作区，若生产需要 SVG，需要先导出同一路径再替换。
+- 其余品牌图形仍走 sprite；新增图形先在 `design/icons/manifest.json` 登记再装配。

@@ -86,7 +86,7 @@ svg.opt__logo { color: var(--text-tertiary); }
 .brand { display: flex; align-items: center; gap: var(--spacing-8); }
 .brand__mark { inline-size: var(--brand-mark); block-size: auto; display: block; }
 /* 产品名：大号 + **例外**的品牌渐变（体系里唯一允许渐变文字的地方，用标记自身的渐变 token；
-   浅暗同版，与 logo-mark-celadon.svg 的渐变一致）。 */
+   浅暗同版，与 Ghost 主标的渐变一致）。 */
 .brand__name { font-size: var(--font-size-20); font-weight: var(--font-weight-strong); letter-spacing: var(--letter-spacing-latin);
                background: linear-gradient(105deg, var(--brand-mark-from) 0%, var(--brand-mark-to) 100%);
                -webkit-background-clip: text; background-clip: text; color: transparent; }
@@ -257,7 +257,7 @@ svg.opt__logo.is-server { inline-size: calc(var(--spacing-16) + var(--spacing-4)
 
       <div class="picker-wrap" id="picker-wrap">
         <button class="picker" type="button" id="cloud-picker" aria-haspopup="listbox" aria-expanded="false">
-            <img class="opt__logo" src="../logo-mark-celadon.svg" alt="" width="20" height="17">
+            <img class="opt__logo" src="../logo-mark-ghost.png" alt="" width="20" height="17">
           <span class="picker__meta">
             <span class="picker__name placeholder" id="cloud-name" data-i18n="cloudSelectHint">Select a cloud server</span>
             <span class="picker__url" id="cloud-url"></span>
@@ -400,7 +400,7 @@ function renderCloud() {
   if (triggerLogo && isCustom() !== triggerLogo.classList.contains('is-server')) {
     triggerLogo.outerHTML = isCustom()
       ? '<svg class="opt__logo is-server" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-server"></use></svg>'
-      : '<img class="opt__logo" src="../logo-mark-celadon.svg" alt="" width="20" height="17">'
+      : '<img class="opt__logo" src="../logo-mark-ghost.png" alt="" width="20" height="17">'
   }
   const found = CLOUD.find((c) => c.url === selected)
   nameEl.textContent = isCustom() ? dictOf(lang).customOption : (found ? dictOf(lang)[found.key] : dictOf(lang).cloudSelectHint)
@@ -414,7 +414,7 @@ function renderCloud() {
   /* 每项两行：LOGO + 名称 / 域名。官方用品牌标记，自建用服务器图标、域名留空。 */
   const logo = (custom) => custom
     ? '<svg class="opt__logo" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-server"></use></svg>'
-    : '<img class="opt__logo" src="../logo-mark-celadon.svg" alt="" width="20" height="17">'
+    : '<img class="opt__logo" src="../logo-mark-ghost.png" alt="" width="20" height="17">'
   const bare = (u) => u.replace(/^https?:\/\//, '')
   const item = (url, label, domain, on) =>
     '<button class="picker__item' + (on ? ' is-on' : '') + '" type="button" role="option" data-url="' + url + '">' +

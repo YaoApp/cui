@@ -39,6 +39,22 @@ describe('BrandMark', () => {
     expect(svg).not.toHaveAttribute('aria-hidden')
   })
 
+  it('renders the Ghost image for the current mark', () => {
+    const { container } = render(<BrandMark name="brand-yao-agents" size={32} label="Yao Agents" />)
+    const image = container.querySelector('img')
+
+    expect(image).toHaveClass('brand-mark', 'brand-mark--image')
+    expect(image?.getAttribute('src')).toContain('/brand/yao-agents-ghost.png')
+    expect(image).toHaveAttribute('width', '32')
+    expect(image).toHaveAttribute('height', '32')
+    expect(image).toHaveAttribute('alt', 'Yao Agents')
+  })
+
+  it('keeps the old sprite path for the archived marks', () => {
+    const { container } = render(<BrandMark name="brand-yao" />)
+    expect(container.querySelector('svg use')?.getAttribute('href')).toBe('#brand-yao')
+  })
+
   it('takes the caller class without dropping its own', () => {
     const { container } = render(<BrandMark name="brand-yao" className="brand-slot" />)
 

@@ -15,6 +15,21 @@ export type BrandMarkProps = {
 
 export function BrandMark({ name, size = 24, label, className }: BrandMarkProps) {
   const classes = ['brand-mark', className].filter(Boolean).join(' ')
+  /* 当前主标是 Ghost 主标的透明 PNG（442 × 509，等比放在方形槽里）；
+     旧的机器人标仍留在 `design/reference/logo-previous.svg` 与图标 sprite 里，不删。 */
+  if (name === 'brand-yao-agents') {
+    return (
+      <img
+        className={`${classes} brand-mark--image`}
+        src={`${import.meta.env.BASE_URL}brand/yao-agents-ghost.png`}
+        width={size}
+        height={size}
+        alt={label ?? ''}
+        aria-hidden={label ? undefined : true}
+        draggable={false}
+      />
+    )
+  }
   return (
     <svg
       className={classes}

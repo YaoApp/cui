@@ -9,7 +9,7 @@ the two are never mixed.
 | File | Contents |
 | --- | --- |
 | `brand-mark.tsx` | The `BrandMark` component, `BrandMarkProps` and `BrandId`. |
-| `brand-mark.less` | The colour of the brand graphic, `--brand-graphic`, with one value per theme. |
+| `brand-mark.less` | Sizing and proportional placement; the current mark carries its own colours. |
 | `brand-mark.test.tsx` | Unit tests. |
 | `index.ts` | The module's public surface. |
 
@@ -34,5 +34,6 @@ Unit tests sit next to the component: `brand-mark.test.tsx`.
 
 ## Known limits
 
-- Only the brand graphics registered in the manifest are supported. Register a new graphic in
-  `design/icons/manifest.json` first, then wire it up.
+- The current `brand-yao-agents` uses `app/public/brand/yao-agents-ghost.png` (442 × 509, proportionally fitted into the square slot). The old robot mark stays in `design/reference/logo-previous.svg` and the sprite, no longer as the current mark.
+- The current mark is a transparent PNG. The vector master lives in the source specification workspace; export the same path before switching production to SVG.
+- Other brand graphics still come from the sprite. Register a new graphic in `design/icons/manifest.json` first, then wire it up.
