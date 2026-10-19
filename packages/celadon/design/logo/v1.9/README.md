@@ -29,8 +29,9 @@
 - The product `BrandMark` uses `app/public/brand/yao-agents-ghost.svg` and
   `app/public/brand/yao-agents-ghost-dark.svg`; both are copies of
   `icons/svg/mark-primary.svg` and `icons/svg/mark-dark.svg`.
-- The favicon and boot screen use `app/public/favicon-ghost.svg`, copied from
-  `icons/svg/icon-primary.svg`.
+- The favicon uses `app/public/favicon-ghost.svg`, copied from
+  `icons/svg/mark-primary.svg`, so the tab shows the borderless mark. The boot
+  screen uses the same mark in its light and dark variants.
 - The previous Celadon and robot marks remain in `design/` and the icon sprite.
 
 
