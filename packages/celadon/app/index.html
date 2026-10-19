@@ -31,7 +31,17 @@
     /* 标记与「旋转指示 + 说明」是两组，组间距两个档；组内一个档 */
     gap: 24px;
   }
-  .boot__mark { inline-size: auto; block-size: 48px; }
+  .boot__mark { position: relative; inline-size: 42px; block-size: 48px; }
+  .boot__mark img {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: contain;
+  }
+  .boot__mark img[data-boot='dark'] { display: none; }
+  html[data-theme='dark'] .boot__mark img[data-boot='light'] { display: none; }
+  html[data-theme='dark'] .boot__mark img[data-boot='dark'] { display: block; }
   .boot__state { display: flex; align-items: center; gap: 8px; }
   .boot__ring {
     inline-size: 16px;
@@ -114,8 +124,11 @@
        放在 HTML 里的理由：网络慢时先下载的是这份 HTML，包还没到，任何由包画出来的画面都还是白屏。 -->
   <main id="app">
     <div class="boot" role="status" aria-live="polite">
-      <!-- 标记居中；旋转指示与说明在它下面一行 -->
-      <img class="boot__mark" src="/favicon-ghost.svg" alt="">
+      <!-- 标记居中，与首页同一张无边框主标；浅色渐变、深色 Cream，按主题只画一张 -->
+      <span class="boot__mark" aria-hidden="true">
+        <img data-boot="light" src="/brand/yao-agents-ghost.svg" alt="">
+        <img data-boot="dark" src="/brand/yao-agents-ghost-dark.svg" alt="">
+      </span>
       <div class="boot__state">
         <svg class="boot__ring" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
           <path d="M1.5 8 A6.5 6.5 0 0 1 8 1.5 A1.5 1.5 0 0 1 8 4.5 Q3.2 5.4 1.5 8 Z"></path>
