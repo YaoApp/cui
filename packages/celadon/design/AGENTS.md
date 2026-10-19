@@ -23,6 +23,7 @@
 | [`index.html`](index.html) · [`index.md`](index.md) | 设计入口页 | 现行 |
 | [`mock.html`](mock.html) | 组件与页面拼装样例 | 现行 |
 | [`logo-mark-ghost.svg`](logo-mark-ghost.svg) · [`logo-mark-ghost-dark.svg`](logo-mark-ghost-dark.svg) · [`logo/v1.9/`](logo/v1.9/) · [`reference/logo-previous.svg`](reference/logo-previous.svg) | Logo：v1.9 Ghost 主标与图标系列已进设计与生产；Celadon 与更早版本保留作比对与回退 | 交付物 |
+| [`product/`](product/) | **产品设计阶段**：模块列表 `00-overview.md` · React + Vite 简版原型 · 独立 Server 5066 | 草案 |
 | [`i18n/*.json`](i18n/) + `bundle.js` | **多语言样例**（`ui.*` 界面文案 / `sample.*` 演示数据）；构建 `node packages/celadon/scripts/build-i18n.mjs` | 现行 |
 | [`prototype/`](prototype/) | **产品草图（纯 HTML + token）**：登录、注册、服务器选择等；先评审 UE/UI，再进产品代码 | 新增 |
 | [`serve.mjs`](serve.mjs) | 本地静态服务（默认 8080，`Cache-Control: no-store`）| 工具 |
