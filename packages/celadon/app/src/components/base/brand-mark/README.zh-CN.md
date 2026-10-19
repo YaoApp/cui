@@ -33,6 +33,6 @@
 
 ## 已知限制
 
-- 当前 `brand-yao-agents` 用 `app/public/brand/yao-agents-ghost.png`（442 × 509，等比放进方形槽）；旧机器人标保留在 `design/reference/logo-previous.svg` 与 sprite 中，不再作为当前主标。
-- 当前主标是透明 PNG；矢量母版在来源规范工作区，若生产需要 SVG，需要先导出同一路径再替换。
+- 当前 `brand-yao-agents` 用 `app/public/brand/yao-agents-ghost.svg`（v1.9，863 × 995，等比放进方形槽），深色主题切 `-dark.svg` 的 Cream body；旧机器人标保留在 `design/reference/logo-previous.svg` 与 sprite 中，不再作为当前主标。
+- 完整图标系列在 `design/logo/v1.9/`，包含 Mark / App 图标 SVG、PNG 九档与规范；这里只接入主标。
 - 其余品牌图形仍走 sprite；新增图形先在 `design/icons/manifest.json` 登记再装配。

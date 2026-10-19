@@ -5,7 +5,28 @@
   flex: none;
 }
 
-/* Ghost 主标是 442 × 509 的透明图，等比放进原有方形槽，中线不随宽度变化 */
+/* Ghost 主标是 863 × 995 的 SVG，等比放进原有方形槽，中线不随宽度变化。
+   浅色用渐变版，深色换成 Cream body；两张图都在 DOM 里，只切绘制。 */
 .brand-mark--image {
+  position: relative;
+}
+
+.brand-mark__img {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
   object-fit: contain;
+}
+
+.brand-mark__img--dark {
+  display: none;
+}
+
+[data-theme='dark'] .brand-mark__img--light {
+  display: none;
+}
+
+[data-theme='dark'] .brand-mark__img--dark {
+  display: block;
 }

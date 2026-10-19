@@ -34,6 +34,6 @@ Unit tests sit next to the component: `brand-mark.test.tsx`.
 
 ## Known limits
 
-- The current `brand-yao-agents` uses `app/public/brand/yao-agents-ghost.png` (442 × 509, proportionally fitted into the square slot). The old robot mark stays in `design/reference/logo-previous.svg` and the sprite, no longer as the current mark.
-- The current mark is a transparent PNG. The vector master lives in the source specification workspace; export the same path before switching production to SVG.
+- The current `brand-yao-agents` uses `app/public/brand/yao-agents-ghost.svg` (v1.9, 863 × 995, proportionally fitted into the square slot); dark theme switches to the Cream body in `-dark.svg`. The old robot mark stays in `design/reference/logo-previous.svg` and the sprite, no longer as the current mark.
+- The full icon series lives in `design/logo/v1.9/`, with Mark / app icon SVGs, nine PNG sizes and the specification. Only the mark is wired into the component.
 - Other brand graphics still come from the sprite. Register a new graphic in `design/icons/manifest.json` first, then wire it up.
