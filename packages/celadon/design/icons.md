@@ -14,7 +14,7 @@
 
 **反例（不要这样做）**：不加描边 / 阴影 / 渐变 · 不旋转 / 不镜像 / 不压扁 · 不改品牌色以外的颜色 · 不把标识当界面图标用
 
-## 2. 图标系列（81 个界面图标）
+## 2. 图标系列（93 个界面图标）
 
 | 规格项 | 值 |
 | --- | --- |
@@ -27,7 +27,7 @@
 | 颜色 | `stroke: currentColor` —— 一个图标只有一种颜色来源 |
 | 尺寸 | 显示档 **14 / 16 / 18 / 20 / 24**（默认 16，导航的功能图标用 18）；图标本体只有 24 网格一套 |
 
-**全量语义名 → lucide 名**（按页面的覆盖度表分组；最后一组是自建品牌符号，不计入 81 个界面图标）
+**全量语义名 → lucide 名**（按页面的覆盖度表分组；最后一组是自建品牌符号，不计入 93 个界面图标）
 
 ### 主导航（11）
 
@@ -45,7 +45,7 @@
 | `i-nav-team` | `users` |
 | `i-nav-logout` | `log-out` |
 
-### 操作（37）
+### 操作（38）
 
 | 语义名 | 来源 |
 | --- | --- |
@@ -76,6 +76,7 @@
 | `i-act-redo` | `redo-2` |
 | `i-act-play` | `play` |
 | `i-act-attach` | `paperclip` |
+| `i-mic` | `mic` |
 | `i-up` | `chevron-up` |
 | `i-down` | `chevron-down` |
 | `i-globe` | `globe` |
@@ -142,7 +143,7 @@
 
 `brand-yao-agents` 的当前主标是 `app/public/brand/yao-agents-ghost.svg`（v1.9，863 × 995，另有深色版）；`BrandMark` 用图片等比放入方形槽，`design/logo/v1.9/` 存完整图标系列。sprite 里的旧机器人符号留作存档，不再作为当前主标。
 
-**统计**：界面图标 **81** 个（lucide）· 自建品牌符号 **4** 个（`brand-yao-agents` / `brand-yao-agents-mono` / `brand-yao` / `brand-yao-mono`）· 第三方品牌 **340** 个（`brand-*`，另存独立雪碧图，外部引用；其中 simple-icons 来源 1 个）。
+**统计**：界面图标 **93** 个（lucide 91 · 自建 2）· 自建品牌符号 **4** 个（`brand-yao-agents` / `brand-yao-agents-mono` / `brand-yao` / `brand-yao-mono`）· 第三方品牌 **340** 个（`brand-*`，另存独立雪碧图，外部引用；其中 simple-icons 来源 1 个）。
 
 ## 3. 尺寸档
 

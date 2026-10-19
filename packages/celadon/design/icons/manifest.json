@@ -42,6 +42,18 @@
     "src": "layout-grid"
   },
   {
+    "id": "i-bot",
+    "lib": "lucide",
+    "cat": "navigation",
+    "src": "bot"
+  },
+  {
+    "id": "i-mic",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "mic"
+  },
+  {
     "id": "i-home",
     "lib": "lucide",
     "cat": "navigation",

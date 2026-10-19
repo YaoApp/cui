@@ -1,0 +1,314 @@
+@import '../../tokens.css';
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-block-size: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--background-app);
+  color: var(--text-primary);
+  font-family: var(--font-family-ui);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-normal);
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.launch {
+  display: flex;
+  flex-direction: column;
+  min-block-size: 100vh;
+  max-inline-size: calc(var(--spacing-48) * 22);
+  margin-inline: auto;
+  padding: var(--spacing-24);
+}
+
+.launch-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-16);
+  min-block-size: var(--spacing-48);
+  border-block-end: var(--border-width) solid var(--border-subtle);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-8);
+  font-size: var(--font-size-15);
+  font-weight: var(--font-weight-strong);
+  letter-spacing: -0.02em;
+}
+
+.brand img {
+  block-size: var(--spacing-24);
+  inline-size: auto;
+}
+
+.launch-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-8);
+  color: var(--text-tertiary);
+  font-size: var(--font-size-11);
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--spacing-4) var(--spacing-8);
+  border-radius: var(--radius-pill);
+  background: var(--brand-soft);
+  color: var(--brand-ink);
+  font-size: var(--font-size-11);
+  font-weight: var(--font-weight-medium);
+}
+
+.launch-main {
+  flex: 1;
+  max-inline-size: calc(var(--spacing-48) * 20);
+  inline-size: 100%;
+  margin-inline: auto;
+  padding-block: calc(var(--spacing-48) + var(--spacing-16)) var(--spacing-48);
+}
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-8);
+}
+
+.eyebrow {
+  color: var(--brand);
+  font-size: var(--font-size-11);
+  font-weight: var(--font-weight-strong);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+h1 {
+  font-size: var(--font-size-28);
+  font-weight: var(--font-weight-strong);
+  letter-spacing: -0.03em;
+  line-height: var(--line-height-title);
+}
+
+h2 {
+  font-size: var(--font-size-17);
+  font-weight: var(--font-weight-strong);
+  line-height: var(--line-height-title);
+}
+
+.lede {
+  color: var(--text-secondary);
+  font-size: var(--font-size-14);
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-8);
+  margin-block: var(--spacing-32) var(--spacing-12);
+  padding: var(--spacing-8) var(--spacing-12);
+  border: var(--border-width) solid var(--border-default);
+  border-radius: var(--radius-small);
+  background: var(--background-field);
+}
+
+.search-label {
+  position: absolute;
+  overflow: hidden;
+  inline-size: var(--border-width);
+  block-size: var(--border-width);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.search input {
+  flex: 1;
+  min-inline-size: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-primary);
+  outline: 0;
+}
+
+.search input::placeholder {
+  color: var(--text-placeholder);
+}
+
+.search:focus-within {
+  border-color: var(--border-control-strong);
+}
+
+.module-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--spacing-12);
+}
+
+.card-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.card-link .card {
+  block-size: 100%;
+}
+
+.card-link:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-8);
+  min-block-size: calc(var(--spacing-48) * 3);
+  padding: var(--spacing-16);
+  border: var(--border-width) solid var(--border-subtle);
+  border-radius: var(--radius-medium);
+  background: var(--background-surface);
+}
+
+.card:hover {
+  border-color: var(--border-hover-strong);
+}
+
+.icon {
+  display: inline-block;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vertical-align: middle;
+}
+
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-8);
+}
+
+.card-icon {
+  display: grid;
+  place-items: center;
+  inline-size: var(--spacing-32);
+  block-size: var(--spacing-32);
+  border-radius: var(--radius-small);
+  background: var(--brand-soft);
+  color: var(--brand);
+}
+
+.card:hover .card-icon {
+  background: var(--brand-soft-hover);
+}
+
+.card-index {
+  color: var(--text-tertiary);
+  font-size: var(--font-size-11);
+  font-variant-numeric: tabular-nums;
+}
+
+.card-title {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-8);
+}
+
+.card-title span {
+  color: var(--text-tertiary);
+  font-size: var(--font-size-11);
+}
+
+.card p {
+  color: var(--text-secondary);
+  font-size: var(--font-size-12);
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  padding: var(--spacing-24);
+  border: var(--border-width) dashed var(--border-default);
+  border-radius: var(--radius-medium);
+  color: var(--text-secondary);
+}
+
+.empty strong {
+  color: var(--text-primary);
+  font-size: var(--font-size-14);
+}
+
+.launch-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-8);
+  margin-block-start: calc(var(--spacing-48) + var(--spacing-24));
+  padding-block-start: var(--spacing-16);
+  border-block-start: var(--border-width) solid var(--border-subtle);
+  color: var(--text-tertiary);
+  font-size: var(--font-size-11);
+}
+
+.tag {
+  padding: var(--spacing-4) var(--spacing-8);
+  border: var(--border-width) solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+}
+
+@media (max-width: 900px) {
+  .launch {
+    padding: var(--spacing-16);
+  }
+
+  .launch-main {
+    padding-block-start: var(--spacing-48);
+  }
+
+  .module-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .launch-head {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: var(--spacing-4);
+    padding-block-end: var(--spacing-8);
+  }
+
+  .module-grid {
+    grid-template-columns: 1fr;
+  }
+
+  h1 {
+    font-size: var(--font-size-24);
+  }
+}

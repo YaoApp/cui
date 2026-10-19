@@ -7,6 +7,8 @@ export type IconId =
   | 'i-pc'
   | 'i-book'
   | 'i-apps'
+  | 'i-bot'
+  | 'i-mic'
   | 'i-home'
   | 'i-search'
   | 'i-minus'
