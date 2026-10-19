@@ -29,7 +29,7 @@
 | `teamName` | `string` | 无 | 画团队徽标，并填在团队行右侧。 |
 | `usage` | `{ remaining: number \| null; upgradeUrl?: string }` | 无 | 余量用 `Intl.NumberFormat` 加本语言单位。 |
 | `shortcut` | `string` | 无 | 设置行右侧的快捷键，如 `⌘,` 或 `Ctrl+,`。 |
-| `variant` | `'footer' \| 'icon'` | `'footer'` | 底部一行带名字，列头只画头像。 |
+| `variant` | `'footer' \| 'icon'` | `'footer'` | 底部一行用 32 头像带名字；列头用 16 头像带名字与 14 向下图标，只画用户自己，按钮高 24。 |
 | `silentFocus` | `boolean` | `false` | 设置窗按 `Esc` 关闭后，按钮承接焦点但不画焦点环，直到下一次键盘或指针操作。 |
 | `links` | `{ home, help, docs }` | 必填 | 三个外链地址。 |
 | `onOpenSettings` | `(section) => void` | 必填 | `profile` · `team` · `usage`。 |

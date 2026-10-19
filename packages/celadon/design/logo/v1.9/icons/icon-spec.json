@@ -1,0 +1,16 @@
+{
+  "brand": "Yao Agents",
+  "version": "1.9",
+  "master": 1024,
+  "mark": {"width": 863, "height": 995, "ratio": 0.867},
+  "tile": {"ghostHeight": 780, "ghostHeightPct": 76, "radius": 228, "safeArea": 192},
+  "eye": {"width": 78, "height": 109, "spacing": 147.5, "highlightRadius": 16},
+  "colors": {
+    "primary": {"body": ["#36D2C2", "#19F0D9"], "eyes": "#14120E", "highlight": "#F4F1EA"},
+    "dark": {"body": "#F4F1EA", "eyes": "#14120E", "highlight": "#F4F1EA"},
+    "light": {"body": ["#36D2C2", "#19F0D9"], "eyes": "#14120E", "highlight": "#F4F1EA"},
+    "mono": {"body": ["#85857A", "currentColor"], "eyes": "knockout", "highlight": null}
+  },
+  "sizes": [1024, 512, 256, 128, 100, 72, 64, 32, 16],
+  "minSize": {"color": 32, "mono": 16}
+}

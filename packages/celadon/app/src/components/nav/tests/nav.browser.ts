@@ -170,7 +170,7 @@ test.describe('导航列的交互', () => {
 			page.evaluate(() => {
 				const w = window as unknown as { frames: [number, number][]; go: () => void }
 				const node = document.querySelector('.nav') as HTMLElement
-				const logo = document.querySelector('.nav__header svg') as SVGElement
+				const logo = document.querySelector('.nav__header .brand-mark') as HTMLElement
 				const loop = () => {
 					w.frames.push([node.getBoundingClientRect().width, logo.getBoundingClientRect().x])
 					if (w.frames.length < 44) requestAnimationFrame(loop)

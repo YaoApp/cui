@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { AlertDialog } from '@/components/base/alert-dialog'
 import { Avatar } from '@/components/base/avatar'
 import { Button } from '@/components/base/button'
+import { Icon } from '@/components/base/icon'
 import { useTranslation } from '@/platform/i18n'
 import { UserMenuIdentity } from './parts/identity/identity'
 import { UserMenuItem } from './parts/item/item'
@@ -92,8 +93,10 @@ export function UserMenu({
         aria-label={triggerLabel}
         onClick={onSignIn}
       >
-        <Avatar name={name} size={32} />
-        {variant === 'footer' ? <span className='user-menu__trigger-name'>{t('userMenu.signedOut')}</span> : null}
+        <Avatar name={name} size={variant === 'footer' ? 32 : 16} />
+        <span className={`user-menu__trigger-name user-menu__trigger-name--${variant}`}>
+          {t('userMenu.signedOut')}
+        </span>
       </Button>
     )
   }
@@ -106,18 +109,25 @@ export function UserMenu({
           aria-label={triggerLabel}
           render={<Button variant='plain' size='small' />}
         >
-          <Avatar name={name} src={avatar} team={team} size={32} loading={loading} />
-          {variant === 'footer' ? (
-            loading ? (
-              <span className='user-menu__skeleton user-menu__skeleton--name' aria-hidden='true' />
-            ) : (
-              <span
-                className='user-menu__trigger-name'
-                title={status === 'unavailable' ? t('userMenu.unavailable') : name || undefined}
-              >
-                {status === 'unavailable' ? t('userMenu.unavailable') : name}
-              </span>
-            )
+          <Avatar
+            name={name}
+            src={avatar}
+            team={variant === 'footer' ? team : undefined}
+            size={variant === 'footer' ? 32 : 16}
+            loading={loading}
+          />
+          {loading ? (
+            <span className='user-menu__skeleton user-menu__skeleton--name' aria-hidden='true' />
+          ) : (
+            <span
+              className={`user-menu__trigger-name user-menu__trigger-name--${variant}`}
+              title={status === 'unavailable' ? t('userMenu.unavailable') : name || undefined}
+            >
+              {status === 'unavailable' ? t('userMenu.unavailable') : name}
+            </span>
+          )}
+          {variant === 'icon' ? (
+            <Icon className='user-menu__trigger-chevron' name='i-down' size={14} />
           ) : null}
         </BaseMenu.Trigger>
         <BaseMenu.Portal>

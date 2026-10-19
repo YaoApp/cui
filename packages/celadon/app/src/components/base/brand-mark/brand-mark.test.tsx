@@ -39,6 +39,27 @@ describe('BrandMark', () => {
     expect(svg).not.toHaveAttribute('aria-hidden')
   })
 
+  it('renders the light and dark Ghost vectors for the current mark', () => {
+    const { container } = render(<BrandMark name="brand-yao-agents" size={32} label="Yao Agents" />)
+    const mark = container.querySelector('.brand-mark--image')
+    const light = container.querySelector('.brand-mark__img--light')
+    const dark = container.querySelector('.brand-mark__img--dark')
+
+    expect(mark).toHaveClass('brand-mark', 'brand-mark--image')
+    expect(mark).toHaveAttribute('role', 'img')
+    expect(mark).toHaveAttribute('aria-label', 'Yao Agents')
+    expect(mark).toHaveStyle({ width: '32px', height: '32px' })
+    expect(light?.getAttribute('src')).toContain('/brand/yao-agents-ghost.svg')
+    expect(dark?.getAttribute('src')).toContain('/brand/yao-agents-ghost-dark.svg')
+    expect(light).toHaveAttribute('alt', '')
+    expect(dark).toHaveAttribute('alt', '')
+  })
+
+  it('keeps the old sprite path for the archived marks', () => {
+    const { container } = render(<BrandMark name="brand-yao" />)
+    expect(container.querySelector('svg use')?.getAttribute('href')).toBe('#brand-yao')
+  })
+
   it('takes the caller class without dropping its own', () => {
     const { container } = render(<BrandMark name="brand-yao" className="brand-slot" />)
 

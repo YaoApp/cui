@@ -22,7 +22,7 @@
 | [`data-format.html`](data-format.html) · [`data-format.md`](data-format.md) | 数据格式样例（数字 · 时间 · 金额等）| 现行 |
 | [`index.html`](index.html) · [`index.md`](index.md) | 设计入口页 | 现行 |
 | [`mock.html`](mock.html) | 组件与页面拼装样例 | 现行 |
-| [`logo-mark-celadon.svg`](logo-mark-celadon.svg) · [`logo-app-celadon.svg`](logo-app-celadon.svg) · [`reference/logo-previous.svg`](reference/logo-previous.svg) | Logo（**仅设计，尚未进生产**）| 交付物 |
+| [`logo-mark-ghost.svg`](logo-mark-ghost.svg) · [`logo-mark-ghost-dark.svg`](logo-mark-ghost-dark.svg) · [`logo/v1.9/`](logo/v1.9/) · [`reference/logo-previous.svg`](reference/logo-previous.svg) | Logo：v1.9 Ghost 主标与图标系列已进设计与生产；Celadon 与更早版本保留作比对与回退 | 交付物 |
 | [`i18n/*.json`](i18n/) + `bundle.js` | **多语言样例**（`ui.*` 界面文案 / `sample.*` 演示数据）；构建 `node packages/celadon/scripts/build-i18n.mjs` | 现行 |
 | [`prototype/`](prototype/) | **产品草图（纯 HTML + token）**：登录、注册、服务器选择等；先评审 UE/UI，再进产品代码 | 新增 |
 | [`serve.mjs`](serve.mjs) | 本地静态服务（默认 8080，`Cache-Control: no-store`）| 工具 |

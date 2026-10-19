@@ -111,10 +111,38 @@ test('puts the collapsed navigation entry at the right edge of the content head'
 
   const head = page.locator('.content__head')
   const trigger = page.locator('.content__head-trailing .user-menu__trigger')
+  const avatar = trigger.locator('.avatar')
   await expect(trigger).toBeVisible()
+  await expect(trigger.locator('.user-menu__trigger-name')).toHaveText('Mock OAuth User')
   const headBox = (await head.boundingBox())!
   const triggerBox = (await trigger.boundingBox())!
+  const avatarBox = (await avatar.boundingBox())!
+  const chevronBox = (await trigger.locator('.user-menu__trigger-chevron').boundingBox())!
   expect(headBox.x + headBox.width - (triggerBox.x + triggerBox.width)).toBeCloseTo(12, 0)
+  expect(triggerBox.height).toBeCloseTo(24, 0)
+  expect(avatarBox.width).toBeCloseTo(16, 0)
+  expect(avatarBox.height).toBeCloseTo(16, 0)
+  expect(chevronBox.width).toBeCloseTo(14, 0)
+  expect(await trigger.locator('.avatar__team').count()).toBe(0)
+})
+
+test('keeps a long name inside the collapsed entry', async ({ page }) => {
+  await page.mouse.move(140, 20)
+  await page.locator('.nav__toggle').first().click()
+  await page.waitForTimeout(400)
+
+  const name = page.locator('.content__head-trailing .user-menu__trigger-name')
+  await name.evaluate((el) => {
+    el.textContent = 'Alexandria-Cassandra Montgomery-Worthington the Third'
+  })
+  const trigger = page.locator('.content__head-trailing .user-menu__trigger')
+  const box = (await trigger.boundingBox())!
+  expect(box.width).toBeLessThanOrEqual(192)
+  expect(await name.evaluate((el) => el.scrollWidth > el.clientWidth)).toBe(true)
+  await expect(trigger.locator('.user-menu__trigger-chevron')).toBeVisible()
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(
+    await page.evaluate(() => innerWidth),
+  )
 })
 
 test('keeps the settings sidebar at the normal window size', async ({ page }) => {

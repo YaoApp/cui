@@ -1,5 +1,5 @@
 /* 头像：实心品牌底加反色字，团队账号右下叠团队徽标。
-   尺寸三档（24 导航、32 菜单与底部一行、64 资料页）；团队徽标 32 配 16、64 配 24。
+   尺寸四档（16 行内图标位、24 导航、32 菜单与底部一行、64 资料页）；团队徽标 32 配 16、64 配 24。
    颜色与描边全部取 token，不写字面色值。 */
 
 .avatar {
@@ -11,6 +11,12 @@
 	border-radius: var(--radius-pill);
 	background: var(--brand);
 	color: var(--brand-text);
+}
+
+.avatar[data-size='16'] {
+	inline-size: var(--spacing-16);
+	block-size: var(--spacing-16);
+	font-size: var(--font-size-caption);
 }
 
 .avatar[data-size='24'] {
