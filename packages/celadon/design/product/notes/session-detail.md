@@ -18,8 +18,7 @@ Session（内容区）
   │    ├─ Agents
   │    ├─ Backend jobs
   │    ├─ Daemons
-  │    ├─ Files
-  │    └─ New branch
+  │    └─ Files
   ├─ Chatbox
   └─ Usage
 
@@ -44,7 +43,7 @@ Browser（第三栏）
 - 指针进入或键盘聚焦徽标时展开树形菜单：先显示会话标题，再以 `|—` 形式列出支线。
 - 每项显示消息数；选择后不在主窗口切换，而是在 Browser 第三栏打开该支线。
 - 主窗口始终显示主线，不因为打开支线而变化。
-- 运行条右侧的 `New branch` 新建支线，并同样在 Browser 打开；新支线有自己的聊天页。
+- 手动创建支线从每轮最后一条 Assistant 消息底部的 Branch 动作发起，并在 Browser 打开；新支线有自己的聊天页。
 - Subagent 不作为标题切换项；它属于执行状态，在运行条的 `Agents` 中汇总，深层导航留给 Browser。
 
 ### 1.3 消息列表
@@ -54,7 +53,10 @@ Browser（第三栏）
 - Agent 的执行结果不把原始输出刷进主对话，使用卡片承载。
 - 卡片按发生顺序插入，并保留回到原消息的锚点。
 - 后台回执以一行系统消息呈现，不生成新的对话轮次。
-- Agent 自动创建支线时插入一条支线帧；CUI 收到帧后自动在 Browser 打开该支线，内容区不切换。
+- 消息流按轮组织：User message + 一条或多条 Agent message；原型至少展示两轮，User 右侧浅底且不显示头像、名称与时间行，Agent 左侧全宽并显示头像、名称与时间。
+- 每轮最后一条 Assistant 消息底部有 Copy 与 Branch 图标动作；User 消息、执行卡片与支线帧不显示动作。
+- 工具层的 `branch_create` 仍支持任意语义节点；界面动作只落在每轮最后一条 Assistant 消息。
+- Agent 自动创建支线时，在该轮 Agent 回复内插入支线卡片；CUI 同时自动在 Browser 打开该支线，内容区不切换。
 
 ### 1.4 Chatbox
 
@@ -64,14 +66,13 @@ Browser（第三栏）
 - 输入文字后，语音输入与 Voice Chat 换成高亮的发送按钮；附件保留。
 - 发送按钮与附件按钮同尺寸，图标用上箭头。
 - 发送后在主线继续，滚动到最新消息。
-- `New branch` 新建支线，并在 Browser 打开它自己的聊天页；主窗口不切换。
+- 手动创建支线从每轮 Assistant 消息的 Branch 动作发起，并在 Browser 打开它自己的聊天页；主窗口不切换。
 - Chatbox 不提供 Workspace 切换；Workspace 在会话开始前确定。
 - Enter 发送，Shift + Enter 换行。
 
 ### 1.5 运行条
 
-- 位于 Chatbox 上方，左侧是 `Agents`、`Backend jobs`、`Daemons`、`Files` 四个可展开入口，右侧是 `New branch`。
-- `New branch` 属于支线操作，放在 Chatbox 外部。
+- 位于 Chatbox 上方，左侧是 `Agents`、`Backend jobs`、`Daemons`、`Files` 四个可展开入口。
 - 同一时间只展开一项，再点同一项收起；按 `Esc` 关闭。
 - 展开内容出现在运行条上方，横向铺开，不改变聊天宽度。
 - `Agents`：Session 与支线层的 Subagent run，显示角色、层级、耗时与状态。
@@ -168,7 +169,7 @@ Board
 - 设置按钮在 Chatbox 底部、合并选择之后；面板在 Chatbox 上方展开，宽 380 像素，窄屏收进视口，Vault 列表可滚动。
 - 消息列表占满内容区宽度，不切出第二栏；支线切换不占独立行，也不改变主窗口内容。
 - 支线与 Workspace 在 Browser 第三栏打开；Browser 与 Content 分开，窄屏时覆盖。
-- 运行条在 Chatbox 上方，左侧包含 `Agents`、`Backend jobs`、`Daemons`、`Files`，右侧是 `New branch`；同一时间只展开一项，展开内容横向铺开，不缩窄聊天区。
+- 运行条在 Chatbox 上方，左侧包含 `Agents`、`Backend jobs`、`Daemons`、`Files`；同一时间只展开一项，展开内容横向铺开，不缩窄聊天区。
 - Usage 在 Chatbox 下方，按轮次、token 与上下文三组排列。
 - 运行卡片边框与状态色来自 token；完成用 success，运行用 brand，重启中用 warning。
 - 卡片操作只用文字链接，不使用多层图标按钮。

@@ -18,7 +18,9 @@ Board 聚合 Session；支线聚合某个子问题的消息与产出；SubagentR
 
 ## 2. 交互规则
 
-- 从一条消息或一个任务节点拉出支线，自动继承该点之前的上下文。
+- 从 Session 中任意可寻址的语义节点拉出支线，自动继承该点之前的上下文。
+- 语义节点包括消息、Agent run、Backend job、Daemon 与文件/证据；命令、输出、ID 等卡片内部内容不单独成为锚点。
+- 从运行中的节点建支线时，支线拿到当时的快照与只读引用，不复制进程，也不接管父节点；需要继续执行时在支线内启动新的 run。
 - 主会话保留目标、进度与结论；支线只承载子问题的讨论、工具调用与产出。
 - 支线有独立入口：标题后的 `支线 (n)` 徽标与消息深链，显示条数；点击后在 Browser 打开。
 - 支线是一等对象：有 ID、深链、标题、摘要，可回到原消息。
@@ -34,7 +36,7 @@ Board 聚合 Session；支线聚合某个子问题的消息与产出；SubagentR
 
 | 工具 | 用途 | 主要调用者 |
 | --- | --- | --- |
-| `branch_create` | 从消息或任务节点创建支线，写入 `branch_created` 帧 | 用户、Agent、Subagent |
+| `branch_create` | 从任意语义节点创建支线，写入 `branch_created` 帧 | 用户、Agent、Subagent |
 | `branch_list` | 按 Session、状态或来源列出支线 | 界面、Agent、自动化 |
 | `branch_get` | 读取标题、状态、摘要、证据与运行信息 | 界面、Agent |
 | `branch_status` | 读取生命周期状态与等待原因 | 界面、Agent |
@@ -47,7 +49,8 @@ Board 聚合 Session；支线聚合某个子问题的消息与产出；SubagentR
 
 ### 3.2 调用规则
 
-- 人工入口 `New branch` 与 Agent 的 `branch_create` 使用同一后端流程，不维护两套生命周期。
+- 人工入口为每轮最后一条 Assistant 消息的 Branch 动作，它与 Agent 的 `branch_create` 使用同一后端流程，不维护两套生命周期。
+- `branch_create` 必须携带 `anchor_node_id` 与 `anchor_type`，上下文快照到该节点为止。
 - Agent 自动创建受会话 Settings 控制：是否开启、并发上限、模型与 Workspace 覆盖策略、权限策略；自动创建不需要二次确认。
 - 自动创建时写入 `branch_created` 帧；CUI 收到帧后插入消息帧并在 Browser 打开支线，主窗口不切换。
 - 支线默认继承 Session 的 Workspace、Vault 授权与工具审批；允许覆盖的范围由 Settings 决定，不能借支线提权。
@@ -79,7 +82,8 @@ SessionBranch
   id
   session_id
   origin              user | agent | subagent | automation
-  anchor_message_id   从哪条消息或任务节点分出
+  anchor_node_id      从哪个语义节点分出
+  anchor_type         message | agent_run | job | daemon | file | evidence
   parent_run_id       nullable；由 SubagentRun 提升时回填
   title
   status
@@ -93,7 +97,7 @@ SessionBranch
   seq
 ```
 
-- `branch_create` 至少接收 `session_id`、`anchor_message_id` 与 `origin`；其余字段按 Settings 和调用者补全。
+- `branch_create` 至少接收 `session_id`、`anchor_node_id`、`anchor_type` 与 `origin`；其余字段按 Settings 和调用者补全。
 - `branch_settled` 的结果必须能回到证据：消息、运行记录、文件、预览或提交。
 - `branch_archive` 只改变可见性，不删除消息、运行与证据。
 
@@ -171,8 +175,11 @@ SubagentRun
 - 指针进入或键盘聚焦徽标时展开树形菜单，先显示会话标题，再以 `|—` 形式列出支线。
 - 每项显示消息数；选择后不在主窗口切换，而是在 Browser 第三栏打开该支线。
 - 主窗口始终显示主线；打开支线不改变内容区的对话。
-- Chatbox 上方运行条右侧的 `New branch` 新建支线，并在 Browser 打开它自己的聊天页。
-- Agent 与用户共用同一创建能力；Agent 创建支线时向 Session 写入一条支线帧，CUI 收到帧后自动在 Browser 打开该支线，主窗口不切换。
+- 运行条不提供独立的 New branch 入口；手动创建从每轮 Assistant 消息的 Branch 动作发起，并在 Browser 打开它自己的聊天页。
+- 会话流按轮组织：每轮是 User message + 一条或多条 Agent message；执行卡片属于该轮 Agent 输出，不单独成为一轮。
+- 每轮最后一条 Assistant 消息底部提供 Copy 与 Branch 两个图标动作；User 消息、执行卡片与支线帧不显示动作。
+- 动作行保持低强调，指针悬停或键盘聚焦后可操作；点击 Branch 从该轮最后一条 Assistant 消息创建支线，主窗口不切换。
+- Agent 与用户共用同一创建能力；Agent 创建支线时，`branch_created` 直接作为该轮 Agent 回复内的支线卡片显示，不单独生成系统帧；CUI 同时在 Browser 打开该支线，主窗口不切换。
 - 自动创建无需确认；是否开启、并发上限，以及自动支线的模型、Workspace 与权限覆盖策略，都在会话 Settings 中设置。
 - 支线页的 Chatbox 与主线同构：底部左侧是模型与思考强度合并选择与设置，右侧是附件、语音输入与 Voice Chat，输入文字后换成发送。
 - 自动支线默认继承 Session 的 Workspace、模型与档位、Vault 授权与工具审批；Settings 可允许覆盖。

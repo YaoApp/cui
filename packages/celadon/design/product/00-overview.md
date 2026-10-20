@@ -47,7 +47,7 @@ Workspace 与 Computer 的归属、Private / Team 作用域与读写角色见 [`
 
 Apps 模块有列表 `/apps` 与详情 `/apps/:id`。从新会话进入详情时带 `from=new-session`，返回按钮回到新会话；从 Apps 列表进入则回到列表。
 
-从 Chatbox 发送后进入会话详情 `/sessions/:id`。详情页包含内容列头、占满内容区的消息列表、固定 Chatbox，以及 Chatbox 上方的 Agents / Backend jobs / Daemons / Files 运行条与右侧 `New branch`、下方的 Usage；标题前用图标与颜色表示会话状态，标题后有 `Branches (n)` 徽标，hover 树形列出支线，点击在 Browser 第三栏打开，主窗口不切换；Workspace 点击在 Browser 打开工作区文件，主线 开始后不能切换；运行条右侧的 `New branch` 新建支线并在 Browser 打开；Agent 自动创建支线 时写入一条 支线帧，CUI 收到后自动在 Browser 打开，自动创建开关、并发上限与自动支线 的模型/Workspace/权限策略在会话 Settings 中设置，Chatbox 底部左侧是模型与思考强度合并选择与设置按钮，右侧是附件、语音输入与 Voice Chat，输入文字后换成发送按钮。消息列表承载 Agent run、Backend job、Daemon、支线帧与回执。结构见 [`notes/session-detail.md`](notes/session-detail.md)，Session Branches 规则见 [`notes/branch.md`](notes/branch.md)。
+从 Chatbox 发送后进入会话详情 `/sessions/:id`。详情页包含内容列头、占满内容区的消息列表、固定 Chatbox，以及 Chatbox 上方的 Agents / Backend jobs / Daemons / Files 运行条、下方的 Usage；标题前用图标与颜色表示会话状态，标题后有 `Branches (n)` 徽标，hover 树形列出支线，点击在 Browser 第三栏打开，主窗口不切换；Workspace 点击在 Browser 打开工作区文件，主线开始后不能切换；手动创建支线从每轮最后一条 Assistant 消息的 Branch 动作发起并在 Browser 打开；Agent 自动创建支线时，在该轮 Agent 回复内显示支线卡片，CUI 同时自动在 Browser 打开；自动创建开关、并发上限与自动支线的模型/Workspace/权限策略在会话 Settings 中设置，Chatbox 底部左侧是模型与思考强度合并选择与设置按钮，右侧是附件、语音输入与 Voice Chat，输入文字后换成发送按钮。消息列表承载 Agent run、Backend job、Daemon、Agent 回复内的支线卡片与回执。结构见 [`notes/session-detail.md`](notes/session-detail.md)，Session Branches 规则见 [`notes/branch.md`](notes/branch.md)。
 
 ## 4. Boards
 

@@ -613,6 +613,8 @@ export function SessionDetailPage({ sessionId }: { sessionId: string }) {
                     title="Extract contract text"
                     state="Completed"
                     icon="i-tasks"
+                    copyText="Extract contract text · Completed · pdftotext contract.pdf - · 12 pages"
+                      onBranch={createBranch}
                   >
                     <code className="sd-command">pdftotext contract.pdf -</code>
                     <p className="sd-exec-copy">12 pages · 8,421 characters · exit 0</p>
@@ -634,6 +636,8 @@ extracted 8,421 characters in 1.2s`}</pre>
                     title="Contract reviewer"
                     state="Completed"
                     icon="i-bot"
+                    copyText="Contract reviewer · Completed · 按付款、违约金、保密期、终止四条线核对，发现 3 个高风险点。"
+                      onBranch={createBranch}
                   >
                     <p className="sd-exec-copy">
                       按付款、违约金、保密期、终止四条线核对，发现 3 个高风险点。
@@ -651,6 +655,8 @@ extracted 8,421 characters in 1.2s`}</pre>
                     title="Clause preview"
                     state={daemonStatus === 'running' ? 'Running' : 'Restarting'}
                     icon="i-pc"
+                    copyText="Clause preview · Running · http://localhost:4173"
+                      onBranch={createBranch}
                   >
                     <p className="sd-exec-copy">带批注的合同预览已启动。</p>
                     <div className="sd-daemon-url">
@@ -668,7 +674,12 @@ extracted 8,421 characters in 1.2s`}</pre>
                     </div>
                   </ExecutionCard>
 
-                  <SessionMessage label="Agent" time="09:41">
+                  <SessionMessage
+                    label="Agent"
+                    time="09:41"
+                    copyText="已定位 3 个高风险点：付款验收、违约金计算、保密期限。"
+                    onBranch={createBranch}
+                  >
                     <p>已定位 3 个高风险点。</p>
                     <ol className="sd-risks">
                       <li>第二笔付款在验收后 30 天支付，但合同没有定义验收标准。</li>
@@ -686,28 +697,61 @@ extracted 8,421 characters in 1.2s`}</pre>
                     Job settled · Extract contract text · exit 0
                   </div>
 
-                  {autoBranchCreated ? (
-                    <div className="sd-branch-frame" role="status">
-                      <span className="sd-branch-frame-icon">
-                        <Icon name="i-branch" size={15} />
-                      </span>
-                      <span className="sd-branch-frame-copy">
-                        <strong>Branch created by Agent</strong>
-                        <small>{agentBranch.title} · opened in Browser</small>
-                      </span>
-                      <button
-                        className="sd-branch-frame-open"
-                        type="button"
-                        onClick={() => openBranch(agentBranch)}
-                      >
-                        Open
-                      </button>
+                  <SessionMessage label="You" time="09:43" tone="user">
+                    <p>把付款条款的风险展开成一段给客户的说明，语气克制一点。</p>
+                  </SessionMessage>
+
+                  <ExecutionCard
+                    kind="agent"
+                    title="Clause writer"
+                    state="Completed"
+                    icon="i-bot"
+                  >
+                    <p className="sd-exec-copy">按客户说明的语气改写付款与验收风险，保留法律边界。</p>
+                    <div className="sd-exec-foot">
+                      <span>00:26 · Session-level run</span>
                     </div>
-                  ) : null}
+                  </ExecutionCard>
+
+                  <SessionMessage
+                    label="Agent"
+                    time="09:45"
+                    copyText="已整理成三段客户说明：验收标准、付款触发条件、逾期计算。说明稿放在 Payment terms 支线。"
+                    onBranch={createBranch}
+                  >
+                    <p>已整理成三段客户说明，语气保持克制。</p>
+                    <p>说明稿放在 <button className="sd-inline-link" type="button" onClick={openPaymentBranch}>Payment terms</button> 支线，主线只保留结论。</p>
+                    <p>同时我开了一条新支线，方便你继续核对措辞：</p>
+                    {autoBranchCreated ? (
+                      <div className="sd-branch-frame" role="status">
+                        <span className="sd-branch-frame-icon">
+                          <Icon name="i-branch" size={15} />
+                        </span>
+                        <span className="sd-branch-frame-copy">
+                          <strong>Branch created by Agent</strong>
+                          <small>{agentBranch.title} · opened in Browser</small>
+                        </span>
+                        <button
+                          className="sd-branch-frame-open"
+                          type="button"
+                          onClick={() => openBranch(agentBranch)}
+                        >
+                          Open
+                        </button>
+                      </div>
+                    ) : null}
+                  </SessionMessage>
                 </>
 
               {sent.map((message) => (
-                <SessionMessage label="You" time={message.at} tone="user" key={message.id}>
+                <SessionMessage
+                  label="You"
+                  time={message.at}
+                  tone="user"
+                  key={message.id}
+                  copyText={message.text}
+                  onBranch={createBranch}
+                >
                   <p>{message.text}</p>
                 </SessionMessage>
               ))}
@@ -838,10 +882,7 @@ extracted 8,421 characters in 1.2s`}</pre>
                   <span>{fileChanges.length} changed</span>
                   <Icon name={openDetail === 'files' ? 'i-up' : 'i-down'} size={12} />
                 </button>
-                <button className="sd-new-branch" type="button" onClick={createBranch}>
-                  <Icon name="i-plus" size={13} />
-                  New branch
-                </button>
+
               </div>
 
               <div className="sd-composer">
@@ -996,24 +1037,92 @@ extracted 8,421 characters in 1.2s`}</pre>
   )
 }
 
+function NodeActions({ copyText, onBranch }: { copyText?: string; onBranch?: () => void }) {
+  const [copied, setCopied] = useState(false)
+  if (!copyText && !onBranch) return null
+  function markCopied() {
+    setCopied(true)
+    window.setTimeout(() => setCopied(false), 1200)
+  }
+  function copy() {
+    if (!copyText) return
+    if (navigator.clipboard?.writeText) {
+      void navigator.clipboard.writeText(copyText).then(markCopied).catch(copyFallback)
+      return
+    }
+    copyFallback()
+  }
+  function copyFallback() {
+    if (!copyText) return
+    const area = document.createElement('textarea')
+    area.value = copyText
+    area.setAttribute('readonly', '')
+    area.style.position = 'fixed'
+    area.style.opacity = '0'
+    document.body.appendChild(area)
+    area.select()
+    document.execCommand('copy')
+    area.remove()
+    markCopied()
+  }
+  return (
+    <div className="sd-node-actions">
+      {copyText ? (
+        <button
+          className="sd-node-action"
+          type="button"
+          aria-label={copied ? 'Copied' : 'Copy'}
+          title={copied ? 'Copied' : 'Copy'}
+          onClick={copy}
+        >
+          <Icon name="i-act-copy" size={16} />
+        </button>
+      ) : null}
+      {onBranch ? (
+        <button
+          className="sd-node-action"
+          type="button"
+          aria-label="Branch from here"
+          title="Branch from here"
+          onClick={onBranch}
+        >
+          <Icon name="i-branch" size={16} />
+        </button>
+      ) : null}
+    </div>
+  )
+}
+
 function SessionMessage({
   label,
   time,
   tone = 'assistant',
+  copyText,
+  onBranch,
   children,
 }: {
   label: string
   time: string
   tone?: 'user' | 'assistant'
+  copyText?: string
+  onBranch?: () => void
   children: ReactNode
 }) {
   return (
     <article className={`sd-message sd-message--${tone}`}>
-      <div className="sd-message-head">
-        <span>{label}</span>
-        <time>{time}</time>
-      </div>
+      {tone === 'assistant' ? (
+        <div className="sd-message-head">
+          <span className="sd-message-author">
+            <span className="sd-message-avatar">
+              <Icon name="i-bot" size={13} />
+            </span>
+            {label}
+          </span>
+          <time>{time}</time>
+        </div>
+      ) : null}
       <div className="sd-message-body">{children}</div>
+      <NodeActions copyText={copyText} onBranch={onBranch} />
     </article>
   )
 }
@@ -1023,12 +1132,16 @@ function ExecutionCard({
   title,
   state,
   icon,
+  copyText,
+  onBranch,
   children,
 }: {
   kind: 'agent' | 'job' | 'daemon'
   title: string
   state: string
   icon: 'i-bot' | 'i-tasks' | 'i-pc'
+  copyText?: string
+  onBranch?: () => void
   children: ReactNode
 }) {
   return (
@@ -1045,6 +1158,7 @@ function ExecutionCard({
           <span className={`sd-exec-state is-${state.toLowerCase().replace('…', '')}`}>{state}</span>
         </div>
         {children}
+        <NodeActions copyText={copyText} onBranch={onBranch} />
       </div>
     </article>
   )

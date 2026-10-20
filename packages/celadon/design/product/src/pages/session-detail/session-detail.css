@@ -583,7 +583,7 @@
 
 .sd-message-head {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: var(--spacing-8);
   color: var(--text-tertiary);
   font-size: var(--font-size-11);
@@ -593,9 +593,28 @@
   justify-content: flex-end;
 }
 
-.sd-message-head span {
+.sd-message-author {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-8);
   color: var(--text-secondary);
   font-weight: var(--font-weight-medium);
+}
+
+.sd-message-avatar {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  inline-size: var(--spacing-24);
+  block-size: var(--spacing-24);
+  border-radius: var(--radius-pill);
+  background: var(--background-selected);
+  color: var(--text-secondary);
+}
+
+.sd-message--assistant .sd-message-avatar {
+  background: var(--brand-soft);
+  color: var(--brand-ink);
 }
 
 .sd-message-head time {
@@ -608,11 +627,45 @@
   line-height: var(--line-height-normal);
 }
 
+.sd-node-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-8);
+  margin-block-start: var(--spacing-8);
+}
+
+.sd-message--user .sd-node-actions,
+.sd-exec .sd-node-actions {
+  display: none;
+}
+
+.sd-node-action {
+  display: inline-grid;
+  place-items: center;
+  inline-size: var(--spacing-32);
+  block-size: var(--spacing-32);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-small);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.sd-node-action:hover {
+  background: var(--background-hover);
+  color: var(--text-primary);
+}
+
+.sd-node-action:active {
+  background: var(--background-selected);
+}
+
 .sd-message--user .sd-message-body {
   padding: var(--spacing-12) var(--spacing-16);
   border: var(--border-width) solid var(--border-subtle);
   border-radius: var(--radius-large);
-  background: var(--background-surface);
+  background: var(--background-selected);
 }
 
 .sd-message-body p {
@@ -1128,28 +1181,6 @@
 
 .sd-icon-button:hover {
   border-color: var(--border-hover-strong);
-  color: var(--text-primary);
-}
-
-.sd-new-branch {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--spacing-4);
-  margin-inline-start: auto;
-  block-size: var(--spacing-24);
-  padding: 0 var(--spacing-8);
-  border: var(--border-width) solid var(--border-subtle);
-  border-radius: var(--radius-pill);
-  background: var(--background-surface);
-  color: var(--text-secondary);
-  font-size: var(--font-size-11);
-  white-space: nowrap;
-  cursor: pointer;
-}
-
-.sd-new-branch:hover {
-  border-color: var(--border-hover-strong);
-  background: var(--background-field);
   color: var(--text-primary);
 }
 
