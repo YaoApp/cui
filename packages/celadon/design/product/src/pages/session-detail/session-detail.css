@@ -79,12 +79,12 @@
   white-space: nowrap;
 }
 
-.sd-thread-badge-wrap {
+.sd-branch-badge-wrap {
   position: relative;
   flex: none;
 }
 
-.sd-thread-badge {
+.sd-branch-badge {
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-4);
@@ -99,17 +99,17 @@
   cursor: pointer;
 }
 
-.sd-thread-badge:hover {
+.sd-branch-badge:hover {
   border-color: var(--border-hover-strong);
   color: var(--text-primary);
 }
 
-.sd-thread-badge > span {
+.sd-branch-badge > span {
   color: var(--text-tertiary);
   font-variant-numeric: tabular-nums;
 }
 
-.sd-thread-menu {
+.sd-branch-menu {
   position: absolute;
   z-index: 20;
   top: calc(100% + var(--spacing-4));
@@ -125,7 +125,7 @@
   box-shadow: var(--shadow-floating);
 }
 
-.sd-thread-menu-head {
+.sd-branch-menu-head {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
@@ -134,7 +134,7 @@
   border-block-end: var(--border-width) solid var(--border-subtle);
 }
 
-.sd-thread-menu-head span {
+.sd-branch-menu-head span {
   overflow: hidden;
   color: var(--text-primary);
   font-size: var(--font-size-12);
@@ -143,13 +143,13 @@
   white-space: nowrap;
 }
 
-.sd-thread-menu-head small {
+.sd-branch-menu-head small {
   flex: none;
   color: var(--text-tertiary);
   font-size: var(--font-size-11);
 }
 
-.sd-thread-tree-item {
+.sd-branch-tree-item {
   position: relative;
   display: flex;
   align-items: center;
@@ -165,7 +165,7 @@
   cursor: pointer;
 }
 
-.sd-thread-tree-item::before {
+.sd-branch-tree-item::before {
   position: absolute;
   top: 0;
   bottom: 50%;
@@ -174,7 +174,7 @@
   content: '';
 }
 
-.sd-thread-tree-item::after {
+.sd-branch-tree-item::after {
   position: absolute;
   top: 50%;
   left: var(--spacing-8);
@@ -183,28 +183,28 @@
   content: '';
 }
 
-.sd-thread-tree-item:hover {
+.sd-branch-tree-item:hover {
   background: var(--background-hover);
   color: var(--text-primary);
 }
 
-.sd-thread-tree-item > span {
+.sd-branch-tree-item > span {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-4);
 }
 
-.sd-thread-tree-item strong {
+.sd-branch-tree-item strong {
   font-size: var(--font-size-12);
   font-weight: var(--font-weight-medium);
 }
 
-.sd-thread-tree-item small {
+.sd-branch-tree-item small {
   color: var(--text-tertiary);
   font-size: var(--font-size-11);
 }
 
-.sd-thread-menu-foot {
+.sd-branch-menu-foot {
   padding: var(--spacing-4) var(--spacing-8);
   border-block-start: var(--border-width) solid var(--border-subtle);
   color: var(--text-tertiary);
@@ -377,6 +377,15 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.sd-settings-section {
+  margin-block-start: var(--spacing-12);
+  padding-block-start: var(--spacing-8);
+  border-block-start: var(--border-width) solid var(--border-subtle);
+  color: var(--text-tertiary);
+  font-size: var(--font-size-11);
+  font-weight: var(--font-weight-medium);
 }
 
 .sd-settings-note {
@@ -851,6 +860,60 @@
   background: var(--success);
 }
 
+.sd-branch-frame {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-8);
+  padding: var(--spacing-8) var(--spacing-12);
+  border: var(--border-width) solid var(--border-subtle);
+  border-radius: var(--radius-medium);
+  background: var(--background-surface);
+}
+
+.sd-branch-frame-icon {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  inline-size: var(--spacing-32);
+  block-size: var(--spacing-32);
+  border-radius: var(--radius-pill);
+  background: var(--brand-soft);
+  color: var(--brand-ink);
+}
+
+.sd-branch-frame-copy {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-inline-size: 0;
+}
+
+.sd-branch-frame-copy strong {
+  color: var(--text-primary);
+  font-size: var(--font-size-12);
+  font-weight: var(--font-weight-medium);
+}
+
+.sd-branch-frame-copy small {
+  color: var(--text-tertiary);
+  font-size: var(--font-size-11);
+}
+
+.sd-branch-frame-open {
+  flex: none;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--brand-ink);
+  font-size: var(--font-size-11);
+  cursor: pointer;
+}
+
+.sd-branch-frame-open:hover {
+  text-decoration: underline;
+}
+
 .sd-composer-wrap {
   flex: none;
   inline-size: 100%;
@@ -1068,7 +1131,7 @@
   color: var(--text-primary);
 }
 
-.sd-new-thread {
+.sd-new-branch {
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-4);
@@ -1084,7 +1147,7 @@
   cursor: pointer;
 }
 
-.sd-new-thread:hover {
+.sd-new-branch:hover {
   border-color: var(--border-hover-strong);
   background: var(--background-field);
   color: var(--text-primary);

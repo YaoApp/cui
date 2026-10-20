@@ -16,12 +16,12 @@ type SessionData = {
   createdAt: string
 }
 
-type Thread = {
+type Branch = {
   id: string
   title: string
   count: number
 }
-type BrowserPage = { kind: 'thread'; thread: Thread } | { kind: 'workspace' }
+type BrowserPage = { kind: 'branch'; branch: Branch } | { kind: 'workspace' }
 type SectionId = 'agents' | 'jobs' | 'daemons' | 'files'
 
 const fallbackSession: SessionData = {
@@ -44,6 +44,10 @@ const fileChanges = [
 ]
 
 type SettingsView = 'main' | 'vault'
+type BranchPolicy = 'inherit' | 'allow'
+
+const agentBranch: Branch = { id: 'liability-review', title: 'Liability review', count: 1 }
+const branchQuotas = ['2', '4', '8']
 
 type VaultItem = {
   id: string
@@ -116,7 +120,7 @@ export function SessionDetailPage({ sessionId }: { sessionId: string }) {
   const data = readSession(sessionId)
   const modelOptions = Array.from(new Set([data.model, 'DeepSeek Flash 4.1', 'DeepSeek Pro 4.1', 'Claude Sonnet 4.5']))
   const effortOptions = Array.from(new Set([data.effort, 'Fast', 'Balanced', 'Deep']))
-  const [threads, setThreads] = useState<Thread[]>([
+  const [branches, setBranches] = useState<Branch[]>([
     { id: 'payment', title: 'Payment terms', count: 3 },
     { id: 'termination', title: 'Termination window', count: 2 },
   ])
@@ -127,12 +131,18 @@ export function SessionDetailPage({ sessionId }: { sessionId: string }) {
   const [daemonStatus, setDaemonStatus] = useState<'running' | 'restarting'>('running')
   const [restarts, setRestarts] = useState(0)
   const [openDetail, setOpenDetail] = useState<SectionId | null>(null)
-  const [threadMenuOpen, setThreadMenuOpen] = useState(false)
+  const [branchMenuOpen, setBranchMenuOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [settingsView, setSettingsView] = useState<SettingsView>('main')
   const [lifetimeId, setLifetimeId] = useState('stop')
   const [approvalId, setApprovalId] = useState('writes')
   const [modelEffort, setModelEffort] = useState(() => `${data.model}::${data.effort}`)
+  const [autoBranchEnabled, setAutoBranchEnabled] = useState(true)
+  const [autoBranchQuota, setAutoBranchQuota] = useState('4')
+  const [autoBranchModelPolicy, setAutoBranchModelPolicy] = useState<BranchPolicy>('inherit')
+  const [autoBranchWorkspacePolicy, setAutoBranchWorkspacePolicy] = useState<BranchPolicy>('inherit')
+  const [autoBranchPrivilegePolicy, setAutoBranchPrivilegePolicy] = useState<BranchPolicy>('inherit')
+  const [autoBranchCreated, setAutoBranchCreated] = useState(false)
   const [vaultItems, setVaultItems] = useState<string[]>(['github-cui-token', 'github-cui-ssh'])
   const [vaultQuery, setVaultQuery] = useState('')
   const messagesRef = useRef<HTMLDivElement>(null)
@@ -179,13 +189,13 @@ export function SessionDetailPage({ sessionId }: { sessionId: string }) {
   }, [openDetail])
 
   useEffect(() => {
-    if (!threadMenuOpen) return
+    if (!branchMenuOpen) return
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') setThreadMenuOpen(false)
+      if (event.key === 'Escape') setBranchMenuOpen(false)
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [threadMenuOpen])
+  }, [branchMenuOpen])
 
   useEffect(() => {
     if (!settingsOpen) return
@@ -210,6 +220,23 @@ export function SessionDetailPage({ sessionId }: { sessionId: string }) {
     document.addEventListener('pointerdown', onPointerDown)
     return () => document.removeEventListener('pointerdown', onPointerDown)
   }, [settingsOpen])
+
+  useEffect(() => {
+    if (!autoBranchEnabled || autoBranchCreated) return
+    const timer = window.setTimeout(() => {
+      setBranches((current) =>
+        current.some((branch) => branch.id === agentBranch.id) ? current : [...current, agentBranch],
+      )
+      setAutoBranchCreated(true)
+      setBrowserPage({ kind: 'branch', branch: agentBranch })
+    }, 1200)
+    return () => window.clearTimeout(timer)
+  }, [autoBranchEnabled, autoBranchCreated])
+
+  useEffect(() => {
+    if (!autoBranchCreated) return
+    messagesRef.current?.scrollTo({ top: messagesRef.current.scrollHeight })
+  }, [autoBranchCreated])
 
   function send() {
     if (!draft.trim()) return
@@ -236,9 +263,9 @@ export function SessionDetailPage({ sessionId }: { sessionId: string }) {
     setOpenDetail((current) => (current === section ? null : section))
   }
 
-  function openThread(thread: Thread) {
-    setBrowserPage({ kind: 'thread', thread })
-    setThreadMenuOpen(false)
+  function openBranch(branch: Branch) {
+    setBrowserPage({ kind: 'branch', branch })
+    setBranchMenuOpen(false)
   }
 
   function openWorkspace() {
@@ -276,19 +303,19 @@ export function SessionDetailPage({ sessionId }: { sessionId: string }) {
     )
   }
 
-  function createThread() {
-    const thread: Thread = {
-      id: `thread-${Date.now()}`,
-      title: `New thread ${threads.length + 1}`,
+  function createBranch() {
+    const branch: Branch = {
+      id: `branch-${Date.now()}`,
+      title: `New branch ${branches.length + 1}`,
       count: 0,
     }
-    setThreads((current) => [...current, thread])
-    openThread(thread)
+    setBranches((current) => [...current, branch])
+    openBranch(branch)
   }
 
-  function openPaymentThread() {
-    const thread = threads.find((item) => item.id === 'payment')
-    if (thread) openThread(thread)
+  function openPaymentBranch() {
+    const branch = branches.find((item) => item.id === 'payment')
+    if (branch) openBranch(branch)
   }
 
   return (
@@ -304,47 +331,47 @@ export function SessionDetailPage({ sessionId }: { sessionId: string }) {
         <div className="sd-head-title">
           <h1>{data.title}</h1>
           <div
-            className="sd-thread-badge-wrap"
-            onMouseEnter={() => setThreadMenuOpen(true)}
-            onMouseLeave={() => setThreadMenuOpen(false)}
+            className="sd-branch-badge-wrap"
+            onMouseEnter={() => setBranchMenuOpen(true)}
+            onMouseLeave={() => setBranchMenuOpen(false)}
           >
             <button
-              className="sd-thread-badge"
+              className="sd-branch-badge"
               type="button"
               aria-haspopup="menu"
-              aria-expanded={threadMenuOpen}
-              aria-controls="sd-thread-menu"
-              aria-label={`Threads (${threads.length})`}
-              onClick={() => setThreadMenuOpen((current) => !current)}
-              onFocus={() => setThreadMenuOpen(true)}
+              aria-expanded={branchMenuOpen}
+              aria-controls="sd-branch-menu"
+              aria-label={`Branches (${branches.length})`}
+              onClick={() => setBranchMenuOpen((current) => !current)}
+              onFocus={() => setBranchMenuOpen(true)}
             >
-              <Icon name="i-split" size={13} />
-              Threads
-              <span>({threads.length})</span>
-              <Icon name={threadMenuOpen ? 'i-up' : 'i-down'} size={12} />
+              <Icon name="i-branch" size={13} />
+              Branches
+              <span>({branches.length})</span>
+              <Icon name={branchMenuOpen ? 'i-up' : 'i-down'} size={12} />
             </button>
-            {threadMenuOpen ? (
-              <div className="sd-thread-menu" id="sd-thread-menu" role="menu">
-                <div className="sd-thread-menu-head">
+            {branchMenuOpen ? (
+              <div className="sd-branch-menu" id="sd-branch-menu" role="menu">
+                <div className="sd-branch-menu-head">
                   <span>{data.title}</span>
                   <small>Session</small>
                 </div>
-                {threads.map((thread) => (
+                {branches.map((branch) => (
                   <button
-                    className="sd-thread-tree-item"
+                    className="sd-branch-tree-item"
                     type="button"
                     role="menuitem"
-                    key={thread.id}
-                    onClick={() => openThread(thread)}
+                    key={branch.id}
+                    onClick={() => openBranch(branch)}
                   >
                     <span>
-                      <strong>{thread.title}</strong>
-                      <small>{thread.count} messages</small>
+                      <strong>{branch.title}</strong>
+                      <small>{branch.count} messages</small>
                     </span>
                     <Icon name="i-right" size={13} />
                   </button>
                 ))}
-                <div className="sd-thread-menu-foot">Open in Browser</div>
+                <div className="sd-branch-menu-foot">Open in Browser</div>
               </div>
             ) : null}
           </div>
@@ -397,6 +424,60 @@ export function SessionDetailPage({ sessionId }: { sessionId: string }) {
                       ))}
                     </select>
                   </label>
+                  <div className="sd-settings-section">Branch automation</div>
+                  <label className="sd-setting-row">
+                    <span>Agent 自动建支线</span>
+                    <select
+                      value={autoBranchEnabled ? 'on' : 'off'}
+                      onChange={(event) => setAutoBranchEnabled(event.target.value === 'on')}
+                    >
+                      <option value="on">On</option>
+                      <option value="off">Off</option>
+                    </select>
+                  </label>
+                  <label className="sd-setting-row">
+                    <span>并发上限</span>
+                    <select value={autoBranchQuota} onChange={(event) => setAutoBranchQuota(event.target.value)}>
+                      {branchQuotas.map((quota) => (
+                        <option value={quota} key={quota}>
+                          {quota}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="sd-setting-row">
+                    <span>自动支线模型</span>
+                    <select
+                      value={autoBranchModelPolicy}
+                      onChange={(event) => setAutoBranchModelPolicy(event.target.value as BranchPolicy)}
+                    >
+                      <option value="inherit">Inherit session</option>
+                      <option value="allow">Allow override</option>
+                    </select>
+                  </label>
+                  <label className="sd-setting-row">
+                    <span>自动支线 Workspace</span>
+                    <select
+                      value={autoBranchWorkspacePolicy}
+                      onChange={(event) => setAutoBranchWorkspacePolicy(event.target.value as BranchPolicy)}
+                    >
+                      <option value="inherit">Inherit session</option>
+                      <option value="allow">Allow other Workspace</option>
+                    </select>
+                  </label>
+                  <label className="sd-setting-row">
+                    <span>自动支线权限</span>
+                    <select
+                      value={autoBranchPrivilegePolicy}
+                      onChange={(event) => setAutoBranchPrivilegePolicy(event.target.value as BranchPolicy)}
+                    >
+                      <option value="inherit">Inherit session</option>
+                      <option value="allow">Allow escalation</option>
+                    </select>
+                  </label>
+                  <p className="sd-settings-note">
+                    自动创建无需确认；收到支线帧后自动打开 Browser。支线完成后保留，可随时从徽标或 Browser 呼出。
+                  </p>
                   <p className="sd-settings-note">
                     不选择就不访问 Vault；可按分组或单条密钥授权，值不会显示在界面里。
                   </p>
@@ -559,8 +640,8 @@ extracted 8,421 characters in 1.2s`}</pre>
                     </p>
                     <div className="sd-exec-foot">
                       <span>01:42 · Session-level run</span>
-                      <button className="sd-link" type="button" onClick={openPaymentThread}>
-                        Open thread
+                      <button className="sd-link" type="button" onClick={openPaymentBranch}>
+                        Open branch
                       </button>
                     </div>
                   </ExecutionCard>
@@ -595,8 +676,8 @@ extracted 8,421 characters in 1.2s`}</pre>
                       <li>保密义务没有期限，终止后仍然无限期有效。</li>
                     </ol>
                     <p>
-                      详细批注放在 <button className="sd-inline-link" type="button" onClick={openPaymentThread}>Payment terms</button>{' '}
-                      Thread。合同预览已启动，可以直接打开带批注的版本。
+                      详细批注放在 <button className="sd-inline-link" type="button" onClick={openPaymentBranch}>Payment terms</button>{' '}
+                      支线。合同预览已启动，可以直接打开带批注的版本。
                     </p>
                   </SessionMessage>
 
@@ -604,6 +685,25 @@ extracted 8,421 characters in 1.2s`}</pre>
                     <span className="sd-receipt-dot" />
                     Job settled · Extract contract text · exit 0
                   </div>
+
+                  {autoBranchCreated ? (
+                    <div className="sd-branch-frame" role="status">
+                      <span className="sd-branch-frame-icon">
+                        <Icon name="i-branch" size={15} />
+                      </span>
+                      <span className="sd-branch-frame-copy">
+                        <strong>Branch created by Agent</strong>
+                        <small>{agentBranch.title} · opened in Browser</small>
+                      </span>
+                      <button
+                        className="sd-branch-frame-open"
+                        type="button"
+                        onClick={() => openBranch(agentBranch)}
+                      >
+                        Open
+                      </button>
+                    </div>
+                  ) : null}
                 </>
 
               {sent.map((message) => (
@@ -738,9 +838,9 @@ extracted 8,421 characters in 1.2s`}</pre>
                   <span>{fileChanges.length} changed</span>
                   <Icon name={openDetail === 'files' ? 'i-up' : 'i-down'} size={12} />
                 </button>
-                <button className="sd-new-thread" type="button" onClick={createThread}>
+                <button className="sd-new-branch" type="button" onClick={createBranch}>
                   <Icon name="i-plus" size={13} />
-                  New thread
+                  New branch
                 </button>
               </div>
 
@@ -749,7 +849,7 @@ extracted 8,421 characters in 1.2s`}</pre>
                   className="sd-input"
                   rows={2}
                   value={draft}
-                  placeholder="Reply in this thread…"
+                  placeholder="Reply in this branch…"
                   aria-label="回复"
                   onChange={(event) => setDraft(event.target.value)}
                   onKeyDown={(event) => {
@@ -839,20 +939,20 @@ extracted 8,421 characters in 1.2s`}</pre>
               <Icon name="i-act-close" size={15} />
             </button>
           </header>
-          {browserPage.kind === 'thread' ? (
+          {browserPage.kind === 'branch' ? (
             <>
               <div className="sd-browser-tab">
-                <Icon name="i-split" size={13} />
-                <span>{browserPage.thread.title}</span>
-                <small>{browserPage.thread.count} messages</small>
+                <Icon name="i-branch" size={13} />
+                <span>{browserPage.branch.title}</span>
+                <small>{browserPage.branch.count} messages</small>
               </div>
               <div className="sd-browser-body">
                 <span className="sd-browser-mark">
-                  <Icon name="i-split" size={22} />
+                  <Icon name="i-branch" size={22} />
                 </span>
-                <h2>{browserPage.thread.title}</h2>
-                <p>This thread has its own chat page in Browser. The main session stays on Main.</p>
-                <span className="sd-browser-note">Thread detail is outside this prototype.</span>
+                <h2>{browserPage.branch.title}</h2>
+                <p>This branch has its own chat page in Browser. The main session stays on Main.</p>
+                <span className="sd-browser-note">Branch detail is outside this prototype.</span>
               </div>
             </>
           ) : (
