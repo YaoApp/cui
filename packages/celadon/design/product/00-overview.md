@@ -12,7 +12,7 @@
 | # | 模块 | 英文 | 图标 | 定义 |
 | --- | --- | --- | --- | --- |
 | 01 | 新会话 | New Session | `i-plus-square` | 使用 Apps / Bots，或 Create App / Bot |
-| 02 | 应用 | Apps | `i-apps` | App 内核 + 人面 + Agent 面；绑定 Workspace 与 Computer |
+| 02 | 应用 | Apps | `i-apps` | 独立服务 + 可选 Bots；发布用 Manifest |
 | 03 | 智能体 | Bots | `i-bot` | 固定形态的 App；共享后是一个 chat 入口 |
 | 04 | 收件箱 | Inbox | `i-inbox` | 所有消息、会话与通知的集散地，人与 Bots 的桥梁 |
 | 05 | 看板 | Boards | `i-board` | 一组相关会话的容器；Kanban 是其中一种视图 |
@@ -46,6 +46,8 @@ Workspace 与 Computer 的归属、Private / Team 作用域与读写角色见 [`
 - **推荐**：Apps 与 Bots 列表立即出现在首屏。点击 App 打开独立 App 界面；点击 Bot 选中 chat 入口。
 
 Apps 模块有列表 `/apps` 与详情 `/apps/:id`。从新会话进入详情时带 `from=new-session`，返回按钮回到新会话；从 Apps 列表进入则回到列表。
+
+Apps 列表可以挂载官方外部 App、第三方外部 App 与 Builder 内部 App。App 用 Manifest 声明端口、域名、可调用 Bots、对外 Skills 与可见范围；平台不要求 App 运行在 Yao 上。规则见 [`notes/service.md`](notes/service.md)。
 
 从 Chatbox 发送后进入会话详情 `/sessions/:id`。详情页包含内容列头、占满内容区的消息列表、固定 Chatbox，以及 Chatbox 上方的 Agents / Backend jobs / Daemons / Files 运行条、下方的 Usage；标题前用图标与颜色表示会话状态，标题后有 `Branches (n)` 徽标，hover 树形列出支线，点击在 Browser 第三栏打开，主窗口不切换；Workspace 点击在 Browser 打开工作区文件，主线开始后不能切换；手动创建支线从每轮最后一条 Assistant 消息的 Branch 动作发起并在 Browser 打开；Agent 自动创建支线时，在该轮 Agent 回复内显示支线卡片，CUI 同时自动在 Browser 打开；自动创建开关、并发上限与自动支线的模型/Workspace/权限策略在会话 Settings 中设置，Chatbox 底部左侧是模型与思考强度合并选择与设置按钮，右侧是附件、语音输入与 Voice Chat，输入文字后换成发送按钮。消息列表承载 Agent run、Backend job、Daemon、Agent 回复内的支线卡片与回执。结构见 [`notes/session-detail.md`](notes/session-detail.md)，Session Branches 规则见 [`notes/branch.md`](notes/branch.md)。
 
