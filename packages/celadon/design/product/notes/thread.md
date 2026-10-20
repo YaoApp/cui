@@ -1,6 +1,6 @@
 # Thread · Session 详情设计笔记
 
-> 状态：后续 · 做 Session 详情时展开
+> 状态：草案 · 已在 Session 详情原型中使用
 > 位置：属于 Session，不占一级导航，也不是 Board 卡片。
 
 ## 1. 层级
@@ -19,8 +19,8 @@ Board 聚合 Session；Thread 聚合某个子问题的消息与产出；Subagent
 
 - 从一条消息或一个任务节点拉出 Thread，自动继承该点之前的上下文。
 - 主会话保留目标、进度与结论；Thread 只承载子问题的讨论、工具调用与产出。
-- Thread 有独立入口：会话侧栏或消息下方的入口，显示条数与未读状态。
-- Thread 是一等对象：有 ID、深链、标题、摘要，可分享、可回到原消息。
+- Thread 有独立入口：标题后的 `Threads (n)` 徽标与消息深链，显示条数；点击后在 Browser 打开。
+- Thread 是一等对象：有 ID、深链、标题、摘要，可回到原消息。
 - 回到主线时，把结论写回主会话；Thread 本身保留完整上下文。
 - Thread 数量与长度要有上限与折叠摘要，避免长会话不可发现、不可读。
 - Thread 的产出与证据挂在 Thread 内，主会话只显示摘要和链接。
@@ -72,7 +72,7 @@ SubagentRun
 - SubagentRun 需要用户回答时，问题回到所属 Session 或 Thread，不新建 Thread。
 - 一个 Session 层 SubagentRun 需要长期独立讨论时，可以提升为 Thread，保留原 run ID 与证据。
 - 所属 Session 或 Thread 关闭时，默认取消其下未完成的 SubagentRun；后台继续运行需要显式标记并保留状态。
-- 分享 Thread 时连带其 SubagentRun 的证据；不支持单独分享一个 SubagentRun。
+- Thread 分享规则未定时，不提供单独分享 SubagentRun；启用分享时，证据随 Thread 一起。
 
 ## 4. UI 表达
 
@@ -83,7 +83,7 @@ SubagentRun
 - 在派发位置插入一张 **Agent run card**，不把 Subagent 的原始消息刷进主对话。
 - 卡片一行显示：状态点、名称、职责、已用时间、摘要入口。
 - 多个并行执行合并成一组，例如「3 个 Agent 正在工作」，展开后逐行显示。
-- 卡片点击打开右侧详情，显示任务说明、工具调用、证据、摘要与停止/重试。
+- 卡片点击打开上下文面板，显示任务说明、工具调用、证据、摘要与停止/重试。
 - 完成后卡片收起为一行摘要；失败时保持展开并标出原因；等待输入时，问题直接进入会话流，不只藏在面板里。
 
 ```text
@@ -92,18 +92,25 @@ SubagentRun
 └───────────────────────────────────────────────────────┘
 ```
 
-### 4.2 会话头
+### 4.2 内容列头与 Threads 徽标
 
-- 显示 `2 running` 作为入口，数字是本会话当前活跃的 Agent run 数；没有活跃运行时显示 `Agents` 入口，不显示过期数字。
+- 内容列头显示会话标题、`Threads (n)` 徽标与会话状态；n 为支线 Thread 数。
+- 指针进入或键盘聚焦徽标时展开树形菜单，先显示会话标题，再以 `|—` 形式列出支线。
+- 每项显示消息数；选择后不在主窗口切换，而是在 Browser 第三栏打开该 Thread。
+- 主窗口始终显示主 Thread；打开支线不改变内容区的对话。
+- Chatbox 上方运行条右侧的 `New thread` 新建支线，并在 Browser 打开它自己的聊天页。
+- Thread 页的 Chatbox 与主 Thread 同构：底部左侧是模型与思考强度合并选择与设置，右侧是附件、语音输入与 Voice Chat，输入文字后换成发送。
+- Thread 默认继承 Session 的 Workspace、模型与档位、Vault 授权与工具审批；是否允许 Thread 单独覆盖待定。
 - 有等待输入或失败的 Agent 时，用状态色标出，不只显示数量。
 - Thread 内单独显示本 Thread 的活跃数，不把父会话的计数混进来。
+- Subagent 不占标题切换入口；它在运行条的 `Agents` 中汇总，深层导航留给 Browser。
 
-### 4.3 右侧活动面板
+### 4.3 Subagent 在详情页的表达
 
-- 分 `Active` 与 `Recent` 两组，按状态与时间排序。
-- 每行：名称、职责、状态、所属 Thread、耗时、摘要。
-- 支持停止、重试、查看证据、提升为 Thread。
-- 面板是执行视图，不是第二个聊天列表；不在面板里展开完整对话。
+- Subagent 以流内 Agent run card 出现，卡片承载状态、摘要、耗时与回链。
+- 运行条 `Agents` 汇总 Session 与 Thread 层的 run，显示角色、层级、耗时与状态。
+- 详情页不另设 Subagent 切换入口，也不在标题旁堆叠执行对象。
+- 执行视图与 Thread 列表分开，不把 Subagent 当成第二个聊天列表。
 
 ### 4.4 Board 与 Inbox
 
@@ -130,9 +137,9 @@ SubagentRun
 ## 6. 暂不决定
 
 - Thread 是否支持跨会话分享。
-- Thread 是否单独选择模型或档位。
+- Thread 是否允许覆盖继承的模型与档位。
 - Thread 是否支持合并回主会话，还是只回写摘要。
-- Thread 的权限是否跟随 Session，还是可以单独授权。
+- Thread 的 Vault 授权是否允许单独调整。
 - Subagent 的嵌套层数与并行上限。
 - Subagent 后台运行的保留时长与回收规则。
 - Subagent 提升为 Thread 时，原 Thread 的摘要如何拆分。

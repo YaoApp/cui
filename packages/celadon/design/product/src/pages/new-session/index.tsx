@@ -117,8 +117,6 @@ export function NewSessionPage() {
   const [advancedOpen, setAdvancedOpen] = useState(false)
   const [recording, setRecording] = useState(false)
   const [attachments, setAttachments] = useState<string[]>([])
-  const [started, setStarted] = useState(false)
-  const [ready, setReady] = useState(false)
   const composerRef = useRef<HTMLTextAreaElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
 
@@ -149,14 +147,7 @@ export function NewSessionPage() {
       return { group, items }
     })
     .filter(({ items }) => items.length > 0)
-  const lifetime = lifetimes.find((item) => item.id === lifetimeId) ?? lifetimes[0]
   const canSend = prompt.trim().length > 0
-
-  useEffect(() => {
-    if (!started) return
-    const timer = window.setTimeout(() => setReady(true), 900)
-    return () => window.clearTimeout(timer)
-  }, [started])
 
   useEffect(() => {
     if (!advancedOpen && !vaultPickerOpen) return
@@ -172,31 +163,12 @@ export function NewSessionPage() {
   function choose(item: Recommendation) {
     setSelectedId(item.id)
     setCreateMode(null)
-    setStarted(false)
-    setReady(false)
     composerRef.current?.focus()
   }
 
   function create(mode: Exclude<CreateMode, null>) {
     setCreateMode(mode)
     setSelectedId(null)
-    setStarted(false)
-    setReady(false)
-    composerRef.current?.focus()
-  }
-
-  function reset() {
-    setStarted(false)
-    setReady(false)
-    setPrompt('')
-    setAttachments([])
-    setVaultItems([])
-    setSelectedId(null)
-    setCreateMode(null)
-    setRecording(false)
-    setAdvancedOpen(false)
-    setVaultPickerOpen(false)
-    setVaultQuery('')
     composerRef.current?.focus()
   }
 
@@ -205,8 +177,36 @@ export function NewSessionPage() {
     setRecording(false)
     setAdvancedOpen(false)
     setVaultPickerOpen(false)
-    setStarted(true)
-    setReady(false)
+
+    const now = new Date()
+    const id = `s-${now.getTime().toString(36)}`
+    const cleanPrompt = prompt.trim().replace(/\s+/g, ' ')
+    const title = cleanPrompt.length > 32 ? `${cleanPrompt.slice(0, 32)}…` : cleanPrompt
+    const session = {
+      id,
+      title,
+      prompt: prompt.trim(),
+      workspace: workspace.label,
+      computer: workspace.computer,
+      model: model.label,
+      effort: effort.label,
+      vault: vaultSummary,
+      agent:
+        createMode === 'app'
+          ? 'Create App'
+          : createMode === 'bot'
+            ? 'Create Bot'
+            : selected?.name ?? 'Yao Agent',
+      attachments,
+      createdAt: now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+    }
+
+    try {
+      window.sessionStorage.setItem(`cui.session.${id}`, JSON.stringify(session))
+    } catch {
+      // The detail page falls back to its sample session when storage is unavailable.
+    }
+    window.location.assign(`/sessions/${id}`)
   }
 
   function toggleVaultItem(id: string) {
@@ -223,81 +223,6 @@ export function NewSessionPage() {
       }
       return Array.from(new Set([...current, ...group.items.map((item) => item.id)]))
     })
-  }
-
-  if (started) {
-    return (
-      <div className="ns-page">
-        <header className="ns-head">
-          <a className="ns-back" href="/new-session" aria-label="返回新会话">
-            <Icon name="i-left" size={16} />
-          </a>
-          <a className="ns-brand" href="/">
-            <img src={logo} alt="" />
-            <span>Yao Agents</span>
-          </a>
-          <span className="ns-crumb">Session</span>
-          <div className="ns-head-meta">
-            <span>产品设计</span>
-            <span className="status">草案</span>
-          </div>
-        </header>
-
-        <main className="ns-main ns-session-main">
-          <span className="eyebrow">SESSION</span>
-          <h1>会话已开始</h1>
-          <p className="lede">资源已准备好。这里是会话的起点。</p>
-
-          <section className="ns-session-prompt" aria-label="你的任务">
-            <span>You</span>
-            <p>{prompt}</p>
-            {attachments.length > 0 ? (
-              <div className="ns-attachments">
-                {attachments.map((name) => (
-                  <span className="ns-attachment" key={name}>
-                    <Icon name="i-file" size={14} />
-                    {name}
-                  </span>
-                ))}
-              </div>
-            ) : null}
-          </section>
-
-          <section className="ns-run-card" aria-live="polite">
-            <span className="ns-run-icon">
-              <Icon name={createMode === 'app' ? 'i-apps' : createMode === 'bot' ? 'i-bot' : selected?.icon ?? 'i-spark'} />
-            </span>
-            <div className="ns-run-copy">
-              <div className="ns-run-title">
-                <strong>{createMode === 'app' ? 'Create App' : createMode === 'bot' ? 'Create Bot' : selected?.name ?? 'Yao Agent'}</strong>
-                <span className={ready ? 'ns-run-state is-ready' : 'ns-run-state'}>
-                  <span className="ns-run-dot" />
-                  {ready ? 'Ready' : 'Starting'}
-                </span>
-              </div>
-              <p>
-                {ready
-                  ? `Using ${workspace.label} on ${workspace.computer}.`
-                  : `Preparing ${workspace.label} on ${workspace.computer}…`}
-              </p>
-              <span className="ns-run-meta">
-                {model.label} · {effort.label} · Vault: {vaultSummary} · {lifetime.label}
-              </span>
-            </div>
-          </section>
-
-          <div className="ns-session-actions">
-            <button className="ns-secondary" type="button" onClick={reset}>
-              <Icon name="i-plus" size={16} />
-              Start another
-            </button>
-            <a className="ns-quiet-link" href="/">
-              返回模块
-            </a>
-          </div>
-        </main>
-      </div>
-    )
   }
 
   return (
@@ -417,6 +342,42 @@ export function NewSessionPage() {
                   </select>
                 </label>
 
+                <label className="ns-choice ns-model-choice">
+                  <Icon name="i-obj-model" size={15} />
+                  <span className="ns-select-label">模型与思考强度</span>
+                  <select
+                    value={`${modelId}::${effortId}`}
+                    aria-label="模型与思考强度"
+                    onChange={(event) => {
+                      const [nextModel, nextEffort] = event.target.value.split('::')
+                      if (nextModel && nextEffort) {
+                        setModelId(nextModel)
+                        setEffortId(nextEffort)
+                      }
+                    }}
+                  >
+                    {models.map((model) =>
+                      efforts.map((effort) => (
+                        <option value={`${model.id}::${effort.id}`} key={`${model.id}::${effort.id}`}>
+                          {model.label} · {effort.label}
+                        </option>
+                      )),
+                    )}
+                  </select>
+                </label>
+                <button
+                  className="ns-icon-button ns-advanced-button"
+                  type="button"
+                  aria-label="高级设置"
+                  aria-expanded={advancedOpen}
+                  aria-controls="ns-advanced"
+                  onClick={() => setAdvancedOpen((current) => !current)}
+                >
+                  <Icon name="i-nav-settings" size={17} />
+                </button>
+              </div>
+
+              <div className="ns-send-area">
                 <input
                   ref={fileRef}
                   className="ns-file-input"
@@ -436,60 +397,26 @@ export function NewSessionPage() {
                 >
                   <Icon name="i-act-attach" size={18} />
                 </button>
-                <button
-                  className={recording ? 'ns-icon-button is-recording' : 'ns-icon-button'}
-                  type="button"
-                  aria-label={recording ? '停止语音输入' : '语音输入'}
-                  aria-pressed={recording}
-                  onClick={() => setRecording((current) => !current)}
-                >
-                  <Icon name="i-mic" size={18} />
-                </button>
-              </div>
-
-              <div className="ns-send-area">
-                <label className="ns-choice">
-                  <Icon name="i-obj-model" size={15} />
-                  <span className="ns-select-label">模型</span>
-                  <select value={modelId} aria-label="模型" onChange={(event) => setModelId(event.target.value)}>
-                    {models.map((item) => (
-                      <option value={item.id} key={item.id}>
-                        {item.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label className="ns-choice">
-                  <Icon name="i-spark" size={15} />
-                  <span className="ns-select-label">思考强度</span>
-                  <select value={effortId} aria-label="思考强度" onChange={(event) => setEffortId(event.target.value)}>
-                    {efforts.map((item) => (
-                      <option value={item.id} key={item.id}>
-                        {item.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <button
-                  className="ns-icon-button ns-advanced-button"
-                  type="button"
-                  aria-label="高级设置"
-                  aria-expanded={advancedOpen}
-                  aria-controls="ns-advanced"
-                  onClick={() => setAdvancedOpen((current) => !current)}
-                >
-                  <Icon name="i-nav-settings" size={17} />
-                </button>
-                <span className="ns-hint">⌘↵</span>
-                <button
-                  className="ns-send"
-                  type="button"
-                  aria-label="开始会话"
-                  disabled={!canSend}
-                  onClick={submit}
-                >
-                  <Icon name="i-send" size={18} />
-                </button>
+                {canSend ? (
+                  <button className="ns-send" type="button" aria-label="开始会话" onClick={submit}>
+                    <Icon name="i-arrow-up" size={16} />
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      className={recording ? 'ns-icon-button is-recording' : 'ns-icon-button'}
+                      type="button"
+                      aria-label={recording ? '停止语音输入' : '语音输入'}
+                      aria-pressed={recording}
+                      onClick={() => setRecording((current) => !current)}
+                    >
+                      <Icon name="i-mic" size={18} />
+                    </button>
+                    <button className="ns-icon-button" type="button" aria-label="Voice Chat">
+                      <Icon name="i-phone" size={18} />
+                    </button>
+                  </>
+                )}
               </div>
             </div>
 
