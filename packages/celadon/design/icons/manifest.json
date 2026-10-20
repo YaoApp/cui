@@ -54,6 +54,18 @@
     "src": "mic"
   },
   {
+    "id": "i-phone",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "phone"
+  },
+  {
+    "id": "i-arrow-up",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "arrow-up"
+  },
+  {
     "id": "i-home",
     "lib": "lucide",
     "cat": "navigation",

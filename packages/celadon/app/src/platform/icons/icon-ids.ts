@@ -9,6 +9,8 @@ export type IconId =
   | 'i-apps'
   | 'i-bot'
   | 'i-mic'
+  | 'i-phone'
+  | 'i-arrow-up'
   | 'i-home'
   | 'i-search'
   | 'i-minus'
