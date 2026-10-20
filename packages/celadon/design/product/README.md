@@ -19,7 +19,7 @@ node server.mjs
 ## 目录
 
 ```
-00-overview.md       概要设计：产品、模块列表、Boards 与 Thread
+00-overview.md       概要设计：产品、模块列表、Boards 与 Branches
 server.mjs           独立 Node / Vite Server
 src/pages/modules/   模块列表页
 src/pages/new-session/ 新会话页与 Apps / Bots 推荐
@@ -30,7 +30,7 @@ src/product-map.ts   七项模块
 src/components/      共用件
 src/app.css          只引用 design/tokens.css
 src/icons.ts         注入 app/src/platform/icons/sprite.svg
-notes/thread.md      Session 详情里的 Thread 机制
+notes/branch.md      Session 详情里的 Session Branches（会话支线）
 notes/session-detail.md Session 详情、运行时与 Job / Daemon
 notes/sharing.md     共享、可见性与资源隔离
 notes/computers.md   电脑池、申请与个人节点绑定
@@ -42,5 +42,5 @@ notes/vault.md       Vault 的密钥保护与授权
 ## 约束
 
 - 颜色、间距、字号、圆角从 `design/tokens.css` 取，不写字面值。
-- 概要只写一级模块与 Boards / Thread 的定位；模块功能随模块逐项展开。
+- 概要只写一级模块与 Boards / Branches 的定位；模块功能随模块逐项展开。
 - 页面表达功能，不把 Markdown 文档搬进界面。

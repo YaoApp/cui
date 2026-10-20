@@ -36,6 +36,7 @@ export type IconId =
   | 'i-dots'
   | 'i-file'
   | 'i-split'
+  | 'i-branch'
   | 'i-rows'
   | 'i-expand'
   | 'i-maximize'

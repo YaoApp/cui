@@ -26,10 +26,10 @@ Workspace 有两个作用域：
 
 ### 1.1 会话中的 Workspace
 
-- 会话开始时确定 Workspace，确定后固定，不能在会话中切换。
+- 会话开始时确定 Workspace，主线确定后固定，不能在会话中切换。
 - 需要另一套文件时新建会话，不复用当前会话的上下文。
 - 会话详情右上角显示当前 Workspace；点击在 Browser 打开工作区文件。
-- 新 Thread 继承所在会话的 Workspace，不单独选择。
+- 支线默认继承所在会话的 Workspace；自动支线是否允许使用其他 Workspace 由会话 Settings 设置。
 - Chatbox 不提供 Workspace 选择或切换。
 
 ## 2. 权限

@@ -12,7 +12,7 @@ Chatbox 是新会话的独立章节，不是推荐列表的一部分。它负责
 
 ```text
 Chatbox
-  ├─ New thread（仅会话详情，运行条右侧）
+  ├─ New branch（仅会话详情，运行条右侧）
   ├─ 意图输入
   ├─ Workspace（仅新会话，位于模型左侧）
   ├─ 模型与思考强度（合并选择）
@@ -45,9 +45,9 @@ Workspace 决定 Computer，并在会话开始前确定。
 - 每个选项显示 Workspace 名称与 Private / Team 作用域。
 - 只列出当前用户可访问的 Workspace。
 - 选中 Workspace 即确定绑定的 Computer，不需要再选一次。
-- 会话开始后 Workspace 固定，Chatbox 不提供切换入口。
+- 会话开始后主线 的 Workspace 固定，Chatbox 不提供切换入口。
 - 会话详情右上角显示当前 Workspace，点击在 Browser 打开工作区文件。
-- 新 Thread 继承同一 Workspace。
+- 支线默认继承同一 Workspace；自动支线是否允许使用其他 Workspace 由会话 Settings 设置。
 
 ```text
 Mac mini · online
@@ -76,15 +76,16 @@ Windows box · online
 - 右侧空输入时是附件、语音输入与 Voice Chat；输入文字后换成附件与发送按钮。
 - 设置按钮在两个页面都位于合并选择之后，右侧组保持一致。
 - 发送按钮与附件按钮同尺寸，图标用上箭头。
-- `New thread` 在 Chatbox 上方的运行条右侧，不属于输入区。
+- `New branch` 在 Chatbox 上方的运行条右侧，不属于输入区。
 
 ### 2.7 高级设置
 
-高级设置在新会话与会话详情的 Chatbox 里，按钮位于模型与思考强度合并选择之后；面板在 Chatbox 上方展开并右对齐。本期先放三项：
+高级设置在新会话与会话详情的 Chatbox 里，按钮位于模型与思考强度合并选择之后；面板在 Chatbox 上方展开并右对齐。本期包含四项：
 
 - **Computer 生命周期**：会话结束后停止，或保持运行。
 - **Vault access**：默认无访问；打开选择器后可以多选分组或单条密钥，分组支持全选与部分选中，不自动加载整个 Vault。
 - **工具审批**：写入类工具是否每次确认。
+- **支线自动化**：开启或关闭自动创建、并发上限，以及自动支线的模型、Workspace 与权限覆盖策略；自动创建无需确认。
 
 会话中的设置面板在 Chatbox 上方展开，不遮挡输入区；`Esc` 或关闭键收起。
 

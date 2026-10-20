@@ -47,7 +47,7 @@ Workspace 与 Computer 的归属、Private / Team 作用域与读写角色见 [`
 
 Apps 模块有列表 `/apps` 与详情 `/apps/:id`。从新会话进入详情时带 `from=new-session`，返回按钮回到新会话；从 Apps 列表进入则回到列表。
 
-从 Chatbox 发送后进入会话详情 `/sessions/:id`。详情页包含内容列头、占满内容区的消息列表、固定 Chatbox，以及 Chatbox 上方的 Agents / Backend jobs / Daemons / Files 运行条与右侧 `New thread`、下方的 Usage；标题前用图标与颜色表示会话状态，标题后有 `Threads (n)` 徽标，hover 树形列出支线，点击在 Browser 第三栏打开，主窗口不切换；Workspace 点击在 Browser 打开工作区文件，会话开始后不能切换；运行条右侧的 `New thread` 新建支线并在 Browser 打开，Chatbox 底部左侧是模型与思考强度合并选择与设置按钮，右侧是附件、语音输入与 Voice Chat，输入文字后换成发送按钮。消息列表承载 Agent run、Backend job、Daemon 与回执。结构见 [`notes/session-detail.md`](notes/session-detail.md)，Thread 规则见 [`notes/thread.md`](notes/thread.md)。
+从 Chatbox 发送后进入会话详情 `/sessions/:id`。详情页包含内容列头、占满内容区的消息列表、固定 Chatbox，以及 Chatbox 上方的 Agents / Backend jobs / Daemons / Files 运行条与右侧 `New branch`、下方的 Usage；标题前用图标与颜色表示会话状态，标题后有 `Branches (n)` 徽标，hover 树形列出支线，点击在 Browser 第三栏打开，主窗口不切换；Workspace 点击在 Browser 打开工作区文件，主线 开始后不能切换；运行条右侧的 `New branch` 新建支线并在 Browser 打开；Agent 自动创建支线 时写入一条 支线帧，CUI 收到后自动在 Browser 打开，自动创建开关、并发上限与自动支线 的模型/Workspace/权限策略在会话 Settings 中设置，Chatbox 底部左侧是模型与思考强度合并选择与设置按钮，右侧是附件、语音输入与 Voice Chat，输入文字后换成发送按钮。消息列表承载 Agent run、Backend job、Daemon、支线帧与回执。结构见 [`notes/session-detail.md`](notes/session-detail.md)，Session Branches 规则见 [`notes/branch.md`](notes/branch.md)。
 
 ## 4. Boards
 
@@ -63,9 +63,9 @@ Board 是逻辑容器，收纳一组相关会话。Kanban 是 Board 的默认视
 
 Board 的列是工作域，例如运营、产品、调研、售前，不是运行状态。每张卡片是 `task`，带 `chat_id`，对应一次会话；运行状态由 `run_status` 单独表示，取值为 `pending`、`queued`、`running`、`completed`、`failed`、`stopped`、`cancelled`。这套“列是领域、状态由会话推导”的结构就是 Board 的特色。
 
-## 5. Thread（后续）
+## 5. Session Branches（后续）
 
-Thread 放在 Session 详情里展开，不占一级导航。机制记录见 [`notes/thread.md`](notes/thread.md)。
+Session Branch 放在 Session 详情里展开，不占一级导航。机制记录见 [`notes/branch.md`](notes/branch.md)。
 
 ## 6. 后续模块
 
