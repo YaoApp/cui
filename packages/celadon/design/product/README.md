@@ -4,7 +4,7 @@
 
 - 独立 Server，端口 **5066**
 - React + Vite，共用 `design/tokens.css`
-- 当前页面：模块列表 `/`，新会话 `/new-session`，Apps 列表 `/apps`，独立 App 界面 `/apps/:id`
+- 当前页面：模块列表 `/`，新会话 `/new-session`，会话详情 `/sessions/:id`，Apps 列表 `/apps`，独立 App 界面 `/apps/:id`
 - 推荐卡使用样例数据，先服务讨论，不接真实接口
 
 ## 运行
@@ -23,6 +23,7 @@ node server.mjs
 server.mjs           独立 Node / Vite Server
 src/pages/modules/   模块列表页
 src/pages/new-session/ 新会话页与 Apps / Bots 推荐
+src/pages/session-detail/ 会话详情与运行时
 src/pages/apps-index/ Apps 列表
 src/pages/app-view/ 独立 App 界面
 src/product-map.ts   七项模块
@@ -30,6 +31,7 @@ src/components/      共用件
 src/app.css          只引用 design/tokens.css
 src/icons.ts         注入 app/src/platform/icons/sprite.svg
 notes/thread.md      Session 详情里的 Thread 机制
+notes/session-detail.md Session 详情、运行时与 Job / Daemon
 notes/sharing.md     共享、可见性与资源隔离
 notes/computers.md   电脑池、申请与个人节点绑定
 notes/workspace.md   Workspace 与 Computer、Private / Team 读写角色

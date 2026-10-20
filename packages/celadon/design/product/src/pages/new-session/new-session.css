@@ -298,6 +298,14 @@
   outline: 0;
 }
 
+.ns-model-choice {
+  max-inline-size: 300px;
+}
+
+.ns-model-choice select {
+  max-inline-size: 260px;
+}
+
 .ns-file-input {
   position: absolute;
   overflow: hidden;
@@ -616,17 +624,11 @@
 }
 
 
-.ns-hint {
-  color: var(--text-tertiary);
-  font-size: var(--font-size-11);
-  font-variant-numeric: tabular-nums;
-}
-
 .ns-send {
   display: inline-grid;
   place-items: center;
-  inline-size: calc(var(--spacing-32) + var(--spacing-4));
-  block-size: calc(var(--spacing-32) + var(--spacing-4));
+  inline-size: var(--spacing-32);
+  block-size: var(--spacing-32);
   padding: 0;
   border: 0;
   border-radius: var(--radius-pill);

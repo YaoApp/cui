@@ -24,6 +24,14 @@ Workspace 有两个作用域：
 
 没有 Workspace 分享、公开链接或按文件授权。单文件对外传递走临时分享池。
 
+### 1.1 会话中的 Workspace
+
+- 会话开始时确定 Workspace，确定后固定，不能在会话中切换。
+- 需要另一套文件时新建会话，不复用当前会话的上下文。
+- 会话详情右上角显示当前 Workspace；点击在 Browser 打开工作区文件。
+- 新 Thread 继承所在会话的 Workspace，不单独选择。
+- Chatbox 不提供 Workspace 选择或切换。
+
 ## 2. 权限
 
 ### 2.1 Private
