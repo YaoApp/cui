@@ -32,11 +32,34 @@ const workspaces = workspaceGroups.flatMap((group) =>
   })),
 )
 
-const models = [
-  { id: 'deepseek-flash-4-1', label: 'DeepSeek Flash 4.1' },
-  { id: 'deepseek-pro-4-1', label: 'DeepSeek Pro 4.1' },
-  { id: 'claude-sonnet-4-5', label: 'Claude Sonnet 4.5' },
+const modelGroups = [
+  {
+    provider: 'DeepSeek',
+    models: [
+      { id: 'deepseek-flash-4-1', label: 'DeepSeek Flash 4.1' },
+      { id: 'deepseek-pro-4-1', label: 'DeepSeek Pro 4.1' },
+    ],
+  },
+  {
+    provider: 'Anthropic',
+    models: [{ id: 'claude-sonnet-4-5', label: 'Claude Sonnet 4.5' }],
+  },
+  {
+    provider: 'OpenAI',
+    models: [{ id: 'gpt-4-1', label: 'GPT-4.1' }],
+  },
 ]
+
+const models = modelGroups.flatMap((group) =>
+  group.models.map((model) => ({ ...model, provider: group.provider })),
+)
+
+function inferRunner(modelId: string) {
+  const model = models.find((item) => item.id === modelId)
+  if (model?.provider === 'Anthropic') return 'claude'
+  if (model?.provider === 'DeepSeek') return 'dsh'
+  return 'tai'
+}
 
 const efforts = [
   { id: 'fast', label: 'Fast' },
@@ -109,12 +132,14 @@ export function NewSessionPage() {
   const [workspaceId, setWorkspaceId] = useState(workspaces[0].id)
   const [modelId, setModelId] = useState(models[0].id)
   const [effortId, setEffortId] = useState(efforts[1].id)
+  const [runnerId, setRunnerId] = useState(() => inferRunner(models[0].id))
   const [vaultItems, setVaultItems] = useState<string[]>([])
   const [vaultPickerOpen, setVaultPickerOpen] = useState(false)
   const [vaultQuery, setVaultQuery] = useState('')
   const [lifetimeId, setLifetimeId] = useState(lifetimes[0].id)
   const [approvalId, setApprovalId] = useState(approvals[0].id)
   const [advancedOpen, setAdvancedOpen] = useState(false)
+  const [agentPickerOpen, setAgentPickerOpen] = useState(false)
   const [recording, setRecording] = useState(false)
   const [attachments, setAttachments] = useState<string[]>([])
   const composerRef = useRef<HTMLTextAreaElement>(null)
@@ -150,15 +175,16 @@ export function NewSessionPage() {
   const canSend = prompt.trim().length > 0
 
   useEffect(() => {
-    if (!advancedOpen && !vaultPickerOpen) return
+    if (!advancedOpen && !vaultPickerOpen && !agentPickerOpen) return
     function onKeyDown(event: KeyboardEvent) {
       if (event.key !== 'Escape') return
       setAdvancedOpen(false)
       setVaultPickerOpen(false)
+      setAgentPickerOpen(false)
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [advancedOpen, vaultPickerOpen])
+  }, [advancedOpen, vaultPickerOpen, agentPickerOpen])
 
   function choose(item: Recommendation) {
     setSelectedId(item.id)
@@ -177,6 +203,7 @@ export function NewSessionPage() {
     setRecording(false)
     setAdvancedOpen(false)
     setVaultPickerOpen(false)
+    setAgentPickerOpen(false)
 
     const now = new Date()
     const id = `s-${now.getTime().toString(36)}`
@@ -196,7 +223,8 @@ export function NewSessionPage() {
           ? 'Create App'
           : createMode === 'bot'
             ? 'Create Bot'
-            : selected?.name ?? 'Yao Agent',
+            : selected?.name ?? '通用智能体',
+      runner: runnerId,
       attachments,
       createdAt: now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
     }
@@ -353,13 +381,14 @@ export function NewSessionPage() {
                       if (nextModel && nextEffort) {
                         setModelId(nextModel)
                         setEffortId(nextEffort)
+                        setRunnerId(inferRunner(nextModel))
                       }
                     }}
                   >
                     {models.map((model) =>
                       efforts.map((effort) => (
                         <option value={`${model.id}::${effort.id}`} key={`${model.id}::${effort.id}`}>
-                          {model.label} · {effort.label}
+                          {model.provider} · {model.label} · {effort.label}
                         </option>
                       )),
                     )}
@@ -433,8 +462,52 @@ export function NewSessionPage() {
                     <Icon name="i-act-close" size={14} />
                   </button>
                 </div>
-                <label className="ns-field">
-                  <span>Computer 生命周期</span>
+                <div className="ns-field">
+                  <span>主智能体</span>
+                  <button
+                    className="ns-vault-trigger"
+                    type="button"
+                    aria-haspopup="dialog"
+                    onClick={() => {
+                      setAdvancedOpen(false)
+                      setAgentPickerOpen(true)
+                    }}
+                  >
+                    <span>{selected?.name ?? '通用智能体'} · {runnerId}</span>
+                    <Icon name="i-right" size={13} />
+                  </button>
+                </div>
+                  <label className="ns-field">
+                    <span>Models</span>
+                    <select
+                      value={`${modelId}::${effortId}`}
+                      onChange={(event) => {
+                        const [nextModel, nextEffort] = event.target.value.split('::')
+                        if (nextModel && nextEffort) {
+                          setModelId(nextModel)
+                          setEffortId(nextEffort)
+                          setRunnerId(inferRunner(nextModel))
+                        }
+                      }}
+                    >
+                      {modelGroups.map((group) => (
+                        <optgroup label={group.provider} key={group.provider}>
+                          {group.models.flatMap((model) =>
+                            efforts.map((effort) => (
+                              <option
+                                value={`${model.id}::${effort.id}`}
+                                key={`${model.id}::${effort.id}`}
+                              >
+                                {group.provider} · {model.label} · {effort.label}
+                              </option>
+                            )),
+                          )}
+                        </optgroup>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="ns-field">
+                    <span>Computer 生命周期</span>
                   <select value={lifetimeId} onChange={(event) => setLifetimeId(event.target.value)}>
                     {lifetimes.map((item) => (
                       <option value={item.id} key={item.id}>
@@ -469,6 +542,64 @@ export function NewSessionPage() {
                   </select>
                 </label>
                 <p className="ns-advanced-note">不选择就不访问 Vault；可按分组或单条密钥授权，值不会显示在界面里。</p>
+              </div>
+            ) : null}
+
+            {agentPickerOpen ? (
+              <div className="ns-vault-picker ns-agent-picker" role="dialog" aria-label="选择主智能体">
+                <div className="ns-vault-head">
+                  <div>
+                    <strong>主智能体</strong>
+                    <span>选择 Bot 与 Runner；首轮后 Runner 固定。</span>
+                  </div>
+                  <button
+                    className="ns-context-close"
+                    type="button"
+                    aria-label="关闭主智能体选择"
+                    onClick={() => setAgentPickerOpen(false)}
+                  >
+                    <Icon name="i-act-close" size={14} />
+                  </button>
+                </div>
+                <div className="ns-agent-body">
+                  <label className="ns-field">
+                    <span>Bot</span>
+                    <select
+                      value={selected?.kind === 'bot' ? selected.id : ''}
+                      onChange={(event) => {
+                        const nextId = event.target.value
+                        setSelectedId(nextId || null)
+                        setCreateMode(null)
+                      }}
+                    >
+                      <option value="">通用智能体</option>
+                      {bots.map((bot) => (
+                        <option value={bot.id} key={bot.id}>
+                          {bot.name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="ns-field">
+                    <span>Runner（执行环境）</span>
+                    <select value={runnerId} onChange={(event) => setRunnerId(event.target.value)}>
+                      {['dsh', 'claude', 'opencode', 'tai', 'yaocode'].map((runner) => (
+                        <option value={runner} key={runner}>
+                          {runner}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <p className="ns-advanced-note">
+                    Runner 默认随 Model 推断：Claude → claude，DeepSeek → dsh，其他 → tai。首轮前可调整，首轮后固定。
+                  </p>
+                </div>
+                <div className="ns-vault-foot">
+                  <span>{selected?.name ?? '通用智能体'} · {runnerId}</span>
+                  <button className="ns-vault-done" type="button" onClick={() => setAgentPickerOpen(false)}>
+                    Done
+                  </button>
+                </div>
               </div>
             ) : null}
 

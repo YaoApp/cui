@@ -100,8 +100,14 @@ Browser（第三栏）
 ### 1.8 会话设置
 
 - 设置按钮在 Chatbox 底部、模型与思考强度合并选择之后；点击在 Chatbox 上方展开 `高级设置` 面板，右对齐并收进视口。
-- 面板包含 Computer 生命周期、Vault access、工具审批与支线自动化。
-- 支线自动化提供自动创建开关、并发上限，以及自动支线的模型、Workspace 与权限覆盖策略；自动创建无需确认。
+- 面板包含主智能体、Models、Computer 生命周期、Vault access、工具审批与支线自动化。
+- Models 位于第二行，显示当前 `default` 角色的 Provider、Model、思考强度与角色摘要；点击进入二级详情，可设置 `default`、`heavy`、`light`、`vision`、`audio`、`embedding` 与 `decision`，每个角色用一个选择器完成 Provider → Model → 思考强度。
+- 主智能体与 Models 解耦，切换 Bot 不改变当前模型或角色选择。
+- 主智能体在主面板只占一行，显示 `Bot · Runner`；点击进入二级详情，可选择 Bot 与 Runner。
+- New Session 产生的 executor 会话可以切换主智能体；首轮后 Runner 只读，只允许切换到支持当前 Runner 的 Bot；Bots 模块与分享服务只读展示。
+- 主智能体选择器只列 Bot 与通用智能体，不列 App；App 使用独立界面，不进入会话设置。
+- 支线自动化在主面板只占一行，显示当前摘要；点击后进入二级详情。
+- 二级详情包含自动创建开关、并发上限，以及自动支线的模型、Workspace 与权限覆盖策略；自动创建无需确认。
 - 自动支线完成后保留，不自动归档，也不单独发送通知；用户可随时从徽标或 Browser 呼出。
 - Vault access 打开二级视图，可按分组或单条密钥多选；搜索框过滤分组与密钥。
 - 密钥值不显示在界面上；未选择时表示不访问 Vault。
