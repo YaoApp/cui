@@ -584,6 +584,13 @@
   font-size: var(--font-size-12);
 }
 
+.ns-agent-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-12);
+  padding: var(--spacing-12);
+}
+
 .ns-vault-foot {
   display: flex;
   align-items: center;

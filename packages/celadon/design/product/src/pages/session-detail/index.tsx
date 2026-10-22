@@ -12,6 +12,7 @@ type SessionData = {
   effort: string
   vault: string
   agent: string
+  runner: string
   attachments: string[]
   createdAt: string
 }
@@ -32,8 +33,9 @@ const fallbackSession: SessionData = {
   computer: 'Mac mini',
   model: 'DeepSeek Flash 4.1',
   effort: 'Balanced',
-  vault: '1 group · 2 secrets',
-  agent: 'Yao Agent',
+  vault: 'No access',
+  agent: '通用智能体',
+  runner: 'dsh',
   attachments: ['contract.pdf'],
   createdAt: '09:38',
 }
@@ -43,7 +45,7 @@ const fileChanges = [
   { name: 'risk-report.csv', change: '+12 −3', state: 'Modified' },
 ]
 
-type SettingsView = 'main' | 'vault'
+type SettingsView = 'main' | 'agent' | 'llm' | 'vault' | 'branch'
 type BranchPolicy = 'inherit' | 'allow'
 
 const agentBranch: Branch = { id: 'liability-review', title: 'Liability review', count: 1 }
@@ -105,6 +107,9 @@ const approvals = [
   { id: 'auto', label: 'Auto-approve' },
 ]
 
+const mainAgents = ['通用智能体', 'Researcher', 'Analyst', 'Editor']
+const mainRunners = ['dsh', 'claude', 'opencode', 'tai', 'yaocode']
+
 function readSession(id: string): SessionData {
   try {
     const raw = window.sessionStorage.getItem(`cui.session.${id}`)
@@ -118,8 +123,22 @@ function readSession(id: string): SessionData {
 
 export function SessionDetailPage({ sessionId }: { sessionId: string }) {
   const data = readSession(sessionId)
-  const modelOptions = Array.from(new Set([data.model, 'DeepSeek Flash 4.1', 'DeepSeek Pro 4.1', 'Claude Sonnet 4.5']))
+  const modelOptions = Array.from(new Set([data.model, 'DeepSeek Flash 4.1', 'DeepSeek Pro 4.1', 'Claude Sonnet 4.5', 'GPT-4.1']))
   const effortOptions = Array.from(new Set([data.effort, 'Fast', 'Balanced', 'Deep']))
+  const providerOf = (model: string) =>
+    model.startsWith('Claude')
+      ? 'Anthropic'
+      : model.startsWith('DeepSeek')
+        ? 'DeepSeek'
+        : model.startsWith('GPT')
+          ? 'OpenAI'
+          : 'Custom'
+  const modelChoices = modelOptions.flatMap((model) =>
+    effortOptions.map((effort) => ({
+      value: `${model}::${effort}`,
+      label: `${providerOf(model)} · ${model} · ${effort}`,
+    })),
+  )
   const [branches, setBranches] = useState<Branch[]>([
     { id: 'payment', title: 'Payment terms', count: 3 },
     { id: 'termination', title: 'Termination window', count: 2 },
@@ -135,6 +154,17 @@ export function SessionDetailPage({ sessionId }: { sessionId: string }) {
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [settingsView, setSettingsView] = useState<SettingsView>('main')
   const [lifetimeId, setLifetimeId] = useState('stop')
+  const [mainAgent, setMainAgent] = useState(data.agent)
+  const [runner] = useState(data.runner)
+  const [defaultRole, setDefaultRole] = useState(`${data.model}::${data.effort}`)
+  const [heavyRole, setHeavyRole] = useState('inherit')
+  const [lightRole, setLightRole] = useState('inherit')
+  const [visionRole, setVisionRole] = useState('inherit')
+  const [audioRole, setAudioRole] = useState('inherit')
+  const [embeddingRole, setEmbeddingRole] = useState('inherit')
+  const [decisionRole, setDecisionRole] = useState('inherit')
+  const defaultRoleLabel = defaultRole.split('::')[0]
+  const llmSummary = `${defaultRoleLabel} · 7 roles`
   const [approvalId, setApprovalId] = useState('writes')
   const [modelEffort, setModelEffort] = useState(() => `${data.model}::${data.effort}`)
   const [autoBranchEnabled, setAutoBranchEnabled] = useState(true)
@@ -143,9 +173,10 @@ export function SessionDetailPage({ sessionId }: { sessionId: string }) {
   const [autoBranchWorkspacePolicy, setAutoBranchWorkspacePolicy] = useState<BranchPolicy>('inherit')
   const [autoBranchPrivilegePolicy, setAutoBranchPrivilegePolicy] = useState<BranchPolicy>('inherit')
   const [autoBranchCreated, setAutoBranchCreated] = useState(false)
-  const [vaultItems, setVaultItems] = useState<string[]>(['github-cui-token', 'github-cui-ssh'])
+  const [vaultItems, setVaultItems] = useState<string[]>([])
   const [vaultQuery, setVaultQuery] = useState('')
   const messagesRef = useRef<HTMLDivElement>(null)
+  const branchSummary = autoBranchEnabled ? `On · max ${autoBranchQuota}` : 'Off'
 
   const selectedGroupCount = vaultGroups.filter(
     (group) => group.items.length > 0 && group.items.every((item) => vaultItems.includes(item.id)),
@@ -392,6 +423,30 @@ export function SessionDetailPage({ sessionId }: { sessionId: string }) {
                       <Icon name="i-act-close" size={14} />
                     </button>
                   </div>
+                  <div className="sd-setting-row">
+                    <span>主智能体</span>
+                    <button
+                      className="sd-vault-trigger"
+                      type="button"
+                      aria-haspopup="dialog"
+                      onClick={() => setSettingsView('agent')}
+                    >
+                      <span>{mainAgent} · {runner}</span>
+                      <Icon name="i-right" size={13} />
+                    </button>
+                  </div>
+                  <div className="sd-setting-row">
+                    <span>Models</span>
+                    <button
+                      className="sd-vault-trigger"
+                      type="button"
+                      aria-haspopup="dialog"
+                      onClick={() => setSettingsView('llm')}
+                    >
+                      <span>{llmSummary}</span>
+                      <Icon name="i-right" size={13} />
+                    </button>
+                  </div>
                   <label className="sd-setting-row">
                     <span>Computer 生命周期</span>
                     <select value={lifetimeId} onChange={(event) => setLifetimeId(event.target.value)}>
@@ -424,65 +479,138 @@ export function SessionDetailPage({ sessionId }: { sessionId: string }) {
                       ))}
                     </select>
                   </label>
-                  <div className="sd-settings-section">Branch automation</div>
-                  <label className="sd-setting-row">
-                    <span>Agent 自动建支线</span>
-                    <select
-                      value={autoBranchEnabled ? 'on' : 'off'}
-                      onChange={(event) => setAutoBranchEnabled(event.target.value === 'on')}
+                  <div className="sd-setting-row">
+                    <span>Branch automation</span>
+                    <button
+                      className="sd-vault-trigger"
+                      type="button"
+                      aria-haspopup="dialog"
+                      onClick={() => setSettingsView('branch')}
                     >
-                      <option value="on">On</option>
-                      <option value="off">Off</option>
-                    </select>
-                  </label>
+                      <span>{branchSummary}</span>
+                      <Icon name="i-right" size={13} />
+                    </button>
+                  </div>
+                  <p className="sd-settings-note">
+                    不选择就不访问 Vault；可按分组或单条密钥授权，值不会显示在界面里。
+                  </p>
+                </>
+              ) : settingsView === 'agent' ? (
+                <>
+                  <div className="sd-settings-head">
+                    <button
+                      className="sd-settings-back"
+                      type="button"
+                      aria-label="返回高级设置"
+                      onClick={() => setSettingsView('main')}
+                    >
+                      <Icon name="i-left" size={14} />
+                    </button>
+                    <strong>主智能体</strong>
+                    <button
+                      className="sd-settings-close"
+                      type="button"
+                      aria-label="关闭高级设置"
+                      onClick={closeSettings}
+                    >
+                      <Icon name="i-act-close" size={14} />
+                    </button>
+                  </div>
                   <label className="sd-setting-row">
-                    <span>并发上限</span>
-                    <select value={autoBranchQuota} onChange={(event) => setAutoBranchQuota(event.target.value)}>
-                      {branchQuotas.map((quota) => (
-                        <option value={quota} key={quota}>
-                          {quota}
+                    <span>Bot</span>
+                    <select value={mainAgent} onChange={(event) => setMainAgent(event.target.value)}>
+                      {Array.from(new Set([data.agent, ...mainAgents])).map((agent) => (
+                        <option value={agent} key={agent}>
+                          {agent}
                         </option>
                       ))}
                     </select>
                   </label>
                   <label className="sd-setting-row">
-                    <span>自动支线模型</span>
-                    <select
-                      value={autoBranchModelPolicy}
-                      onChange={(event) => setAutoBranchModelPolicy(event.target.value as BranchPolicy)}
-                    >
-                      <option value="inherit">Inherit session</option>
-                      <option value="allow">Allow override</option>
-                    </select>
-                  </label>
-                  <label className="sd-setting-row">
-                    <span>自动支线 Workspace</span>
-                    <select
-                      value={autoBranchWorkspacePolicy}
-                      onChange={(event) => setAutoBranchWorkspacePolicy(event.target.value as BranchPolicy)}
-                    >
-                      <option value="inherit">Inherit session</option>
-                      <option value="allow">Allow other Workspace</option>
-                    </select>
-                  </label>
-                  <label className="sd-setting-row">
-                    <span>自动支线权限</span>
-                    <select
-                      value={autoBranchPrivilegePolicy}
-                      onChange={(event) => setAutoBranchPrivilegePolicy(event.target.value as BranchPolicy)}
-                    >
-                      <option value="inherit">Inherit session</option>
-                      <option value="allow">Allow escalation</option>
+                    <span>Runner（执行环境）</span>
+                    <select value={runner} disabled aria-label="Runner（执行环境，首轮后固定）">
+                      {mainRunners.map((item) => (
+                        <option value={item} key={item}>
+                          {item}
+                        </option>
+                      ))}
                     </select>
                   </label>
                   <p className="sd-settings-note">
-                    自动创建无需确认；收到支线帧后自动打开 Browser。支线完成后保留，可随时从徽标或 Browser 呼出。
+                    本会话已有消息，Runner 已固定；新会话可在首轮前选择 Runner。切换 Bot 不重置上下文，只允许选择支持当前 Runner 的 Bot。
                   </p>
-                  <p className="sd-settings-note">
-                    不选择就不访问 Vault；可按分组或单条密钥授权，值不会显示在界面里。
-                  </p>
+                  <div className="sd-vault-foot">
+                    <span>{mainAgent} · {runner}</span>
+                    <button className="sd-vault-done" type="button" onClick={() => setSettingsView('main')}>
+                      Done
+                    </button>
+                  </div>
                 </>
-              ) : (
+              ) : settingsView === 'llm' ? (
+                <>
+                  <div className="sd-settings-head">
+                    <button
+                      className="sd-settings-back"
+                      type="button"
+                      aria-label="返回高级设置"
+                      onClick={() => setSettingsView('main')}
+                    >
+                      <Icon name="i-left" size={14} />
+                    </button>
+                    <strong>Models</strong>
+                    <button
+                      className="sd-settings-close"
+                      type="button"
+                      aria-label="关闭高级设置"
+                      onClick={closeSettings}
+                    >
+                      <Icon name="i-act-close" size={14} />
+                    </button>
+                  </div>
+                  <label className="sd-setting-row">
+                    <span>Default</span>
+                    <select value={defaultRole} onChange={(event) => setDefaultRole(event.target.value)}>
+                      {modelChoices.map((choice) => (
+                        <option value={choice.value} key={choice.value}>
+                          {choice.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  {[
+                    ['Heavy', heavyRole, setHeavyRole],
+                    ['Light', lightRole, setLightRole],
+                    ['Vision', visionRole, setVisionRole],
+                    ['Audio', audioRole, setAudioRole],
+                    ['Embedding', embeddingRole, setEmbeddingRole],
+                    ['Decision', decisionRole, setDecisionRole],
+                  ].map(([label, value, setter]) => (
+                    <label className="sd-setting-row" key={label as string}>
+                      <span>{label as string}</span>
+                      <select
+                        value={value as string}
+                        onChange={(event) => (setter as (next: string) => void)(event.target.value)}
+                      >
+                        <option value="inherit">Inherit default</option>
+                        {modelChoices.map((choice) => (
+                          <option value={choice.value} key={choice.value}>
+                            {choice.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  ))}
+                  <p className="sd-settings-note">
+                    角色默认继承 Default；主智能体与 Models 解耦，修改从下一轮生效。
+                  </p>
+                  <div className="sd-vault-foot">
+                    <span>{llmSummary}</span>
+                    <button className="sd-vault-done" type="button" onClick={() => setSettingsView('main')}>
+                      Done
+                    </button>
+                  </div>
+                </>
+              ) : settingsView === 'vault' ? (
                 <>
                   <div className="sd-settings-head">
                     <button
@@ -565,6 +693,87 @@ export function SessionDetailPage({ sessionId }: { sessionId: string }) {
                     >
                       Clear
                     </button>
+                    <button className="sd-vault-done" type="button" onClick={() => setSettingsView('main')}>
+                      Done
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="sd-settings-head">
+                    <button
+                      className="sd-settings-back"
+                      type="button"
+                      aria-label="返回高级设置"
+                      onClick={() => setSettingsView('main')}
+                    >
+                      <Icon name="i-left" size={14} />
+                    </button>
+                    <strong>Branch automation</strong>
+                    <button
+                      className="sd-settings-close"
+                      type="button"
+                      aria-label="关闭高级设置"
+                      onClick={closeSettings}
+                    >
+                      <Icon name="i-act-close" size={14} />
+                    </button>
+                  </div>
+                  <label className="sd-setting-row">
+                    <span>Agent 自动建支线</span>
+                    <select
+                      value={autoBranchEnabled ? 'on' : 'off'}
+                      onChange={(event) => setAutoBranchEnabled(event.target.value === 'on')}
+                    >
+                      <option value="on">On</option>
+                      <option value="off">Off</option>
+                    </select>
+                  </label>
+                  <label className="sd-setting-row">
+                    <span>并发上限</span>
+                    <select value={autoBranchQuota} onChange={(event) => setAutoBranchQuota(event.target.value)}>
+                      {branchQuotas.map((quota) => (
+                        <option value={quota} key={quota}>
+                          {quota}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="sd-setting-row">
+                    <span>自动支线模型</span>
+                    <select
+                      value={autoBranchModelPolicy}
+                      onChange={(event) => setAutoBranchModelPolicy(event.target.value as BranchPolicy)}
+                    >
+                      <option value="inherit">Inherit session</option>
+                      <option value="allow">Allow override</option>
+                    </select>
+                  </label>
+                  <label className="sd-setting-row">
+                    <span>自动支线 Workspace</span>
+                    <select
+                      value={autoBranchWorkspacePolicy}
+                      onChange={(event) => setAutoBranchWorkspacePolicy(event.target.value as BranchPolicy)}
+                    >
+                      <option value="inherit">Inherit session</option>
+                      <option value="allow">Allow other Workspace</option>
+                    </select>
+                  </label>
+                  <label className="sd-setting-row">
+                    <span>自动支线权限</span>
+                    <select
+                      value={autoBranchPrivilegePolicy}
+                      onChange={(event) => setAutoBranchPrivilegePolicy(event.target.value as BranchPolicy)}
+                    >
+                      <option value="inherit">Inherit session</option>
+                      <option value="allow">Allow escalation</option>
+                    </select>
+                  </label>
+                  <p className="sd-settings-note">
+                    自动创建无需确认；收到支线帧后自动打开 Browser。支线完成后保留，可随时从徽标或 Browser 呼出。
+                  </p>
+                  <div className="sd-vault-foot">
+                    <span>{branchSummary}</span>
                     <button className="sd-vault-done" type="button" onClick={() => setSettingsView('main')}>
                       Done
                     </button>
@@ -912,7 +1121,7 @@ extracted 8,421 characters in 1.2s`}</pre>
                         {modelOptions.map((model) =>
                           effortOptions.map((effort) => (
                             <option value={`${model}::${effort}`} key={`${model}::${effort}`}>
-                              {model} · {effort}
+                              {providerOf(model)} · {model} · {effort}
                             </option>
                           )),
                         )}
