@@ -78,16 +78,49 @@ Windows box · online
 
 ### 2.7 高级设置
 
-高级设置在新会话与会话详情的 Chatbox 里，按钮位于模型与思考强度合并选择之后；面板在 Chatbox 上方展开并右对齐。本期包含四项：
+高级设置在新会话与会话详情的 Chatbox 里，按钮位于模型与思考强度合并选择之后；面板在 Chatbox 上方展开并右对齐。本期共六项，支线自动化只在会话详情出现，新会话显示其余五项：
 
+- **主智能体**：显示当前 Bot 或通用智能体，可以切换；具体规则见 2.8。
+- **Models**：显示当前 Provider、Model、思考强度与角色摘要；点击进入二级详情；具体规则见 2.9。
 - **Computer 生命周期**：会话结束后停止，或保持运行。
 - **Vault access**：默认无访问；打开选择器后可以多选分组或单条密钥，分组支持全选与部分选中，不自动加载整个 Vault。
 - **工具审批**：写入类工具是否每次确认。
-- **支线自动化**：开启或关闭自动创建、并发上限，以及自动支线的模型、Workspace 与权限覆盖策略；自动创建无需确认。
+- **支线自动化**：主面板只显示摘要与入口，点击进入二级详情；二级详情包含自动创建、并发上限，以及自动支线的模型、Workspace 与权限覆盖策略；自动创建无需确认。
 
 会话中的设置面板在 Chatbox 上方展开，不遮挡输入区；`Esc` 或关闭键收起。
 
 具体交互后续单独讨论。这里只保证入口存在，且不把密钥值显示在界面上。
+
+### 2.8 主智能体
+
+主智能体只描述 Session 由哪个 Bot 执行，不是 App 入口。
+
+主智能体在 Settings 中是单行摘要，点击后进入二级详情；摘要显示 `Bot · Runner`。
+
+- 二级详情包含 Bot 与 Runner 两项；
+- Runner 是执行环境与会话存储，不是模型或 Provider；
+- 首次选择 Model 时 Runner 默认联动：Claude → claude，DeepSeek → dsh，其他 → tai；首轮前可手动调整；
+- 联动结果由后端接口解析，前端不硬编码映射；
+- 选择器只列 Bot 与通用智能体，不列 App；
+- New Session 可以切换主智能体，切换后 Session 由新的 Bot 执行；
+- 首轮对话前可以选择或重新确定 Runner；
+- 首轮对话后 Runner 已固定，只读展示，只允许切换到支持当前 Runner 的 Bot；
+- 切换不重置 Session 上下文，Workspace 与已有消息保留；
+- Bots 模块的默认会话与分享服务的主智能体固定，设置里只读展示；
+- App 使用独立界面，不进入平台 Chatbox 的主智能体选择器。
+
+### 2.9 Models
+
+Models 是 Settings 的第二行，位于主智能体之后。
+
+- 主面板显示当前 `default` 角色的 Provider、Model 与角色摘要；
+- 点击后进入二级详情，逐项设置 `default`、`heavy`、`light`、`vision`、`audio`、`embedding` 与 `decision`；
+- 未单独设置的角色继承 `default`，模型能力不足时显示不可用；
+- Chatbox 底部的模型与思考强度是 `default` 角色的快捷控制，选择器内按 Provider → Model → 思考强度组织；
+- 主智能体与 Models 解耦，切换主智能体不改变模型或角色选择；
+- 角色修改从下一轮生效，不重建 Session。
+
+完整规则见 [`llm-provider.md`](llm-provider.md)。
 
 ## 3. 状态
 
@@ -100,10 +133,10 @@ Windows box · online
 
 ## 4. 与 Apps / Bots 的关系
 
-- **App 卡点击进入独立的 App 界面**，不把 App 塞进 Chatbox。
-- **Bot 卡点击选中 chat 入口**，在 Chatbox 里直接开始对话。
-- Create App / Create Bot 从 Chatbox 进入创建流程。
-- Chatbox 可以没有 App 或 Bot，直接描述任务；此时由默认 Agent 执行。
+- **App 卡点击进入独立的 App 界面**，不把 App 塞进 Chatbox，也不把 App 变成主智能体。
+- **Bot 卡点击选中主智能体**，在 Chatbox 里直接开始对话；之后可在设置中切换。
+- Create App / Create Bot 从 Chatbox 进入创建流程；本版使用会话方式创建，2.1.0 接入 App Builder 后直接进入对应的创建应用。
+- Chatbox 可以没有 Bot，直接描述任务；此时由通用智能体执行。
 
 ## 5. 待定
 

@@ -54,7 +54,7 @@ Bot 由以下几部分组成：
 Bot
   identity          名称、头像、描述、欢迎语
   instruct          prompts 与行为约束
-  llm policy        LLM Provider 与默认模型
+  llm default       默认 Provider 与模型
   runner policy     可选；允许使用的 Runner 清单
   skills            Bot 携带的技能，包含 MCP、知识库、外部工具与脚本
   vault access policy 可选；允许访问的 Vault 分组或密钥范围
@@ -73,7 +73,7 @@ Bot 是可复用定义，不是每种场景都拥有自己的 Session。按 Sess
 
 | 场景 | Session 归属 | Workspace | Bot 可切换 | 说明 |
 | --- | --- | --- | --- | --- |
-| New Session | 用户创建的 Session | 用户选择 | 可切换 | Bot 作为执行者，Session 是主对象 |
+| New Session | 用户创建的 Session | 用户选择 | 可切换（Chatbox Settings） | Bot 作为执行者，Session 是主对象 |
 | Bots 模块 | Bot 的默认会话 | Bot 专属 Workspace | 不可切换 | 一个 Bot 绑定一个持久会话 |
 | 分享服务 | 每个外部用户各自的 Session | 每个外部用户各自的 Workspace | 不可切换 | Bot 定义共享，会话与数据隔离 |
 
@@ -96,7 +96,8 @@ New Session 中，Bot 是 Session 的执行者，不是 Session 的所有者。
 - 首轮对话前切换 Bot，可以按新 Bot 重新确定 Runner；
 - 首轮对话后 Runner 已固定，只允许切换到支持当前 Runner 的 Bot；
 - Workspace 由用户选择，属于 Session，Bot 的默认 Workspace 不覆盖它；
-- 切换 Bot 只改变 instruct、Skills 与身份，不重置 Session 上下文。
+- 切换 Bot 只改变 instruct、Skills 与身份，不重置 Session 上下文；
+- Chatbox Settings 的「主智能体」是可展开项，摘要显示 Bot 与 Runner；二级详情可以选择 Bot 与 Runner，首轮后 Runner 只读。
 
 ### 3.2 Bots 模块
 
@@ -119,7 +120,7 @@ Bots 模块中的 Bot 是产品化入口，一个 Bot 绑定一个持久会话�
 - 每个外部用户访问时，创建自己的 Session，并从 Runner 清单与可用节点的交集中确定 Runner；交集为空时服务不可用；
 - 平台为每个外部用户创建或复用其 Workspace，用户会话不在 Bot 的 Builder Workspace 中运行；
 - Bot 定义共享，Session、Workspace 与上下文隔离；
-- 用户不能切换 Bot 或 Runner；LLM Provider 在 Bot 允许范围内可以切换；
+- 用户不能切换 Bot 或 Runner；LLM Provider 可以切换，与主智能体解耦；
 - Bot 的 Vault access policy 由运行侧执行，外部用户不能读取密钥值，也不能超出 policy 范围；
 - 外部用户的数据不写回 Bot 的 Builder Workspace。
 
@@ -127,7 +128,7 @@ Bots 模块中的 Bot 是产品化入口，一个 Bot 绑定一个持久会话�
 
 Bot 定义更新后，Bots 模块的默认会话与分享服务的已有会话都跟随新定义。
 
-- 下一轮对话开始使用新的身份、instruct、Skills、LLM policy 与 Vault access policy；
+- 下一轮对话开始使用新的身份、instruct、Skills、LLM 默认值与 Vault access policy；
 - 历史消息不重写，保留原有署名与内容；
 - Workspace 与 Session 上下文保留；
 - Runner 仍按会话固定，不随 Bot 更新改变；
@@ -171,7 +172,7 @@ Runner 的内部会话应按 Session 绑定，而不是按主 Agent 绑定。这
 
 Runner 决定任务如何执行、使用哪个 CLI 或 SDK，以及内部会话保存在哪里。LLM Provider 决定调用哪个模型服务。
 
-产品文档与界面统一使用 LLM Provider，不再使用 Connector 作为产品概念。Connector 只保留为兼容层。
+产品界面的主入口使用 Models，Provider 只在明细中出现。Connector 只保留为兼容层。
 
 Runner 由 Bot 声明为可执行壳清单，不在 Bot 上直接固定一个值：
 
@@ -185,7 +186,7 @@ runner policy
 
 Runner 清单只描述执行壳，例如 `dsh`、`tai`，不描述模型。
 
-LLM 策略声明默认 Provider 与 Model，以及允许切换的范围。会话内切换只影响后续轮次，不重建 Session。
+Bot 只声明默认 Provider 与 Model。Session 内的 Models 与主智能体解耦，切换只影响后续轮次，不重建 Session。Provider、Model 与角色规则见 [`llm-provider.md`](llm-provider.md)。
 
 Runner 的具体值在 Session 首次创建时确定：
 
@@ -193,10 +194,22 @@ Runner 的具体值在 Session 首次创建时确定：
 2. 分享服务为外部用户创建会话时；
 3. New Session 的首轮对话前，在 Settings 的高级项中选择。
 
+默认 Runner 映射：
+
+```text
+Claude / Anthropic   claude
+DeepSeek             dsh
+其他                  tai
+```
+
+首次选择 Model 时按映射推断 Runner；首轮前改 Model 会重新推断；用户手动选择 Runner 可以覆盖推断值。
+
+Model 到 Runner 的解析由后端接口提供，前端只消费解析结果。后端可以结合 Bot 的 Runner 清单、节点可用性与模型策略返回最终 Runner，映射规则不写死在前端。
+
 选择规则：
 
 - 只从 Bot 清单与节点可用 Runner 的交集中选择；
-- 优先使用 LLM Provider 推断出的 Runner，前提是它在清单内；
+- 优先使用 Model 映射推断出的 Runner，前提是它在清单内；
 - 推断结果不在清单内时，按清单顺序选择可用的 Runner；
 - 交集为空时阻止会话创建，不回退到清单外的 Runner。
 
@@ -204,9 +217,9 @@ Runner 写入 Session 后不可更换。Session 内所有 Bot 都跟随这个 Ru
 
 运行中节点不可用时，不自动切换到清单内的其他 Runner。Session 应暂停或失败，需要更换 Runner 时新建 Session。
 
-LLM Provider 与模型不受首轮限制，可以在任意轮次切换；切换范围受当前 Runner 与 Bot 的 LLM 策略约束。
+LLM Provider 与模型与主智能体、Runner 均解耦，可以在任意轮次切换；角色能力要求由平台统一支持。
 
-会话开始后，Runner 只读展示，不放在 Chatbox 中；Chatbox 中的模型选择是 LLM Provider 与 Model，不是 Runner。
+会话开始后，Runner 只读展示，不放在 Chatbox 中；Chatbox 中的 Models 选择器包含 Provider、Model 与思考强度，不是 Runner。
 
 ## 6. Skills 三层
 
@@ -262,3 +275,13 @@ A2A 的规则：
 - Subagent 标记为 `Subagent`，A2A Guest 标记为 `A2A`。
 
 Bot 可以作为 A2A Guest 被调用，但被调用不会把父 Session 变成 Bots 模块的默认会话。
+
+## 9. Apps 与 Session
+
+App 是独立服务，不是 Session 的主智能体。
+
+- App 卡打开独立的 App 界面，不创建平台 Chatbox 会话；
+- App 不出现在主智能体选择器，也不出现在 Chatbox Settings 的主智能体列表；
+- App 可以通过 Yao Open API 调用 Bot，这不会改变任何平台 Session 的主智能体；
+- App 自己的对话界面归 App 所有，不使用平台 Chatbox 的主智能体切换规则；
+- 平台 Session 的主智能体只允许是 Bot 或通用智能体。

@@ -42,7 +42,7 @@ Workspace 与 Computer 的归属、Private / Team 作用域与读写角色见 [`
 
 新会话是独立页面 `/new-session`。页面分两个章节：
 
-- **Chatbox**：意图输入、语音输入、Workspace、附件、模型与思考强度合并选择、高级设置。新会话的 Workspace 选择在底部左侧，其后是合并选择与设置；Workspace 决定 Computer，两者合并在一个按电脑分组的选择器里。合并选择的每个选项同时带模型与档位，选中即同时改变两者。右侧空输入时是附件、语音输入与 Voice Chat，输入文字后换成发送。高级设置预留 Computer 生命周期、Vault 授权与工具审批。规则见 [`notes/chatbox.md`](notes/chatbox.md)。
+- **Chatbox**：意图输入、语音输入、Workspace、附件、模型与思考强度合并选择、高级设置。新会话的 Workspace 选择在底部左侧，其后是合并选择与设置；Workspace 决定 Computer，两者合并在一个按电脑分组的选择器里。合并选择的每个选项同时带模型与档位，选中即同时改变两者。右侧空输入时是附件、语音输入与 Voice Chat，输入文字后换成发送。高级设置包含主智能体、Models、Computer 生命周期、Vault 授权与工具审批。规则见 [`notes/chatbox.md`](notes/chatbox.md)。运行中的引导、排队、打断、语音/视频通话与主动联络规则见 [`notes/realtime-outreach.md`](notes/realtime-outreach.md)。
 - **推荐**：Apps 与 Bots 列表立即出现在首屏。点击 App 打开独立 App 界面；点击 Bot 选中 chat 入口。
 
 Apps 模块有列表 `/apps` 与详情 `/apps/:id`。从新会话进入详情时带 `from=new-session`，返回按钮回到新会话；从 Apps 列表进入则回到列表。
