@@ -35,7 +35,7 @@ Browser（第三栏）
 - 标题后是 `支线(n)` 徽标，n 为支线数。
 - 右上角是当前 Workspace，点击在 Browser 打开工作区文件。
 - 会话开始后主线的 Workspace 固定，不提供切换入口；自动支线是否允许其他 Workspace 由会话设置控制。
-- 会话不提供分享，也不放 Agent 身份信息。
+- 标题右侧依次是 `分享`、`Memory` 与当前 Workspace；分享在最前，Memory 与 Workspace 同样使用中性样式。Memory 打开居中的记忆与身份模态窗；面板包含看板、会话与记忆三档，构建规则见 [`identity.md`](identity.md)，记忆规则见 [`memory.md`](memory.md)。
 
 ### 1.2 支线切换
 

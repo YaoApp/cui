@@ -290,6 +290,12 @@
     "src": "sparkles"
   },
   {
+    "id": "i-memory",
+    "lib": "lucide",
+    "cat": "state",
+    "src": "brain"
+  },
+  {
     "id": "i-folder",
     "lib": "lucide",
     "cat": "file",

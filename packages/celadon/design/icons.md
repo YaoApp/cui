@@ -113,6 +113,7 @@
 | `i-check` | `check` |
 | `i-clock` | `clock` |
 | `i-spark` | `sparkles` |
+| `i-memory` | `brain` |
 | `i-state-warning` | `triangle-alert` |
 | `i-state-error` | `circle-alert` |
 | `i-state-info` | `info` |

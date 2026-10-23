@@ -54,6 +54,10 @@ export function ModulesPage() {
                 <a className="card-link" href="/apps" key={module.id}>
                   <ModuleCard module={module} />
                 </a>
+              ) : module.id === 'bots' ? (
+                <a className="card-link" href="/bots" key={module.id}>
+                  <ModuleCard module={module} />
+                </a>
               ) : (
                 <ModuleCard key={module.id} module={module} />
               ),

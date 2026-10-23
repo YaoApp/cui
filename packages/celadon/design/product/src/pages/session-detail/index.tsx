@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { ChatComposer } from '../../components/chat-composer'
 import { Icon } from '../../components/icon'
+import { MemoryPanel } from '../../components/memory-panel'
 import './session-detail.css'
 
 type SessionData = {
@@ -8,6 +10,9 @@ type SessionData = {
   prompt: string
   workspace: string
   computer: string
+  avatar?: string
+  board?: string
+  column?: string
   model: string
   effort: string
   vault: string
@@ -31,6 +36,8 @@ const fallbackSession: SessionData = {
   prompt: '帮我读一下这份 12 页合同，重点看付款、违约金、保密期与终止条款。',
   workspace: 'Research',
   computer: 'Mac mini',
+  board: '产品',
+  column: '待处理',
   model: 'DeepSeek Flash 4.1',
   effort: 'Balanced',
   vault: 'No access',
@@ -152,6 +159,7 @@ export function SessionDetailPage({ sessionId }: { sessionId: string }) {
   const [openDetail, setOpenDetail] = useState<SectionId | null>(null)
   const [branchMenuOpen, setBranchMenuOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [memoryOpen, setMemoryOpen] = useState(false)
   const [settingsView, setSettingsView] = useState<SettingsView>('main')
   const [lifetimeId, setLifetimeId] = useState('stop')
   const [mainAgent, setMainAgent] = useState(data.agent)
@@ -359,6 +367,7 @@ export function SessionDetailPage({ sessionId }: { sessionId: string }) {
         <span className="sd-status-icon" role="img" aria-label="Ready" title="Ready">
           <Icon name="i-check" size={12} />
         </span>
+        {data.avatar ? <img className="sd-agent-avatar" src={data.avatar} alt="" /> : null}
         <div className="sd-head-title">
           <h1>{data.title}</h1>
           <div
@@ -783,6 +792,14 @@ export function SessionDetailPage({ sessionId }: { sessionId: string }) {
             </div>
           ) : null}
         </>
+        <button className="sd-share-button" type="button">
+          <Icon name="i-act-external" size={13} />
+          分享
+        </button>
+        <button className="sd-memory-button" type="button" aria-label="记忆与身份" onClick={() => setMemoryOpen(true)}>
+          <Icon name="i-memory" size={14} />
+          <span>Memory</span>
+        </button>
         <button
           className={browserPage?.kind === 'workspace' ? 'sd-workspace-button is-active' : 'sd-workspace-button'}
           type="button"
@@ -1095,73 +1112,53 @@ extracted 8,421 characters in 1.2s`}</pre>
               </div>
 
               <div className="sd-composer">
-                <textarea
-                  className="sd-input"
-                  rows={2}
+                <ChatComposer
+                  bare
                   value={draft}
+                  onChange={setDraft}
+                  onSubmit={send}
                   placeholder="Reply in this branch…"
-                  aria-label="回复"
-                  onChange={(event) => setDraft(event.target.value)}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter' && !event.shiftKey) {
-                      event.preventDefault()
-                      send()
-                    }
-                  }}
-                />
-                <div className="sd-composer-bar">
-                  <div className="sd-composer-left">
-                    <label className="sd-choice sd-model-choice">
-                      <span className="sd-sr-only">模型与思考强度</span>
-                      <select
-                        value={modelEffort}
-                        aria-label="模型与思考强度"
-                        onChange={(event) => setModelEffort(event.target.value)}
+                  canSend={Boolean(draft.trim())}
+                  rows={2}
+                  submitKey="enter"
+                  onFiles={() => {}}
+                  onMic={() => {}}
+                  onVoiceChat={() => {}}
+                  resources={
+                    <>
+                      <label className="sd-choice sd-model-choice">
+                        <span className="sd-sr-only">模型与思考强度</span>
+                        <select
+                          value={modelEffort}
+                          aria-label="模型与思考强度"
+                          onChange={(event) => setModelEffort(event.target.value)}
+                        >
+                          {modelOptions.map((model) =>
+                            effortOptions.map((effort) => (
+                              <option value={`${model}::${effort}`} key={`${model}::${effort}`}>
+                                {providerOf(model)} · {model} · {effort}
+                              </option>
+                            )),
+                          )}
+                        </select>
+                      </label>
+                      <button
+                        className={
+                          settingsOpen
+                            ? 'sd-settings-button sd-composer-settings is-active'
+                            : 'sd-settings-button sd-composer-settings'
+                        }
+                        type="button"
+                        aria-label="高级设置"
+                        aria-expanded={settingsOpen}
+                        aria-controls="sd-settings"
+                        onClick={toggleSettings}
                       >
-                        {modelOptions.map((model) =>
-                          effortOptions.map((effort) => (
-                            <option value={`${model}::${effort}`} key={`${model}::${effort}`}>
-                              {providerOf(model)} · {model} · {effort}
-                            </option>
-                          )),
-                        )}
-                      </select>
-                    </label>
-                    <button
-                      className={
-                        settingsOpen
-                          ? 'sd-settings-button sd-composer-settings is-active'
-                          : 'sd-settings-button sd-composer-settings'
-                      }
-                      type="button"
-                      aria-label="高级设置"
-                      aria-expanded={settingsOpen}
-                      aria-controls="sd-settings"
-                      onClick={toggleSettings}
-                    >
-                      <Icon name="i-nav-settings" size={15} />
-                    </button>
-                  </div>
-                  <div className="sd-composer-right">
-                    <button className="sd-icon-button" type="button" aria-label="添加附件">
-                      <Icon name="i-act-attach" size={17} />
-                    </button>
-                    {draft.trim() ? (
-                      <button className="sd-send" type="button" aria-label="发送" onClick={send}>
-                        <Icon name="i-arrow-up" size={16} />
+                        <Icon name="i-nav-settings" size={15} />
                       </button>
-                    ) : (
-                      <>
-                        <button className="sd-icon-button" type="button" aria-label="语音输入">
-                          <Icon name="i-mic" size={17} />
-                        </button>
-                        <button className="sd-icon-button sd-voice-chat" type="button" aria-label="Voice Chat">
-                          <Icon name="i-phone" size={17} />
-                        </button>
-                      </>
-                    )}
-                  </div>
-                </div>
+                    </>
+                  }
+                />
               </div>
               <div className="sd-usage">
                 <span className="sd-usage-group">
@@ -1241,6 +1238,18 @@ extracted 8,421 characters in 1.2s`}</pre>
             </>
           )}
         </aside>
+      ) : null}
+      {memoryOpen ? (
+        <MemoryPanel
+          variant="session"
+          title={data.title}
+          workspace={data.workspace}
+          model={`${data.model} · ${data.effort}`}
+          agent={data.agent}
+          createdAt={data.createdAt}
+          board={data.board && data.column ? { name: data.board, column: data.column } : undefined}
+          onClose={() => setMemoryOpen(false)}
+        />
       ) : null}
     </div>
   )

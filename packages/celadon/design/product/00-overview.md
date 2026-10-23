@@ -40,16 +40,20 @@ Workspace 与 Computer 的归属、Private / Team 作用域与读写角色见 [`
 - 使用：选择一个已有 Bot，直接进入会话；或打开一个 App 的独立界面。
 - 创建：Create App 或 Create Bot，在会话中从模板或空白开始构建。
 
-新会话是独立页面 `/new-session`。页面分两个章节：
+新会话是主导航中的页面 `/new-session`，进入时「新会话」为当前项。页面分两个章节：
 
-- **Chatbox**：意图输入、语音输入、Workspace、附件、模型与思考强度合并选择、高级设置。新会话的 Workspace 选择在底部左侧，其后是合并选择与设置；Workspace 决定 Computer，两者合并在一个按电脑分组的选择器里。合并选择的每个选项同时带模型与档位，选中即同时改变两者。右侧空输入时是附件、语音输入与 Voice Chat，输入文字后换成发送。高级设置包含主智能体、Models、Computer 生命周期、Vault 授权与工具审批。规则见 [`notes/chatbox.md`](notes/chatbox.md)。运行中的引导、排队、打断、语音/视频通话与主动联络规则见 [`notes/realtime-outreach.md`](notes/realtime-outreach.md)。
+- **Chatbox**：意图输入、语音输入、Workspace、附件、模型与思考强度合并选择、高级设置。新会话的 Workspace 选择在底部左侧，其后是合并选择与设置；Workspace 决定 Computer，两者合并在一个按电脑分组的选择器里。合并选择的每个选项同时带模型与档位，选中即同时改变两者。右侧空输入时是附件、语音输入与 Voice Chat，输入文字后换成发送。高级设置包含主智能体、Models、Computer 生命周期、看板与列、Vault 授权与工具审批。规则见 [`notes/chatbox.md`](notes/chatbox.md)。运行中的引导、排队、打断、语音/视频通话与主动联络规则见 [`notes/realtime-outreach.md`](notes/realtime-outreach.md)。
 - **推荐**：Apps 与 Bots 列表立即出现在首屏。点击 App 打开独立 App 界面；点击 Bot 选中 chat 入口。
 
-Apps 模块有列表 `/apps` 与详情 `/apps/:id`。从新会话进入详情时带 `from=new-session`，返回按钮回到新会话；从 Apps 列表进入则回到列表。
+Apps 模块有列表 `/apps` 与详情 `/apps/:id`。详情以独占页打开，应用自己决定页面、导航与状态；外层只保留最小化与关闭胶囊。列表展示应用身份、分类、界面形态、Workspace、状态与更新时间，并提供新建入口。规则见 [`notes/apps.md`](notes/apps.md)。
 
 Apps 列表可以挂载官方外部 App、第三方外部 App 与 Builder 内部 App。App 用 Manifest 声明端口、域名、可调用 Bots、对外 Skills 与可见范围；平台不要求 App 运行在 Yao 上。规则见 [`notes/service.md`](notes/service.md)。
 
-从 Chatbox 发送后进入会话详情 `/sessions/:id`。详情页包含内容列头、占满内容区的消息列表、固定 Chatbox，以及 Chatbox 上方的 Agents / Backend jobs / Daemons / Files 运行条、下方的 Usage；标题前用图标与颜色表示会话状态，标题后有 `Branches (n)` 徽标，hover 树形列出支线，点击在 Browser 第三栏打开，主窗口不切换；Workspace 点击在 Browser 打开工作区文件，主线开始后不能切换；手动创建支线从每轮最后一条 Assistant 消息的 Branch 动作发起并在 Browser 打开；Agent 自动创建支线时，在该轮 Agent 回复内显示支线卡片，CUI 同时自动在 Browser 打开；自动创建开关、并发上限与自动支线的模型/Workspace/权限策略在会话 Settings 中设置，Chatbox 底部左侧是模型与思考强度合并选择与设置按钮，右侧是附件、语音输入与 Voice Chat，输入文字后换成发送按钮。消息列表承载 Agent run、Backend job、Daemon、Agent 回复内的支线卡片与回执。结构见 [`notes/session-detail.md`](notes/session-detail.md)，Session Branches 规则见 [`notes/branch.md`](notes/branch.md)。
+从 Chatbox 发送后进入会话详情 `/sessions/:id`。详情页包含内容列头、占满内容区的消息列表、固定 Chatbox，以及 Chatbox 上方的 Agents / Backend jobs / Daemons / Files 运行条、下方的 Usage；标题前用图标与颜色表示会话状态，标题后有 `Branches (n)` 徽标，hover 树形列出支线，点击在 Browser 第三栏打开，主窗口不切换；标题右侧依次是 `分享`、`Memory` 与当前 Workspace，分享在最前，Memory 与 Workspace 使用中性样式；Workspace 点击在 Browser 打开工作区文件，主线开始后不能切换；手动创建支线从每轮最后一条 Assistant 消息的 Branch 动作发起并在 Browser 打开；Agent 自动创建支线时，在该轮 Agent 回复内显示支线卡片，CUI 同时自动在 Browser 打开；自动创建开关、并发上限与自动支线的模型/Workspace/权限策略在会话 Settings 中设置，Chatbox 底部左侧是模型与思考强度合并选择与设置按钮，右侧是附件、语音输入与 Voice Chat，输入文字后换成发送按钮。消息列表承载 Agent run、Backend job、Daemon、Agent 回复内的支线卡片与回执。结构见 [`notes/session-detail.md`](notes/session-detail.md)，Session Branches 规则见 [`notes/branch.md`](notes/branch.md)。
+
+Session 详情与 Bots 会话头部的 `Memory` 入口打开居中的记忆与身份模态窗。Session 显示看板、会话与记忆三档；Bots 会话显示智能体、会话与记忆三档。记忆面板包含开关、按天日志、压缩摘要与记忆文件，后续扩展为看板记忆与会话记忆分库。身份与构建规则见 [`notes/identity.md`](notes/identity.md)，记忆规则见 [`notes/memory.md`](notes/memory.md)。
+
+Bots 使用十种 Ghost 身体形态作为头像，出现在导航、首页卡片、会话头部、欢迎区与身份面板。新建 Bot 时可以选择形态，也可以上传自己的图片。规则见 [`notes/bots.md`](notes/bots.md)。
 
 ## 4. Boards
 
