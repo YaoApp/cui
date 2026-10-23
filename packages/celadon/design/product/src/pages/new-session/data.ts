@@ -9,6 +9,7 @@ export type Recommendation = {
   english: string
   description: string
   icon: IconId
+  avatar?: string
   meta: string
 }
 
@@ -50,6 +51,7 @@ export const bots: Recommendation[] = [
     english: 'Researcher',
     description: '找资料、追来源、核对说法，给出带引用的结论。',
     icon: 'i-search',
+    avatar: '/avatars/light/tall-256.png',
     meta: 'Web · Citations',
   },
   {
@@ -59,6 +61,7 @@ export const bots: Recommendation[] = [
     english: 'Analyst',
     description: '读数据、找异常、给出图表与可执行的判断。',
     icon: 'i-file-sheet',
+    avatar: '/avatars/light/mochi-256.png',
     meta: 'Data · Charts',
   },
   {
@@ -68,6 +71,7 @@ export const bots: Recommendation[] = [
     english: 'Editor',
     description: '收紧结构、统一语气，检查事实与表达。',
     icon: 'i-act-edit',
+    avatar: '/avatars/light/wave-256.png',
     meta: 'Writing · Review',
   },
 ]

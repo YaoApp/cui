@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
-import logo from '../../../../logo-mark-ghost.svg'
+import { useEffect, useState } from 'react'
+import { AppNav } from '../../components/app-nav'
+import { ChatComposer } from '../../components/chat-composer'
 import { Icon } from '../../components/icon'
 import { apps, bots, type Recommendation } from './data'
 import './new-session.css'
@@ -79,6 +80,39 @@ const approvals = [
   { id: 'auto', label: 'Auto-approve' },
 ]
 
+const boards = [
+  {
+    id: 'product',
+    name: '产品',
+    columns: [
+      { id: 'backlog', name: '待处理' },
+      { id: 'doing', name: '进行中' },
+      { id: 'review', name: '待审核' },
+    ],
+  },
+  {
+    id: 'growth',
+    name: '增长',
+    columns: [
+      { id: 'ideas', name: '想法' },
+      { id: 'running', name: '进行中' },
+      { id: 'done', name: '完成' },
+    ],
+  },
+  {
+    id: 'research',
+    name: '调研',
+    columns: [
+      { id: 'queue', name: '待调研' },
+      { id: 'reading', name: '阅读中' },
+      { id: 'summary', name: '待总结' },
+    ],
+  },
+]
+
+const defaultBoardId = 'product'
+const defaultColumnId = 'backlog'
+
 type VaultItem = {
   id: string
   name: string
@@ -127,7 +161,10 @@ type CreateMode = 'app' | 'bot' | null
 
 export function NewSessionPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null)
-  const [createMode, setCreateMode] = useState<CreateMode>(null)
+  const [createMode, setCreateMode] = useState<CreateMode>(() => {
+    const create = new URLSearchParams(window.location.search).get('create')
+    return create === 'app' || create === 'bot' ? create : null
+  })
   const [prompt, setPrompt] = useState('')
   const [workspaceId, setWorkspaceId] = useState(workspaces[0].id)
   const [modelId, setModelId] = useState(models[0].id)
@@ -138,17 +175,21 @@ export function NewSessionPage() {
   const [vaultQuery, setVaultQuery] = useState('')
   const [lifetimeId, setLifetimeId] = useState(lifetimes[0].id)
   const [approvalId, setApprovalId] = useState(approvals[0].id)
+  const [boardId, setBoardId] = useState(defaultBoardId)
+  const [columnId, setColumnId] = useState(defaultColumnId)
+  const [boardPickerOpen, setBoardPickerOpen] = useState(false)
   const [advancedOpen, setAdvancedOpen] = useState(false)
   const [agentPickerOpen, setAgentPickerOpen] = useState(false)
   const [recording, setRecording] = useState(false)
   const [attachments, setAttachments] = useState<string[]>([])
-  const composerRef = useRef<HTMLTextAreaElement>(null)
-  const fileRef = useRef<HTMLInputElement>(null)
 
   const selected = [...apps, ...bots].find((item) => item.id === selectedId) ?? null
   const workspace = workspaces.find((item) => item.id === workspaceId) ?? workspaces[0]
   const model = models.find((item) => item.id === modelId) ?? models[0]
   const effort = efforts.find((item) => item.id === effortId) ?? efforts[1]
+  const board = boards.find((item) => item.id === boardId) ?? boards[0]
+  const column = board.columns.find((item) => item.id === columnId) ?? board.columns[0]
+  const boardIsDefault = boardId === defaultBoardId && columnId === defaultColumnId
   const selectedGroupCount = vaultGroups.filter(
     (group) => group.items.length > 0 && group.items.every((item) => vaultItems.includes(item.id)),
   ).length
@@ -175,27 +216,26 @@ export function NewSessionPage() {
   const canSend = prompt.trim().length > 0
 
   useEffect(() => {
-    if (!advancedOpen && !vaultPickerOpen && !agentPickerOpen) return
+    if (!advancedOpen && !vaultPickerOpen && !agentPickerOpen && !boardPickerOpen) return
     function onKeyDown(event: KeyboardEvent) {
       if (event.key !== 'Escape') return
       setAdvancedOpen(false)
       setVaultPickerOpen(false)
       setAgentPickerOpen(false)
+      setBoardPickerOpen(false)
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [advancedOpen, vaultPickerOpen, agentPickerOpen])
+  }, [advancedOpen, agentPickerOpen, boardPickerOpen, vaultPickerOpen])
 
   function choose(item: Recommendation) {
     setSelectedId(item.id)
     setCreateMode(null)
-    composerRef.current?.focus()
   }
 
   function create(mode: Exclude<CreateMode, null>) {
     setCreateMode(mode)
     setSelectedId(null)
-    composerRef.current?.focus()
   }
 
   function submit() {
@@ -215,6 +255,10 @@ export function NewSessionPage() {
       prompt: prompt.trim(),
       workspace: workspace.label,
       computer: workspace.computer,
+      boardId: board.id,
+      columnId: column.id,
+      board: board.name,
+      column: column.name,
       model: model.label,
       effort: effort.label,
       vault: vaultSummary,
@@ -254,20 +298,10 @@ export function NewSessionPage() {
   }
 
   return (
-    <div className="ns-page">
-      <header className="ns-head">
-        <a className="ns-brand" href="/">
-          <img src={logo} alt="" />
-          <span>Yao Agents</span>
-        </a>
-        <a className="ns-crumb" href="/">← Modules</a>
-        <div className="ns-head-meta">
-          <span>产品设计</span>
-          <span className="status">草案</span>
-        </div>
-      </header>
-
-      <main className="ns-main">
+    <div className="ns-shell">
+      <AppNav section="new" />
+      <div className="ns-page">
+        <main className="ns-main">
         <section className="ns-intro">
           <span className="eyebrow">01 · NEW SESSION</span>
           <h1>今天想完成什么？</h1>
@@ -287,7 +321,7 @@ export function NewSessionPage() {
             {selected ? (
               <div className="ns-context">
                 <span className="ns-context-icon">
-                  <Icon name={selected.icon} size={16} />
+                  {selected.avatar ? <img src={selected.avatar} alt="" /> : <Icon name={selected.icon} size={16} />}
                 </span>
                 <span>
                   Chatting with <strong>{selected.name}</strong>
@@ -320,11 +354,11 @@ export function NewSessionPage() {
               </div>
             ) : null}
 
-            <textarea
-              ref={composerRef}
-              className="ns-input"
-              rows={3}
+            <ChatComposer
+              bare
               value={prompt}
+              onChange={setPrompt}
+              onSubmit={submit}
               placeholder={
                 createMode === 'app'
                   ? '描述你要创建的 App：解决什么问题，给谁用。'
@@ -332,122 +366,83 @@ export function NewSessionPage() {
                     ? '描述 Bot 的职责、技能与工作方式。'
                     : '描述任务，或选择下面的推荐…'
               }
-              onChange={(event) => setPrompt(event.target.value)}
-              onKeyDown={(event) => {
-                if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
-                  event.preventDefault()
-                  submit()
-                }
+              canSend={canSend}
+              rows={3}
+              submitKey="mod-enter"
+              recording={recording}
+              onMic={() => setRecording((current) => !current)}
+              onVoiceChat={() => {}}
+              onFiles={(files) => {
+                const names = files.map((file) => file.name)
+                setAttachments((current) => [...current, ...names])
               }}
-            />
-
-            {recording ? (
-              <div className="ns-listening" aria-live="polite">
-                <span className="ns-run-dot" />
-                Listening…
-              </div>
-            ) : null}
-
-            <div className="ns-composer-foot">
-              <div className="ns-resources">
-                <label className="ns-select ns-workspace-select">
-                  <Icon name="i-ws" size={16} />
-                  <span className="ns-select-label">Workspace 与 Computer</span>
-                  <select
-                    value={workspaceId}
-                    aria-label="Workspace 与 Computer"
-                    onChange={(event) => setWorkspaceId(event.target.value)}
-                  >
-                    {workspaceGroups.map((group) => (
-                      <optgroup label={`${group.computer} · ${group.status}`} key={group.computer}>
-                        {group.items.map((item) => (
-                          <option value={item.id} key={item.id}>
-                            {item.label} · {item.scope} · {group.computer}
-                          </option>
-                        ))}
-                      </optgroup>
-                    ))}
-                  </select>
-                </label>
-
-                <label className="ns-choice ns-model-choice">
-                  <Icon name="i-obj-model" size={15} />
-                  <span className="ns-select-label">模型与思考强度</span>
-                  <select
-                    value={`${modelId}::${effortId}`}
-                    aria-label="模型与思考强度"
-                    onChange={(event) => {
-                      const [nextModel, nextEffort] = event.target.value.split('::')
-                      if (nextModel && nextEffort) {
-                        setModelId(nextModel)
-                        setEffortId(nextEffort)
-                        setRunnerId(inferRunner(nextModel))
-                      }
-                    }}
-                  >
-                    {models.map((model) =>
-                      efforts.map((effort) => (
-                        <option value={`${model.id}::${effort.id}`} key={`${model.id}::${effort.id}`}>
-                          {model.provider} · {model.label} · {effort.label}
-                        </option>
-                      )),
-                    )}
-                  </select>
-                </label>
-                <button
-                  className="ns-icon-button ns-advanced-button"
-                  type="button"
-                  aria-label="高级设置"
-                  aria-expanded={advancedOpen}
-                  aria-controls="ns-advanced"
-                  onClick={() => setAdvancedOpen((current) => !current)}
-                >
-                  <Icon name="i-nav-settings" size={17} />
-                </button>
-              </div>
-
-              <div className="ns-send-area">
-                <input
-                  ref={fileRef}
-                  className="ns-file-input"
-                  type="file"
-                  multiple
-                  onChange={(event) => {
-                    const names = Array.from(event.target.files ?? []).map((file) => file.name)
-                    setAttachments((current) => [...current, ...names])
-                    event.target.value = ''
-                  }}
-                />
-                <button
-                  className="ns-icon-button"
-                  type="button"
-                  aria-label="添加附件"
-                  onClick={() => fileRef.current?.click()}
-                >
-                  <Icon name="i-act-attach" size={18} />
-                </button>
-                {canSend ? (
-                  <button className="ns-send" type="button" aria-label="开始会话" onClick={submit}>
-                    <Icon name="i-arrow-up" size={16} />
-                  </button>
-                ) : (
-                  <>
-                    <button
-                      className={recording ? 'ns-icon-button is-recording' : 'ns-icon-button'}
-                      type="button"
-                      aria-label={recording ? '停止语音输入' : '语音输入'}
-                      aria-pressed={recording}
-                      onClick={() => setRecording((current) => !current)}
+              listening={
+                recording ? (
+                  <div className="ns-listening" aria-live="polite">
+                    <span className="ns-run-dot" />
+                    Listening…
+                  </div>
+                ) : undefined
+              }
+              resources={
+                <>
+                  <label className="ns-select ns-workspace-select">
+                    <Icon name="i-ws" size={16} />
+                    <span className="ns-select-label">Workspace 与 Computer</span>
+                    <select
+                      value={workspaceId}
+                      aria-label="Workspace 与 Computer"
+                      onChange={(event) => setWorkspaceId(event.target.value)}
                     >
-                      <Icon name="i-mic" size={18} />
-                    </button>
-                    <button className="ns-icon-button" type="button" aria-label="Voice Chat">
-                      <Icon name="i-phone" size={18} />
-                    </button>
-                  </>
-                )}
-              </div>
-            </div>
+                      {workspaceGroups.map((group) => (
+                        <optgroup label={`${group.computer} · ${group.status}`} key={group.computer}>
+                          {group.items.map((item) => (
+                            <option value={item.id} key={item.id}>
+                              {item.label} · {item.scope} · {group.computer}
+                            </option>
+                          ))}
+                        </optgroup>
+                      ))}
+                    </select>
+                  </label>
+
+                  <label className="ns-choice ns-model-choice">
+                    <Icon name="i-obj-model" size={15} />
+                    <span className="ns-select-label">模型与思考强度</span>
+                    <select
+                      value={`${modelId}::${effortId}`}
+                      aria-label="模型与思考强度"
+                      onChange={(event) => {
+                        const [nextModel, nextEffort] = event.target.value.split('::')
+                        if (nextModel && nextEffort) {
+                          setModelId(nextModel)
+                          setEffortId(nextEffort)
+                          setRunnerId(inferRunner(nextModel))
+                        }
+                      }}
+                    >
+                      {models.map((model) =>
+                        efforts.map((effort) => (
+                          <option value={`${model.id}::${effort.id}`} key={`${model.id}::${effort.id}`}>
+                            {model.provider} · {model.label} · {effort.label}
+                          </option>
+                        )),
+                      )}
+                    </select>
+                  </label>
+                  <button
+                    className="cc-icon-button"
+                    type="button"
+                    aria-label="高级设置"
+                    aria-expanded={advancedOpen}
+                    aria-controls="ns-advanced"
+                    onClick={() => setAdvancedOpen((current) => !current)}
+                  >
+                    <Icon name="i-nav-settings" size={17} />
+                  </button>
+                </>
+              }
+            />
 
             {advancedOpen ? (
               <div className="ns-advanced" id="ns-advanced" role="dialog" aria-label="高级设置">
@@ -517,6 +512,24 @@ export function NewSessionPage() {
                   </select>
                 </label>
                 <div className="ns-field">
+                  <span>看板与列</span>
+                  <button
+                    className="ns-vault-trigger"
+                    type="button"
+                    aria-haspopup="dialog"
+                    onClick={() => {
+                      setAdvancedOpen(false)
+                      setBoardPickerOpen(true)
+                    }}
+                  >
+                    <span>
+                      {board.name} · {column.name}
+                      {boardIsDefault ? ' · 全局默认' : ''}
+                    </span>
+                    <Icon name="i-right" size={13} />
+                  </button>
+                </div>
+                <div className="ns-field">
                   <span>Vault access</span>
                   <button
                     className="ns-vault-trigger"
@@ -542,6 +555,74 @@ export function NewSessionPage() {
                   </select>
                 </label>
                 <p className="ns-advanced-note">不选择就不访问 Vault；可按分组或单条密钥授权，值不会显示在界面里。</p>
+              </div>
+            ) : null}
+
+            {boardPickerOpen ? (
+              <div className="ns-vault-picker ns-board-picker" role="dialog" aria-label="选择看板与列">
+                <div className="ns-vault-head">
+                  <div>
+                    <strong>看板与列</strong>
+                    <span>会话创建后会成为这张卡片；这里只覆盖本次会话。</span>
+                  </div>
+                  <button
+                    className="ns-context-close"
+                    type="button"
+                    aria-label="关闭看板与列选择"
+                    onClick={() => setBoardPickerOpen(false)}
+                  >
+                    <Icon name="i-act-close" size={14} />
+                  </button>
+                </div>
+                <div className="ns-board-body">
+                  <label className="ns-field">
+                    <span>看板</span>
+                    <select
+                      value={boardId}
+                      onChange={(event) => {
+                        const nextBoard = boards.find((item) => item.id === event.target.value) ?? boards[0]
+                        setBoardId(nextBoard.id)
+                        setColumnId(nextBoard.columns[0].id)
+                      }}
+                    >
+                      {boards.map((item) => (
+                        <option value={item.id} key={item.id}>
+                          {item.name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="ns-field">
+                    <span>列</span>
+                    <select value={column.id} onChange={(event) => setColumnId(event.target.value)}>
+                      {board.columns.map((item) => (
+                        <option value={item.id} key={item.id}>
+                          {item.name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <p className="ns-advanced-note">
+                    全局默认：产品 · 待处理。恢复默认只改本次选择。
+                  </p>
+                </div>
+                <div className="ns-vault-foot">
+                  <span>{board.name} · {column.name}</span>
+                  <button
+                    className="ns-vault-clear"
+                    type="button"
+                    disabled={boardIsDefault}
+                    onClick={() => {
+                      setBoardId(defaultBoardId)
+                      setColumnId(defaultColumnId)
+                    }}
+                  >
+                    恢复默认
+                  </button>
+                  <button className="ns-vault-done" type="button" onClick={() => setBoardPickerOpen(false)}>
+                    Done
+                  </button>
+                </div>
               </div>
             ) : null}
 
@@ -749,7 +830,8 @@ export function NewSessionPage() {
             onChoose={choose}
           />
         </section>
-      </main>
+        </main>
+      </div>
     </div>
   )
 }
@@ -779,7 +861,7 @@ function RecommendationRow({
           const content = (
             <>
               <span className="ns-card-icon">
-                <Icon name={item.icon} size={20} />
+                {item.avatar ? <img src={item.avatar} alt="" /> : <Icon name={item.icon} size={20} />}
               </span>
               <span className="ns-card-copy">
                 <span className="ns-card-title">

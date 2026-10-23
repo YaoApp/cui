@@ -48,6 +48,7 @@ export type IconId =
   | 'i-stop'
   | 'i-split2'
   | 'i-spark'
+  | 'i-memory'
   | 'i-folder'
   | 'i-tasks'
   | 'i-pause'

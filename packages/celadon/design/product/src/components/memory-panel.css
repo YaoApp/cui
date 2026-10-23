@@ -1,0 +1,577 @@
+.mp-backdrop {
+  position: fixed;
+  z-index: 110;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-24);
+  background: var(--scrim);
+  backdrop-filter: blur(var(--backdrop-blur));
+}
+
+.mp-panel {
+  display: flex;
+  flex-direction: column;
+  inline-size: min(760px, 100%);
+  max-block-size: min(720px, calc(100vh - var(--spacing-48)));
+  overflow: hidden;
+  border: var(--border-width) solid var(--border-subtle);
+  border-radius: var(--radius-large);
+  background: var(--background-surface);
+  box-shadow: var(--shadow-overlay);
+}
+
+.mp-panel button,
+.mp-panel a {
+  font: inherit;
+}
+
+.mp-panel button:focus-visible,
+.mp-panel a:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.mp-head {
+  display: flex;
+  flex: none;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-16);
+  padding: var(--spacing-24) var(--spacing-24) var(--spacing-16);
+}
+
+.mp-head-copy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  min-inline-size: 0;
+}
+
+.mp-eyebrow {
+  color: var(--brand-ink);
+  font-size: var(--font-size-11);
+  font-weight: var(--font-weight-strong);
+  letter-spacing: 0.08em;
+}
+
+.mp-head h2 {
+  overflow: hidden;
+  margin: 0;
+  font-size: var(--font-size-20);
+  line-height: var(--line-height-title);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mp-head p {
+  margin: 0;
+  color: var(--text-tertiary);
+  font-size: var(--font-size-11);
+}
+
+.mp-close {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  inline-size: var(--spacing-24);
+  block-size: var(--spacing-24);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-small);
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+}
+
+.mp-close:hover {
+  background: var(--background-hover);
+  color: var(--text-primary);
+}
+
+.mp-tabs {
+  display: flex;
+  flex: none;
+  gap: var(--spacing-4);
+  padding: 0 var(--spacing-24);
+  border-block-end: var(--border-width) solid var(--border-subtle);
+}
+
+.mp-tab {
+  min-block-size: var(--spacing-48);
+  padding: 0 var(--spacing-8);
+  border: 0;
+  border-block-end: 2px solid transparent;
+  background: transparent;
+  color: var(--text-tertiary);
+  font-size: var(--font-size-12);
+  cursor: pointer;
+}
+
+.mp-tab:hover {
+  color: var(--text-primary);
+}
+
+.mp-tab.is-active {
+  border-block-end-color: var(--brand);
+  color: var(--text-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+.mp-body {
+  flex: 1;
+  min-block-size: 0;
+  overflow: auto;
+  padding: var(--spacing-24);
+}
+
+.mp-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-12);
+}
+
+.mp-section-head,
+.mp-section-subhead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-12);
+}
+
+.mp-section-head h3 {
+  margin: var(--spacing-4) 0 0;
+  font-size: var(--font-size-20);
+  line-height: var(--line-height-title);
+}
+
+.mp-section-subhead {
+  align-items: baseline;
+  margin-block-start: var(--spacing-8);
+  padding-block-start: var(--spacing-12);
+  border-block-start: var(--border-width) solid var(--border-subtle);
+}
+
+.mp-section-subhead strong {
+  font-size: var(--font-size-13);
+}
+
+.mp-section-subhead span {
+  color: var(--text-tertiary);
+  font-size: var(--font-size-11);
+}
+
+.mp-badge {
+  padding: 2px var(--spacing-8);
+  border-radius: var(--radius-pill);
+  background: var(--background-field);
+  color: var(--text-tertiary);
+  font-size: var(--font-size-11);
+  white-space: nowrap;
+}
+
+.mp-copy {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--font-size-13);
+  line-height: var(--line-height-normal);
+}
+
+.mp-note {
+  margin: 0;
+  padding: var(--spacing-12);
+  border-radius: var(--radius-small);
+  background: var(--background-field);
+  color: var(--text-tertiary);
+  font-size: var(--font-size-11);
+  line-height: var(--line-height-normal);
+}
+
+.mp-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-4);
+  align-self: flex-start;
+  color: var(--brand-ink);
+  font-size: var(--font-size-12);
+  text-decoration: none;
+}
+
+.mp-fields {
+  display: flex;
+  flex-direction: column;
+  border-block-start: var(--border-width) solid var(--border-subtle);
+}
+
+.mp-field {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--spacing-16);
+  padding-block: var(--spacing-12);
+  border-block-end: var(--border-width) solid var(--border-subtle);
+}
+
+.mp-field span {
+  flex: none;
+  color: var(--text-tertiary);
+  font-size: var(--font-size-11);
+}
+
+.mp-field strong {
+  overflow: hidden;
+  color: var(--text-primary);
+  font-size: var(--font-size-12);
+  font-weight: var(--font-weight-medium);
+  text-align: end;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mp-identity {
+  display: flex;
+  gap: var(--spacing-12);
+  padding: var(--spacing-16);
+  border: var(--border-width) solid var(--border-subtle);
+  border-radius: var(--radius-medium);
+  background: var(--background-field);
+}
+
+.mp-identity-icon {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  inline-size: calc(var(--spacing-48) + var(--spacing-8));
+  block-size: calc(var(--spacing-48) + var(--spacing-8));
+  border-radius: var(--radius-medium);
+  background: var(--brand-soft);
+  color: var(--brand-ink);
+}
+
+.mp-identity-icon img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: contain;
+}
+
+.mp-identity > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-inline-size: 0;
+}
+
+.mp-identity strong {
+  font-size: var(--font-size-15);
+}
+
+.mp-identity span {
+  color: var(--text-tertiary);
+  font-size: var(--font-size-11);
+}
+
+.mp-identity p {
+  margin: var(--spacing-4) 0 0;
+  color: var(--text-secondary);
+  font-size: var(--font-size-12);
+  line-height: var(--line-height-normal);
+}
+
+.mp-capabilities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-4);
+}
+
+.mp-capabilities span {
+  padding: 2px var(--spacing-8);
+  border-radius: var(--radius-pill);
+  background: var(--brand-soft);
+  color: var(--brand-ink);
+  font-size: var(--font-size-11);
+}
+
+.mp-board-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-12);
+  overflow: hidden;
+  padding: var(--spacing-16);
+  border: var(--border-width) solid var(--border-subtle);
+  border-radius: var(--radius-medium);
+  background: var(--background-field);
+}
+
+.mp-board-icon {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  inline-size: var(--spacing-32);
+  block-size: var(--spacing-32);
+  border-radius: var(--radius-small);
+  background: var(--background-surface);
+  color: var(--brand-ink);
+}
+
+.mp-board-card > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mp-board-card strong {
+  font-size: var(--font-size-13);
+}
+
+.mp-board-card span {
+  color: var(--text-tertiary);
+  font-size: var(--font-size-11);
+}
+
+.mp-board-shape {
+  position: absolute;
+  inset-inline-end: var(--spacing-16);
+  inline-size: var(--spacing-48);
+  block-size: var(--spacing-32);
+  border: var(--border-width) solid var(--border-subtle);
+  border-radius: var(--radius-small);
+  transform: rotate(-6deg);
+  opacity: 0.5;
+}
+
+.mp-scope-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--spacing-8);
+}
+
+.mp-scope {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  padding: var(--spacing-12);
+  border: var(--border-width) solid var(--border-subtle);
+  border-radius: var(--radius-small);
+  background: var(--background-surface);
+}
+
+.mp-scope.is-active {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+}
+
+.mp-scope.is-future {
+  border-style: dashed;
+  background: transparent;
+}
+
+.mp-scope span {
+  color: var(--text-tertiary);
+  font-size: var(--font-size-11);
+}
+
+.mp-scope strong {
+  font-size: var(--font-size-12);
+}
+
+.mp-scope p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--font-size-11);
+  line-height: var(--line-height-normal);
+}
+
+.mp-switch {
+  position: relative;
+  flex: none;
+  inline-size: calc(var(--spacing-32) + var(--spacing-8));
+  block-size: var(--spacing-24);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--background-field);
+  cursor: pointer;
+}
+
+.mp-switch i {
+  position: absolute;
+  inset-block-start: calc(var(--border-width) * 2);
+  inset-inline-start: 2px;
+  inline-size: calc(var(--spacing-24) - var(--spacing-4));
+  block-size: calc(var(--spacing-24) - var(--spacing-4));
+  border-radius: var(--radius-pill);
+  background: var(--background-surface);
+  box-shadow: var(--shadow-subtle);
+  transition: inset-inline-start 160ms ease;
+}
+
+.mp-switch.is-on {
+  background: var(--brand);
+}
+
+.mp-switch.is-on i {
+  inset-inline-start: calc(var(--spacing-16) + var(--border-width) * 2);
+}
+
+.mp-logs {
+  display: flex;
+  flex-direction: column;
+  border-block-start: var(--border-width) solid var(--border-subtle);
+}
+
+.mp-log {
+  border-block-end: var(--border-width) solid var(--border-subtle);
+}
+
+.mp-log-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-8);
+  inline-size: 100%;
+  padding: var(--spacing-12) 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-primary);
+  text-align: start;
+  cursor: pointer;
+}
+
+.mp-log-head > span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mp-log-head strong {
+  font-size: var(--font-size-12);
+}
+
+.mp-log-head small {
+  color: var(--text-tertiary);
+  font-size: var(--font-size-11);
+}
+
+.mp-log-head .icon {
+  color: var(--text-tertiary);
+}
+
+.mp-log-head.is-open .icon {
+  color: var(--brand-ink);
+}
+
+.mp-log-entries {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  margin: 0;
+  padding: 0 0 var(--spacing-12);
+  list-style: none;
+}
+
+.mp-log-entries li {
+  position: relative;
+  padding-inline-start: var(--spacing-12);
+  color: var(--text-secondary);
+  font-size: var(--font-size-12);
+  line-height: var(--line-height-normal);
+}
+
+.mp-log-entries li::before {
+  position: absolute;
+  inset-inline-start: 0;
+  inset-block-start: 0.7em;
+  inline-size: var(--spacing-4);
+  block-size: var(--spacing-4);
+  border-radius: var(--radius-pill);
+  background: var(--border-default);
+  content: '';
+}
+
+.mp-summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-8);
+  padding: var(--spacing-12);
+  border-radius: var(--radius-small);
+  background: var(--background-field);
+}
+
+.mp-meter {
+  overflow: hidden;
+  block-size: var(--spacing-4);
+  border-radius: var(--radius-pill);
+  background: var(--border-subtle);
+}
+
+.mp-meter i {
+  display: block;
+  block-size: 100%;
+  border-radius: inherit;
+  background: var(--brand);
+}
+
+.mp-summary p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--font-size-12);
+  line-height: var(--line-height-normal);
+}
+
+.mp-summary-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-8);
+  color: var(--text-tertiary);
+  font-size: var(--font-size-11);
+}
+
+.mp-action {
+  min-block-size: var(--spacing-24);
+  padding: 0 var(--spacing-8);
+  border: var(--border-width) solid var(--border-default);
+  border-radius: var(--radius-small);
+  background: var(--background-surface);
+  color: var(--text-primary);
+  font-size: var(--font-size-11);
+  cursor: pointer;
+}
+
+.mp-action:hover {
+  border-color: var(--border-hover-strong);
+}
+
+.mp-files {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.mp-file {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-8);
+  padding: var(--spacing-8) 0;
+  border-block-end: var(--border-width) solid var(--border-subtle);
+  color: var(--text-secondary);
+  font-size: var(--font-size-12);
+}
+
+.mp-file small {
+  margin-inline-start: auto;
+  color: var(--text-tertiary);
+  font-size: var(--font-size-11);
+}
+
+@media (max-width: 600px) {
+  .mp-panel {
+    inline-size: 100%;
+  }
+
+  .mp-scope-grid {
+    grid-template-columns: 1fr;
+  }
+}

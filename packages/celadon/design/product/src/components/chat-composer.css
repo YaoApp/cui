@@ -1,0 +1,205 @@
+.cc-composer {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-8);
+  inline-size: 100%;
+  max-inline-size: 900px;
+  margin-block-start: var(--spacing-24);
+  padding: var(--spacing-12) var(--spacing-12) var(--spacing-8);
+  border: var(--border-width) solid var(--border-default);
+  border-radius: var(--radius-large);
+  background: var(--background-surface);
+  box-shadow: var(--shadow-subtle);
+}
+
+.cc-composer:focus-within {
+  border-color: var(--border-control-strong);
+}
+
+.cc-composer--bare {
+  margin-block-start: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.cc-input {
+  inline-size: 100%;
+  min-block-size: calc(var(--spacing-48) * 2);
+  padding: var(--spacing-4) var(--spacing-4) 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: var(--font-size-15);
+  line-height: var(--line-height-normal);
+  resize: none;
+  outline: 0;
+}
+
+.cc-input::placeholder {
+  color: var(--text-placeholder);
+}
+
+.cc-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-8) var(--spacing-12);
+  padding-block-start: var(--spacing-8);
+}
+
+.cc-resources {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-8);
+  min-inline-size: 0;
+}
+
+.cc-resource {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-4);
+  max-inline-size: 220px;
+  padding: var(--spacing-4) var(--spacing-8);
+  border: var(--border-width) solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+  background: var(--background-field);
+  color: var(--text-secondary);
+  font-size: var(--font-size-12);
+  cursor: pointer;
+}
+
+.cc-resource:hover {
+  border-color: var(--border-hover-strong);
+  color: var(--text-primary);
+}
+
+.cc-resource > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cc-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-8);
+  margin-inline-start: auto;
+}
+
+.cc-file-input {
+  position: absolute;
+  overflow: hidden;
+  inline-size: var(--border-width);
+  block-size: var(--border-width);
+  clip-path: inset(50%);
+}
+
+.cc-icon-button {
+  display: inline-grid;
+  place-items: center;
+  inline-size: var(--spacing-32);
+  block-size: var(--spacing-32);
+  padding: 0;
+  border: var(--border-width) solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+  background: var(--background-field);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.cc-icon-button:hover {
+  border-color: var(--border-hover-strong);
+  color: var(--text-primary);
+}
+
+.cc-icon-button.is-recording {
+  border-color: var(--brand);
+  background: var(--brand);
+  color: var(--text-inverse);
+  box-shadow: 0 0 0 var(--spacing-4) var(--brand-soft);
+}
+
+.cc-send {
+  display: inline-grid;
+  place-items: center;
+  inline-size: var(--spacing-32);
+  block-size: var(--spacing-32);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--brand);
+  color: var(--text-inverse);
+  cursor: pointer;
+}
+
+.cc-send:hover {
+  background: var(--brand-hover);
+}
+
+.cc-send:disabled {
+  background: var(--background-disabled);
+  color: var(--text-disabled);
+  cursor: not-allowed;
+}
+
+.cc-attachments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-4);
+  padding: var(--spacing-4);
+}
+
+.cc-attachment {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-4);
+  max-inline-size: 100%;
+  padding: var(--spacing-4) var(--spacing-8);
+  border-radius: var(--radius-pill);
+  background: var(--background-field);
+  color: var(--text-secondary);
+  font-size: var(--font-size-11);
+}
+
+.cc-attachment button {
+  display: inline-grid;
+  place-items: center;
+  inline-size: var(--spacing-16);
+  block-size: var(--spacing-16);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+}
+
+.cc-attachment button:hover {
+  background: var(--background-hover);
+  color: var(--text-primary);
+}
+
+.cc-note {
+  margin: 0;
+  color: var(--text-tertiary);
+  font-size: var(--font-size-11);
+  text-align: center;
+}
+
+@media (max-width: 600px) {
+  .cc-footer {
+    align-items: flex-start;
+  }
+
+  .cc-actions {
+    margin-inline-start: 0;
+  }
+}

@@ -1,8 +1,20 @@
+.ns-shell {
+  display: flex;
+  block-size: 100vh;
+  block-size: 100dvh;
+  overflow: hidden;
+  background: var(--background-app);
+}
+
 .ns-page {
   display: flex;
+  flex: 1;
   flex-direction: column;
-  min-block-size: 100vh;
-  background: var(--background-app);
+  min-inline-size: 0;
+  block-size: 100vh;
+  block-size: 100dvh;
+  overflow: auto;
+  background: var(--background-surface);
 }
 
 .ns-page a:focus-visible,
@@ -165,6 +177,12 @@
   border-radius: var(--radius-pill);
   background: var(--background-surface);
   color: var(--brand);
+}
+
+.ns-context-icon img {
+  inline-size: var(--spacing-24);
+  block-size: var(--spacing-24);
+  object-fit: contain;
 }
 
 .ns-context strong {
@@ -584,6 +602,17 @@
   font-size: var(--font-size-12);
 }
 
+.ns-board-picker {
+  inline-size: min(380px, calc(100vw - var(--spacing-32)));
+}
+
+.ns-board-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-12);
+  padding: var(--spacing-12);
+}
+
 .ns-agent-body {
   display: flex;
   flex-direction: column;
@@ -805,6 +834,12 @@
   border-radius: var(--radius-small);
   background: var(--brand-soft);
   color: var(--brand);
+}
+
+.ns-card-icon img {
+  inline-size: var(--spacing-32);
+  block-size: var(--spacing-32);
+  object-fit: contain;
 }
 
 .ns-card.is-selected .ns-card-icon {
