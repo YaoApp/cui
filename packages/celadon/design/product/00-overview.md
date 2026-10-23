@@ -19,6 +19,8 @@
 | 06 | 工作空间 | Workspaces | `i-ws` | 跨设备统一管理；可访问的 N 台电脑上的 N 个空间 |
 | 07 | 电脑 | Computers | `i-pc` | 电脑池、个人节点与可用节点（已申请） |
 
+收件箱是导航中的一级页面，进入后条目作为左侧二级导航展开，右侧是当前条目的详情。它接住 Bots 会话、任务结果、支线状态、分享与呼叫通知。筛选分为全部、未读、会话与通知，未读数显示在二级导航标题，离开收件箱后同步到一级导航角标。规则见 [`notes/inbox.md`](notes/inbox.md)。
+
 图标来自 `app/src/platform/icons/` 的雪碧图；原型在挂载时把同一份 `sprite.svg` 注入页面，用 `<use href="#i-…">` 取图。
 
 术语约定：模块名用「智能体」，对外说明用「数字员工」；「机器人」只指聊天机器人，不作为本模块名。
@@ -68,6 +70,8 @@ Board 是逻辑容器，收纳一组相关会话。Kanban 是 Board 的默认视
 - 任务：`GET/POST /v1/agent/tasks`，`PUT /v1/agent/tasks/:chat_id/move`。
 
 Board 的列是工作域，例如运营、产品、调研、售前，不是运行状态。每张卡片是 `task`，带 `chat_id`，对应一次会话；运行状态由 `run_status` 单独表示，取值为 `pending`、`queued`、`running`、`completed`、`failed`、`stopped`、`cancelled`。这套“列是领域、状态由会话推导”的结构就是 Board 的特色。
+
+原型入口为 `/boards`。左侧二级导航切换看板，内容区按列展示任务卡片；点击卡片从右侧打开任务详情，包含会话、信息、文件与运行四个分区。看板创建、任务创建、状态筛选、搜索与看板切换均可操作。规则见 [`notes/boards.md`](notes/boards.md)。
 
 ## 5. Session Branches（后续）
 
