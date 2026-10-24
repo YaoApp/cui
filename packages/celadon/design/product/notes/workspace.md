@@ -130,6 +130,8 @@ Git 跟目录走。带 Git 的目录在文件列表中显示分支图标与未�
 
 文件预览提供分享链接。分享只复制当前文件，不包含目录结构、Git 历史与其他文件，有效期可选 1、7 或 30 天，创建后可复制链接。
 
+Bots 默认工作空间在 Bot 首页右侧 Browser 面板打开，只显示该空间的文件，不跳转到 Workspace 页面，也不显示 Workspace 侧栏、其他 Workspace 或 Access / Apps / Settings 标签。
+
 ## 6. 单文件分享
 
 Workspace 本身不分享。需要把单个文件交给别人时：

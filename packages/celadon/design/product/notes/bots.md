@@ -74,7 +74,7 @@ Bot 是可复用定义，不是每种场景都拥有自己的 Session。按 Sess
 | 场景 | Session 归属 | Workspace | Bot 可切换 | 说明 |
 | --- | --- | --- | --- | --- |
 | New Session | 用户创建的 Session | 用户选择 | 可切换（Chatbox Settings） | Bot 作为执行者，Session 是主对象 |
-| Bots 模块 | Bot 的默认会话 | Bot 专属 Workspace | 不可切换 | 一个 Bot 绑定一个持久会话 |
+| Bots 模块 | Bot 的默认会话 | 系统分配 Bot 专属 Workspace | 不可切换 | 一个 Bot 绑定一个持久会话 |
 | 分享服务 | 每个外部用户各自的 Session | 每个外部用户各自的 Workspace | 不可切换 | Bot 定义共享，会话与数据隔离 |
 
 三种场景对应同一个 Bot 定义的三种绑定模式：
@@ -101,17 +101,20 @@ New Session 中，Bot 是 Session 的执行者，不是 Session 的所有者。
 
 ### 3.2 Bots 模块
 
-Bots 模块中的 Bot 是产品化入口，一个 Bot 绑定一个持久会话和一个专属 Workspace。
+Bots 模块中的 Bot 是产品化入口，一个 Bot 绑定一个持久会话，并由系统分配专属 Workspace 与 Computer。
 
 - 打开 Bot 进入它的默认会话；
 - 主 Agent 固定为该 Bot，不显示选择器；
 - Runner 在 Bot 默认会话创建时从清单与节点可用 Runner 的交集中确定，之后固定；交集为空时阻止创建；
 - LLM Provider 与模型由 Bot 提供默认值，可在会话内切换；
-- Workspace 使用 Bot 专属 Workspace，不跟随 New Session 选择；
+- Workspace 与 Computer 由系统分配，不跟随 New Session 选择，也不在 Chatbox 中显示；
+- 右上角只有一个固定的「工作空间」入口，点击后在右侧 Browser 面板打开这个 Bot 默认空间的文件，不显示其他 Workspace、切换器或管理页；
 - Bot 的 Vault access policy 范围内的引用可在默认会话中选择与切换，密钥值不展示；
 - Bot 可以调用 A2A 专家，也可以被其他 Agent 通过 A2A 调用。
 
-这是 Bot 的主页，不是 New Session 列表。
+这是 Bot 的主页，也是上手即用的入口，不是 New Session 列表，也不是 Workspace 管理页。
+
+Bots 首页与 Session 详情的 Workspace 入口都在右侧 Browser 面板打开，不跳转到 Workspace 页面。Bots 首页显示 Bot 的默认空间，Session 详情显示当前会话的 Workspace。
 
 ### 3.3 分享服务
 

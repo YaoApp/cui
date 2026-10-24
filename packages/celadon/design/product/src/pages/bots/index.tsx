@@ -4,6 +4,7 @@ import { ChatComposer } from '../../components/chat-composer'
 import { CreateEntryModal } from '../../components/create-entry-modal'
 import { Icon } from '../../components/icon'
 import { MemoryPanel } from '../../components/memory-panel'
+import { childrenOf, fileIcon, readWorkspace, workspaceSeed } from '../workspaces/data'
 import { botProfiles, readBot, type BotProfile } from './data'
 import './bots.css'
 
@@ -129,6 +130,7 @@ function BotChat({ bot }: { bot: BotProfile }) {
   const [attachments, setAttachments] = useState<string[]>([])
   const [recording, setRecording] = useState(false)
   const [memoryOpen, setMemoryOpen] = useState(false)
+  const [browserOpen, setBrowserOpen] = useState(false)
   const messagesRef = useRef<HTMLDivElement>(null)
   const replyTimer = useRef<number | null>(null)
 
@@ -169,6 +171,7 @@ function BotChat({ bot }: { bot: BotProfile }) {
 
   return (
     <main className="bots-chat">
+      <div className="bots-chat-main">
       <header className="bots-chat-head">
         <a className="bots-head-back" href="/bots" aria-label="返回智能体列表">
           <Icon name="i-left" size={15} />
@@ -188,10 +191,16 @@ function BotChat({ bot }: { bot: BotProfile }) {
           <Icon name="i-memory" size={14} />
           <span>Memory</span>
         </button>
-        <button className="bots-workspace" type="button" aria-label={`Workspace ${bot.workspace}`}>
+        <button
+          className={`bots-workspace${browserOpen ? ' is-active' : ''}`}
+          type="button"
+          aria-label="打开工作空间"
+          aria-expanded={browserOpen}
+          title={`打开工作空间 ${bot.workspace}`}
+          onClick={() => setBrowserOpen((current) => !current)}
+        >
           <Icon name="i-ws" size={14} />
-          <span>{bot.workspace}</span>
-          <Icon name="i-right" size={12} />
+          <span>工作空间</span>
         </button>
       </header>
 
@@ -251,10 +260,6 @@ function BotChat({ bot }: { bot: BotProfile }) {
         resources={
           <>
             <button className="cc-resource" type="button">
-              <Icon name="i-ws" size={14} />
-              <span>{bot.workspace}</span>
-            </button>
-            <button className="cc-resource" type="button">
               <Icon name="i-obj-model" size={14} />
               <span>{bot.model} · {bot.effort}</span>
             </button>
@@ -285,6 +290,7 @@ function BotChat({ bot }: { bot: BotProfile }) {
           ) : undefined
         }
       />
+      </div>
       {memoryOpen ? (
         <MemoryPanel
           variant="bot"
@@ -302,7 +308,43 @@ function BotChat({ bot }: { bot: BotProfile }) {
           onClose={() => setMemoryOpen(false)}
         />
       ) : null}
+      {browserOpen ? <BotBrowser bot={bot} onClose={() => setBrowserOpen(false)} /> : null}
     </main>
+  )
+}
+
+function BotBrowser({ bot, onClose }: { bot: BotProfile; onClose: () => void }) {
+  const workspace = readWorkspace(workspaceSeed, bot.workspaceId)
+  const entries = workspace ? childrenOf(workspace.files, '/') : []
+
+  return (
+    <aside className="bots-browser" aria-label="Browser">
+      <header className="bots-browser-head">
+        <span className="bots-browser-kicker">BROWSER</span>
+        <button className="bots-browser-close" type="button" aria-label="关闭 Browser" onClick={onClose}>
+          <Icon name="i-act-close" size={16} />
+        </button>
+      </header>
+      <div className="bots-browser-tab">
+        <Icon name="i-ws" size={14} />
+        <span>{bot.workspace}</span>
+        <small>Workspace</small>
+      </div>
+      <div className="bots-browser-files" role="list" aria-label="Workspace files">
+        <div className="bots-browser-path">
+          <span>{bot.workspace}</span>
+          <small>Workspace files</small>
+        </div>
+        {entries.map((file) => (
+          <div className="bots-browser-file" role="listitem" key={file.path}>
+            <Icon name={fileIcon(file)} size={14} />
+            <span>{file.name}</span>
+            <small>{file.type === 'folder' ? 'Folder' : file.size ?? 'Modified'}</small>
+          </div>
+        ))}
+        {entries.length === 0 ? <p className="bots-browser-empty">这个工作空间还没有文件。</p> : null}
+      </div>
+    </aside>
   )
 }
 
@@ -328,7 +370,6 @@ function BotWelcome({ bot, onSuggest }: { bot: BotProfile; onSuggest: (prompt: s
           </button>
         ))}
       </div>
-      <p className="bots-welcome-note">Bot 的身份、技能和工作区由定义固定。</p>
     </section>
   )
 }

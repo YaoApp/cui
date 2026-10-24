@@ -126,7 +126,7 @@ export function BoardsPage() {
         onBoardSelect={setBoardId}
         onCreateBoard={() => setCreateBoardOpen(true)}
       />
-      <main className="boards-main">
+      <main className={`boards-main${selectedTask ? ' has-browser' : ''}`}>
         <section className="boards-panel" aria-label={`${board.title} 看板`}>
           <header className="boards-head">
             <span className={`boards-head-icon is-${board.tone}`}>
@@ -205,7 +205,7 @@ export function BoardsPage() {
         </section>
 
         {selectedTask && selectedColumn ? (
-          <TaskPanel
+          <BoardBrowser
             task={selectedTask}
             column={selectedColumn}
             onClose={() => setTaskId(null)}
@@ -332,9 +332,33 @@ function TaskCard({ task, selected, onClick }: { task: BoardTask; selected: bool
   )
 }
 
-function TaskPanel({ task, column, onClose }: { task: BoardTask; column: BoardColumn; onClose: () => void }) {
-  const [tab, setTab] = useState<TaskTab>('chat')
+function BoardBrowser({ task, column, onClose }: { task: BoardTask; column: BoardColumn; onClose: () => void }) {
   const status = statusMeta[task.status]
+
+  return (
+    <aside className="boards-browser" aria-label="Browser">
+      <header className="boards-browser-head">
+        <span className="boards-browser-kicker">BROWSER</span>
+        <button className="boards-browser-close" type="button" aria-label="关闭 Browser" onClick={onClose}>
+          <Icon name="i-act-close" size={16} />
+        </button>
+      </header>
+      <div className="boards-browser-tabs" role="tablist" aria-label="Browser tabs">
+        <button className="boards-browser-tab is-active" type="button" role="tab" aria-selected="true">
+          <span className={`board-panel-status is-${status.tone}`}>
+            <Icon name={status.icon} size={14} />
+          </span>
+          <span>{task.title}</span>
+          <small>{column.title}</small>
+        </button>
+      </div>
+      <TaskPanel task={task} column={column} />
+    </aside>
+  )
+}
+
+function TaskPanel({ task, column }: { task: BoardTask; column: BoardColumn }) {
+  const [tab, setTab] = useState<TaskTab>('chat')
   const messages = task.messages ?? [
     { from: 'user' as const, text: task.description, time: '09:00' },
     {
@@ -356,20 +380,7 @@ function TaskPanel({ task, column, onClose }: { task: BoardTask; column: BoardCo
   ]
 
   return (
-    <aside className="board-task-panel" aria-label={`${task.title} 详情`}>
-      <header className="board-panel-head">
-        <span className={`board-panel-status is-${status.tone}`}>
-          <Icon name={status.icon} size={15} />
-        </span>
-        <div>
-          <strong>{task.title}</strong>
-          <span>{column.title} · {status.label}</span>
-        </div>
-        <button className="board-panel-close" type="button" aria-label="关闭任务详情" onClick={onClose}>
-          <Icon name="i-act-close" size={16} />
-        </button>
-      </header>
-
+    <div className="board-task-panel" aria-label={`${task.title} 详情`}>
       <div className="board-panel-tabs" role="tablist" aria-label="任务详情分区">
         {tabs.map((item) => (
           <button
@@ -392,7 +403,7 @@ function TaskPanel({ task, column, onClose }: { task: BoardTask; column: BoardCo
         {tab === 'files' ? <TaskFiles task={task} /> : null}
         {tab === 'run' ? <TaskRun task={task} /> : null}
       </div>
-    </aside>
+    </div>
   )
 }
 

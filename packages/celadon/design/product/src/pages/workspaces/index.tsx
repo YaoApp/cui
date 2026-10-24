@@ -22,7 +22,8 @@ import './workspaces.css'
 type CreateInput = { name: string; computerId: string; scope: WorkspaceScope }
 
 export function WorkspacesPage({ workspaceId }: { workspaceId?: string }) {
-  const initialPreviewPath = new URLSearchParams(window.location.search).get('preview') ?? undefined
+  const searchParams = new URLSearchParams(window.location.search)
+  const initialPreviewPath = searchParams.get('preview') ?? undefined
   const [workspaces, setWorkspaces] = useState(workspaceSeed)
   const [selectedId, setSelectedId] = useState<string | undefined>(workspaceId)
   const [createOpen, setCreateOpen] = useState(false)
@@ -234,12 +235,14 @@ function WorkspaceDetail({
   onDelete,
   onBack,
   initialPreviewPath,
+  focus = false,
 }: {
   workspace: Workspace
   onUpdate: (workspace: Workspace) => void
   onDelete: () => void
   onBack: () => void
   initialPreviewPath?: string
+  focus?: boolean
 }) {
   const [tab, setTab] = useState<WorkspaceTab>('files')
   const canWrite = workspace.role !== 'viewer'
@@ -255,23 +258,27 @@ function WorkspaceDetail({
   return (
     <div className="workspace-detail">
       <header className="workspace-detail-head">
-        <button className="workspace-back" type="button" aria-label="返回工作空间概览" onClick={onBack}>
+        <button className="workspace-back" type="button" aria-label={focus ? '返回智能体' : '返回工作空间概览'} onClick={onBack}>
           <Icon name="i-left" size={15} />
         </button>
         <span className={`workspace-detail-icon is-${workspace.scope}`}><Icon name="i-ws" size={18} /></span>
         <div className="workspace-detail-title">
           <div>
-            <h1>{workspace.name}</h1>
-            <span className={`workspace-scope is-${workspace.scope}`}>
-              <Icon name={scope.icon} size={11} />
-              {scope.label}
-            </span>
-            <span className={`workspace-role is-${role.tone}`}>{role.label}</span>
+            <h1>{focus ? '工作空间' : workspace.name}</h1>
+            {!focus ? (
+              <>
+                <span className={`workspace-scope is-${workspace.scope}`}>
+                  <Icon name={scope.icon} size={11} />
+                  {scope.label}
+                </span>
+                <span className={`workspace-role is-${role.tone}`}>{role.label}</span>
+              </>
+            ) : null}
           </div>
-          <span>{workspace.computerName} · {workspace.computerOs} · 更新于 {workspace.updatedAt}</span>
+          <span>{focus ? workspace.name : `${workspace.computerName} · ${workspace.computerOs} · 更新于 ${workspace.updatedAt}`}</span>
         </div>
         <div className="workspace-detail-actions">
-          {workspace.scope === 'team' ? (
+          {!focus && workspace.scope === 'team' ? (
             <button className="workspace-secondary" type="button" onClick={() => setTab('access')}>
               <Icon name="i-nav-team" size={14} />
               成员
@@ -280,21 +287,23 @@ function WorkspaceDetail({
         </div>
       </header>
 
-      <div className="workspace-tabs" role="tablist" aria-label="工作空间内容">
-        {tabs.map((item) => (
-          <button
-            className={`workspace-tab${tab === item.id ? ' is-active' : ''}`}
-            type="button"
-            role="tab"
-            aria-selected={tab === item.id}
-            key={item.id}
-            onClick={() => setTab(item.id)}
-          >
-            <Icon name={item.icon} size={14} />
-            {item.label}
-          </button>
-        ))}
-      </div>
+      {focus ? null : (
+        <div className="workspace-tabs" role="tablist" aria-label="工作空间内容">
+          {tabs.map((item) => (
+            <button
+              className={`workspace-tab${tab === item.id ? ' is-active' : ''}`}
+              type="button"
+              role="tab"
+              aria-selected={tab === item.id}
+              key={item.id}
+              onClick={() => setTab(item.id)}
+            >
+              <Icon name={item.icon} size={14} />
+              {item.label}
+            </button>
+          ))}
+        </div>
+      )}
 
       <div className="workspace-body">
         {!canWrite ? (
@@ -307,11 +316,11 @@ function WorkspaceDetail({
         {tab === 'files' ? (
           <FilesTab workspace={workspace} onUpdate={onUpdate} canWrite={canWrite} initialPreviewPath={initialPreviewPath} />
         ) : null}
-        {tab === 'access' ? (
+        {tab === 'access' && !focus ? (
           <AccessTab workspace={workspace} onUpdate={onUpdate} canManage={workspace.role === 'owner' || workspace.role === 'admin'} />
         ) : null}
-        {tab === 'apps' ? <AppsTab workspace={workspace} /> : null}
-        {tab === 'settings' ? (
+        {tab === 'apps' && !focus ? <AppsTab workspace={workspace} /> : null}
+        {tab === 'settings' && !focus ? (
           <SettingsTab workspace={workspace} onUpdate={onUpdate} onDelete={onDelete} canWrite={canWrite} />
         ) : null}
       </div>

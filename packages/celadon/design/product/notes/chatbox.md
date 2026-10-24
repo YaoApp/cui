@@ -45,6 +45,8 @@ Workspace 决定 Computer，并在会话开始前确定。
 - 只列出当前用户可访问的 Workspace。
 - 选中 Workspace 即确定绑定的 Computer，不需要再选一次。
 - 会话开始后主线 的 Workspace 固定，Chatbox 不提供切换入口。
+- Bots 模块的 Chatbox 不显示 Workspace 选择；Bot 默认会话由系统分配专属 Workspace 与 Computer。
+- Bots 会话右上角只有一个固定的「工作空间」入口，点击后在右侧 Browser 面板打开该 Bot 默认空间的文件。
 - 会话详情右上角显示当前 Workspace，点击在 Browser 打开工作区文件。
 - 支线默认继承同一 Workspace；自动支线是否允许使用其他 Workspace 由会话 Settings 设置。
 

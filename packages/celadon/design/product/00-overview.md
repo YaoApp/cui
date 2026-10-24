@@ -25,6 +25,8 @@
 
 术语约定：模块名用「智能体」，对外说明用「数字员工」；「机器人」只指聊天机器人，不作为本模块名。
 
+Bots 是上手即用的个人 Agent 入口。系统在创建时分配专属 Workspace 与 Computer，Chatbox 不显示 Workspace 选择，右上角只有一个固定的「工作空间」入口，点击后在右侧 Browser 面板打开该 Bot 默认空间的文件。复杂的 Build 构建放在 New Session 的高级路径，不进入 Bots 首页。
+
 App 是一个无壳能力内核加两套寻址面：人面与 Agent 面。发布时绑定 Workspace 与 Computer，只暴露指定的 App 域，后端用文件系统隔离。Bot 是固定形态的 App，没有独立人面，共享出去是一个 chat 入口。分享入口通过 Tao 提供 HTTPS、hash 子域、`yao.run` 短链与自定义域名，可用 Ding 或 OTP 收口。Workspace 只有自己可见与团队可见两档，不提供分享；单文件可复制到临时分享池，到期清理。
 
 全局能力：搜索、通知、账户、设置、主题与语言。共享与隔离是跨模块能力，规则见 [`notes/sharing.md`](notes/sharing.md)。
