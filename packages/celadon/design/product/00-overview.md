@@ -31,7 +31,7 @@ App 是一个无壳能力内核加两套寻址面：人面与 Agent 面。发布
 
 Vault 与 Workspace、Computer 同级，是保护密钥、令牌与凭据的跨模块能力，入口放在 Settings 的二级。一个所有者一个 Vault，个人与团队各一个；会话按分组或单条密钥显式多选授权，不自动使用整个 Vault，规则见 [`notes/vault.md`](notes/vault.md)。
 
-电脑的池、申请与个人节点绑定见 [`notes/computers.md`](notes/computers.md)。
+电脑的池、申请与个人节点绑定见 [`notes/computers.md`](notes/computers.md)。用户版原型入口为 `/computers`，默认展示电脑清单，提供「接入本机」与「接入云电脑」两个操作，支持仅自己使用或团队可用的共享方式；接入云电脑仅 Team Owner 可操作，付费云电脑使用积分支付，余额不足时引导充值，支付后直接开通。审批申请会先加入清单并显示审批中，详情可查看进度，管理后台通过后直接转为可用；审批中的申请可以撤销。系统管理员的池配置与审批后台独立于用户版。
 
 Workspace 与 Computer 的归属、Private / Team 作用域与读写角色见 [`notes/workspace.md`](notes/workspace.md)。
 

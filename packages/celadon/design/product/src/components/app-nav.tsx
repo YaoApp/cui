@@ -58,7 +58,7 @@ const primaryItems: Array<{
   { id: 'inbox', label: '收件箱', icon: 'i-inbox', href: '/inbox' },
   { id: 'boards', label: '看板', icon: 'i-board', href: '/boards' },
   { id: 'workspaces', label: '工作空间', icon: 'i-ws' },
-  { id: 'computers', label: '电脑', icon: 'i-pc' },
+  { id: 'computers', label: '电脑', icon: 'i-pc', href: '/computers' },
 ]
 
 export function AppNav({
