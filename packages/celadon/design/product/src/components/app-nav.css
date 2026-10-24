@@ -625,3 +625,144 @@
     inline-size: 204px;
   }
 }
+
+.app-nav-sub--workspaces {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  margin-block-start: var(--spacing-12);
+  border-block-end: 0;
+  overflow: hidden;
+}
+
+.app-nav-sub--workspaces .app-nav-sub-head span:last-child {
+  color: var(--text-tertiary);
+  font-size: var(--font-size-11);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.app-nav-workspace-overview {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-tertiary);
+  font: inherit;
+  font-size: var(--font-size-11);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.app-nav-workspace-overview:hover {
+  color: var(--text-primary);
+}
+
+.app-nav-workspace-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-8);
+  min-block-size: 0;
+  overflow: auto;
+}
+
+.app-nav-workspace-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.app-nav-workspace-group-label {
+  padding: var(--spacing-4) var(--spacing-8);
+  color: var(--text-tertiary);
+  font-size: var(--font-size-11);
+}
+
+.app-nav-workspace-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-8);
+  inline-size: 100%;
+  min-block-size: var(--spacing-32);
+  padding: var(--spacing-4) var(--spacing-8);
+  border: 0;
+  border-radius: var(--radius-small);
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  text-align: start;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.app-nav-workspace-row:hover {
+  background: var(--nav-hover);
+  color: var(--text-primary);
+}
+
+.app-nav-workspace-row.is-selected {
+  background: var(--nav-select);
+  color: var(--text-primary);
+}
+
+.app-nav-workspace-icon {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  inline-size: var(--spacing-24);
+  block-size: var(--spacing-24);
+  border-radius: var(--radius-small);
+  background: var(--background-field);
+  color: var(--text-secondary);
+}
+
+.app-nav-workspace-icon.is-private {
+  background: var(--brand-soft);
+  color: var(--brand-ink);
+}
+
+.app-nav-workspace-icon.is-team {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.app-nav-workspace-copy {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 1px;
+  min-inline-size: 0;
+}
+
+.app-nav-workspace-title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+  min-inline-size: 0;
+}
+
+.app-nav-workspace-title strong {
+  overflow: hidden;
+  font-size: var(--font-size-12);
+  font-weight: var(--font-weight-medium);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-nav-workspace-title small {
+  flex: none;
+  padding: 1px var(--spacing-4);
+  border-radius: var(--radius-small);
+  background: var(--background-field);
+  color: var(--text-tertiary);
+  font-size: var(--font-size-11);
+}
+
+.app-nav-workspace-copy > span:last-child {
+  overflow: hidden;
+  color: var(--text-tertiary);
+  font-size: var(--font-size-11);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
