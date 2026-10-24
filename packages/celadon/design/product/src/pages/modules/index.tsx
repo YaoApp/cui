@@ -66,6 +66,10 @@ export function ModulesPage() {
                 <a className="card-link" href="/boards" key={module.id}>
                   <ModuleCard module={module} />
                 </a>
+              ) : module.id === 'workspace' ? (
+                <a className="card-link" href="/workspaces" key={module.id}>
+                  <ModuleCard module={module} />
+                </a>
               ) : module.id === 'computer' ? (
                 <a className="card-link" href="/computers" key={module.id}>
                   <ModuleCard module={module} />

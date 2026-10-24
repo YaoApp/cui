@@ -20,6 +20,15 @@ export type InboxNavItem = {
   tone?: 'success' | 'warning' | 'danger' | 'neutral' | 'brand'
 }
 
+export type WorkspaceNavItem = {
+  id: string
+  name: string
+  scope: 'private' | 'team'
+  computer: string
+  role: string
+  readonly: boolean
+}
+
 export type BoardNavItem = {
   id: string
   title: string
@@ -45,6 +54,11 @@ type AppNavProps = {
   onBoardSelect?: (id: string) => void
   onCreateBoard?: () => void
   onCreateBot?: () => void
+  workspaceItems?: WorkspaceNavItem[]
+  workspaceSelectedId?: string
+  onWorkspaceSelect?: (id: string) => void
+  onWorkspaceOverview?: () => void
+  onCreateWorkspace?: () => void
 }
 
 const primaryItems: Array<{
@@ -57,7 +71,7 @@ const primaryItems: Array<{
   { id: 'apps', label: '应用', icon: 'i-apps', href: '/apps' },
   { id: 'inbox', label: '收件箱', icon: 'i-inbox', href: '/inbox' },
   { id: 'boards', label: '看板', icon: 'i-board', href: '/boards' },
-  { id: 'workspaces', label: '工作空间', icon: 'i-ws' },
+  { id: 'workspaces', label: '工作空间', icon: 'i-ws', href: '/workspaces' },
   { id: 'computers', label: '电脑', icon: 'i-pc', href: '/computers' },
 ]
 
@@ -77,6 +91,11 @@ export function AppNav({
   onBoardSelect,
   onCreateBoard,
   onCreateBot,
+  workspaceItems,
+  workspaceSelectedId,
+  onWorkspaceSelect,
+  onWorkspaceOverview,
+  onCreateWorkspace,
 }: AppNavProps) {
   return (
     <aside className="app-nav" aria-label="主导航">
@@ -139,6 +158,16 @@ export function AppNav({
           onFilterChange={onInboxFilterChange}
           onSelect={onInboxSelect}
           onOverview={onInboxOverview}
+        />
+      ) : null}
+
+      {section === 'workspaces' && workspaceItems ? (
+        <WorkspaceSubnav
+          items={workspaceItems}
+          selectedId={workspaceSelectedId}
+          onSelect={onWorkspaceSelect}
+          onOverview={onWorkspaceOverview}
+          onCreate={onCreateWorkspace}
         />
       ) : null}
 
@@ -337,6 +366,69 @@ function BotsSubnav({ botId, onCreateBot }: { botId?: string; onCreateBot: () =>
         <Icon name="i-plus" size={14} />
         <span>新建智能体</span>
       </button>
+    </div>
+  )
+}
+
+function WorkspaceSubnav({
+  items,
+  selectedId,
+  onSelect,
+  onOverview,
+  onCreate,
+}: {
+  items: WorkspaceNavItem[]
+  selectedId?: string
+  onSelect?: (id: string) => void
+  onOverview?: () => void
+  onCreate?: () => void
+}) {
+  const groups = (['private', 'team'] as const).map((scope) => ({
+    scope,
+    label: scope === 'private' ? '我的工作空间' : '团队工作空间',
+    entries: items.filter((item) => item.scope === scope),
+  })).filter((group) => group.entries.length > 0)
+
+  return (
+    <div className="app-nav-sub app-nav-sub--workspaces">
+      <div className="app-nav-sub-head">
+        <button className="app-nav-workspace-overview" type="button" onClick={onOverview}>
+          工作空间
+        </button>
+        <span>{items.length} 个</span>
+      </div>
+      <div className="app-nav-workspace-list">
+        {groups.map((group) => (
+          <div className="app-nav-workspace-group" key={group.scope}>
+            <span className="app-nav-workspace-group-label">{group.label}</span>
+            {group.entries.map((item) => (
+              <button
+                className={`app-nav-workspace-row${item.id === selectedId ? ' is-selected' : ''}`}
+                type="button"
+                key={item.id}
+                onClick={() => onSelect?.(item.id)}
+              >
+                <span className={`app-nav-workspace-icon is-${item.scope}`}>
+                  <Icon name={item.scope === 'private' ? 'i-lock' : 'i-ws'} size={14} />
+                </span>
+                <span className="app-nav-workspace-copy">
+                  <span className="app-nav-workspace-title">
+                    <strong>{item.name}</strong>
+                    {item.readonly ? <small>只读</small> : null}
+                  </span>
+                  <span>{item.computer} · {item.role}</span>
+                </span>
+              </button>
+            ))}
+          </div>
+        ))}
+      </div>
+      {onCreate ? (
+        <button className="app-nav-sub-new" type="button" onClick={onCreate}>
+          <Icon name="i-plus" size={14} />
+          <span>新建工作空间</span>
+        </button>
+      ) : null}
     </div>
   )
 }
