@@ -72,20 +72,25 @@ export function ShareDialog({
         <label className="ex-share-field">
           <span>访问范围</span>
           <select value={visibility} onChange={(event) => setVisibility(event.target.value)}>
+            <option value="private">Private · 仅发布者可见</option>
             <option value="team">Team · 仅团队可见</option>
             <option value="link">Anyone with link · 拿到链接即可访问</option>
           </select>
         </label>
 
-        <div className="ex-share-link">
-          <span>{url}</span>
-          <button type="button" onClick={copyLink}>
-            {copied ? '已复制' : '复制链接'}
-          </button>
-        </div>
+        {visibility !== 'private' ? (
+          <div className="ex-share-link">
+            <span>{url}</span>
+            <button type="button" onClick={copyLink}>
+              {copied ? '已复制' : '复制链接'}
+            </button>
+          </div>
+        ) : (
+          <p className="ex-share-copy">Private 不生成对外链接，只有发布者可以在 Apps 中打开。</p>
+        )}
 
         <footer className="ex-share-foot">
-          <span>当前：{visibility === 'team' ? 'Team' : 'Link'} · 只读入口</span>
+          <span>当前：{visibility === 'private' ? 'Private' : visibility === 'team' ? 'Team' : 'Link'} · 只读入口</span>
           <button className="ex-share-done" type="button" onClick={onClose}>
             Done
           </button>

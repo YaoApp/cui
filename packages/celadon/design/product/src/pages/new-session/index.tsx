@@ -3,28 +3,26 @@ import { AppNav } from '../../components/app-nav'
 import { ChatComposer } from '../../components/chat-composer'
 import { Icon } from '../../components/icon'
 import { apps, bots, type Recommendation } from './data'
+import { scopeMeta, workspaceSeed } from '../workspaces/data'
 import './new-session.css'
 
-const workspaceGroups = [
-  {
-    computer: 'Mac mini',
-    status: 'online',
-    items: [
-      { id: 'research', label: 'Research', scope: 'Private' },
-      { id: 'handbook', label: 'Team handbook', scope: 'Team' },
-    ],
-  },
-  {
-    computer: 'Windows box',
-    status: 'online',
-    items: [{ id: 'sandbox', label: 'Sandbox', scope: 'Private' }],
-  },
-  {
-    computer: 'Linux pool',
-    status: 'available',
-    items: [{ id: 'lab-notes', label: 'Lab notes', scope: 'Team' }],
-  },
-]
+const computerStatus: Record<string, string> = {
+  'Mac Studio · 研究机': 'online',
+  'Wren 的 MacBook Pro': 'online',
+  'Linux 构建机': 'available',
+}
+
+const workspaceGroups = Array.from(new Set(workspaceSeed.map((workspace) => workspace.computerName))).map((computer) => ({
+  computer,
+  status: computerStatus[computer] ?? 'online',
+  items: workspaceSeed
+    .filter((workspace) => workspace.computerName === computer)
+    .map((workspace) => ({
+      id: workspace.id,
+      label: workspace.name,
+      scope: scopeMeta[workspace.scope].label,
+    })),
+}))
 
 const workspaces = workspaceGroups.flatMap((group) =>
   group.items.map((item) => ({

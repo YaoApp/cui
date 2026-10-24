@@ -4,6 +4,8 @@ import { Icon } from '../../components/icon'
 import {
   availableNodes as initialAvailableNodes,
   computerPools,
+  computerMemberCandidates,
+  computerScopeMeta,
   connectionServer,
   defaultFolder,
   recentFolders,
@@ -11,6 +13,7 @@ import {
   policyMeta,
   requestCopy,
   statusMeta,
+  type ComputerMemberRole,
   type ComputerNode,
   type ComputerPool,
   type ComputerScope,
@@ -34,7 +37,7 @@ export function ComputersPage() {
   const pendingCount = Object.values(requests).filter((state) => state === 'pending').length
   const computers = [...availableNodes, ...personalNodes]
 
-  function requestAccess(pool: ComputerPool, input: { name: string; scope: ComputerScope }) {
+  function requestAccess(pool: ComputerPool, input: { name: string; scope: ComputerScope; memberIds: string[]; memberRoles: Record<string, ComputerMemberRole> }) {
     const immediate = pool.policy === 'auto' || pool.policy === 'paid'
     setRequests((current) => ({
       ...current,
@@ -54,6 +57,8 @@ export function ComputersPage() {
       source: pool.name.replace('云电脑', '').trim(),
       lastActive: immediate ? '刚刚开通' : '刚刚提交',
       scope: input.scope,
+      memberIds: input.memberIds,
+      memberRoles: input.memberRoles,
       poolId: pool.id,
       ownerId: currentUserId,
     }
@@ -65,10 +70,11 @@ export function ComputersPage() {
   }
 
   function canRevoke(node: ComputerNode) {
+    const teamShared = node.scope === 'shared' || node.scope === 'members'
     if (node.personal) {
-      return node.ownerId === currentUserId || (node.scope === 'shared' && isTeamOwner)
+      return node.ownerId === currentUserId || (teamShared && isTeamOwner)
     }
-    if (node.scope === 'shared') return isTeamOwner
+    if (teamShared) return isTeamOwner
     return node.ownerId === currentUserId
   }
 
@@ -87,7 +93,7 @@ export function ComputersPage() {
     }
   }
 
-  function connectComputer(input: { name: string; folder: string; scope: ComputerScope }) {
+  function connectComputer(input: { name: string; folder: string; scope: ComputerScope; memberIds: string[]; memberRoles: Record<string, ComputerMemberRole> }) {
     const node: ComputerNode = {
       id: `personal-${Date.now()}`,
       computerId: `psn-${Date.now().toString(36)}`,
@@ -103,6 +109,8 @@ export function ComputersPage() {
       lastActive: '刚刚接入',
       personal: true,
       scope: input.scope,
+      memberIds: input.memberIds,
+      memberRoles: input.memberRoles,
       ownerId: currentUserId,
     }
     setPersonalNodes((current) => [...current, node])
@@ -215,7 +223,7 @@ function ComputerList({
       </div>
       <div className="computers-note">
         <Icon name="i-lock" size={14} />
-        电脑使用权不等于 Workspace 访问权。Workspace 仍按 Private / Team 与 Viewer / Editor 单独控制。
+        电脑使用权不等于 Workspace 访问权。Workspace 仍按 Private / Team / Specified members 与角色单独控制。
       </div>
     </section>
   )
@@ -254,7 +262,7 @@ function NodeCard({ node, onDetail, onRevoke }: { node: ComputerNode; onDetail: 
         </span>
         {node.scope ? (
           <span className="computer-scope-badge">
-            {node.scope === 'private' ? '仅自己' : '团队'}
+            {computerScopeMeta[node.scope].short}
           </span>
         ) : null}
       </div>
@@ -380,7 +388,7 @@ function ComputerDetailDialog({
           <span className={`computer-node-icon is-${status.tone}`}><Icon name="i-pc" size={18} /></span>
           <div>
             <strong>{node.name}</strong>
-            <span>{node.personal ? '个人电脑' : `云电脑 · ${node.source}`}{node.scope ? ` · ${node.scope === 'private' ? '仅自己' : '团队'}` : ''}</span>
+            <span>{node.personal ? '个人电脑' : `云电脑 · ${node.source}`}{node.scope ? ` · ${computerScopeMeta[node.scope].short}` : ''}</span>
           </div>
           <span className={`computer-status is-${status.tone}`}>
             <Icon name={status.icon} size={11} />
@@ -399,6 +407,19 @@ function ComputerDetailDialog({
           <div><span>最近状态</span><strong>{node.lastActive}</strong></div>
         </div>
 
+        {node.scope === 'members' && node.memberIds?.length ? (
+          <div className="computer-detail-members">
+            <strong>指定成员</strong>
+            <div>
+              {node.memberIds.map((id) => {
+                const member = computerMemberCandidates.find((candidate) => candidate.id === id)
+                if (!member) return null
+                return <span key={id}>{member.name} · {node.memberRoles?.[id] === 'admin' ? 'Admin' : 'User'}</span>
+              })}
+            </div>
+          </div>
+        ) : null}
+
         {pending ? (
           <div className="computer-approval">
             <div className="computer-approval-head">
@@ -407,10 +428,10 @@ function ComputerDetailDialog({
             </div>
             <div className="computer-approval-steps">
               <div className="computer-approval-step is-done"><span>1</span><div><strong>已提交申请</strong><small>电脑已加入清单，资源暂未分配</small></div></div>
-              <div className="computer-approval-step is-current"><span>2</span><div><strong>Team Owner 审批</strong><small>等待管理员在管理后台处理</small></div></div>
+              <div className="computer-approval-step is-current"><span>2</span><div><strong>平台管理员审批</strong><small>等待平台管理员在独立管理后台处理</small></div></div>
               <div className="computer-approval-step"><span>3</span><div><strong>审批通过后可直接接入</strong><small>无需再次申请，状态会自动更新为在线</small></div></div>
             </div>
-            <p className="computer-dialog-hint">审批由管理后台完成，用户不需要重复提交申请。</p>
+            <p className="computer-dialog-hint">审批由平台管理后台完成，用户不需要重复提交申请。</p>
           </div>
         ) : null}
 
@@ -496,11 +517,18 @@ function AddComputerDialog({
   onConfirm,
 }: {
   onClose: () => void
-  onConfirm: (input: { name: string; folder: string; scope: ComputerScope }) => void
+  onConfirm: (input: { name: string; folder: string; scope: ComputerScope; memberIds: string[]; memberRoles: Record<string, ComputerMemberRole> }) => void
 }) {
   const [name, setName] = useState('这台电脑')
   const [folder, setFolder] = useState(defaultFolder)
   const [scope, setScope] = useState<ComputerScope>('private')
+  const [memberIds, setMemberIds] = useState<string[]>([])
+  const [memberRoles, setMemberRoles] = useState<Record<string, ComputerMemberRole>>({})
+
+  function toggleMember(id: string) {
+    setMemberIds((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id])
+    setMemberRoles((current) => current[id] ? current : { ...current, [id]: 'user' })
+  }
   const [folderOpen, setFolderOpen] = useState(false)
 
   useEffect(() => {
@@ -525,7 +553,7 @@ function AddComputerDialog({
             <Icon name="i-act-close" size={16} />
           </button>
         </header>
-        <p className="computer-dialog-copy">这台电脑已经在 Yao Agents 中运行。确认接入的服务器、电脑名称、存储目录与共享方式，即可完成接入。</p>
+        <p className="computer-dialog-copy">这台电脑已经在 Yao Agents 中运行。确认服务器、电脑名称、存储目录与共享方式；仅自己使用可直接接入，团队可用需 Team Owner 审批。</p>
 
         <div className="computer-server">
           <span className="computer-server-icon"><Icon name="i-globe" size={18} /></span>
@@ -606,10 +634,50 @@ function AddComputerDialog({
               onClick={() => setScope('shared')}
             >
               <Icon name="i-ws" size={14} />
-              <span><strong>团队可用</strong><small>团队内可见</small></span>
+              <span><strong>团队可用</strong><small>团队内可见，需审批</small></span>
+            </button>
+            <button
+              className={scope === 'members' ? 'computer-scope-option is-selected' : 'computer-scope-option'}
+              type="button"
+              aria-pressed={scope === 'members'}
+              onClick={() => setScope('members')}
+            >
+              <Icon name="i-nav-user" size={14} />
+              <span><strong>指定成员</strong><small>仅名单内可见，需审批</small></span>
             </button>
           </div>
         </div>
+
+        {scope === 'members' ? (
+          <div className="computer-member-picker">
+            <span>指定成员</span>
+            <div>
+              {computerMemberCandidates.map((member) => (
+                <label key={member.id}>
+                  <input type="checkbox" checked={memberIds.includes(member.id)} onChange={() => toggleMember(member.id)} />
+                  <span>{member.name}<small>{member.email}</small></span>
+                  {memberIds.includes(member.id) ? (
+                    <select
+                      aria-label={`${member.name} 的角色`}
+                      value={memberRoles[member.id] ?? 'user'}
+                      onChange={(event) => setMemberRoles((current) => ({ ...current, [member.id]: event.target.value as ComputerMemberRole }))}
+                    >
+                      <option value="user">User</option>
+                      <option value="admin">Admin</option>
+                    </select>
+                  ) : null}
+                </label>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        {scope === 'shared' || scope === 'members' ? (
+          <div className="computer-dialog-note">
+            <Icon name="i-ws" size={13} />
+            团队共享需 Team Owner 审批；审批通过前只有自己可用。
+          </div>
+        ) : null}
 
         <div className="computer-dialog-note">
           <Icon name="i-lock" size={13} />
@@ -617,7 +685,7 @@ function AddComputerDialog({
         </div>
         <footer className="computer-dialog-actions">
           <button className="computer-dialog-secondary" type="button" onClick={onClose}>取消</button>
-          <button className="computer-dialog-primary" type="button" disabled={!name.trim()} onClick={() => onConfirm({ name, folder, scope })}>确认接入</button>
+          <button className="computer-dialog-primary" type="button" disabled={!name.trim()} onClick={() => onConfirm({ name, folder, scope, memberIds, memberRoles })}>确认接入</button>
         </footer>
       </section>
     </div>
@@ -635,7 +703,7 @@ function RequestPoolDialog({
   pointsBalance: number
   onRecharge: (amount: number) => void
   onClose: () => void
-  onConfirm: (input: { name: string; scope: ComputerScope }) => void
+  onConfirm: (input: { name: string; scope: ComputerScope; memberIds: string[]; memberRoles: Record<string, ComputerMemberRole> }) => void
 }) {
   const policy = policyMeta[pool.policy]
   const paid = pool.policy === 'paid'
@@ -643,6 +711,13 @@ function RequestPoolDialog({
   const enoughPoints = pointsBalance >= cost
   const [name, setName] = useState(pool.name)
   const [scope, setScope] = useState<ComputerScope>('private')
+  const [memberIds, setMemberIds] = useState<string[]>([])
+  const [memberRoles, setMemberRoles] = useState<Record<string, ComputerMemberRole>>({})
+
+  function toggleMember(id: string) {
+    setMemberIds((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id])
+    setMemberRoles((current) => current[id] ? current : { ...current, [id]: 'user' })
+  }
   const [rechargeOpen, setRechargeOpen] = useState(false)
   const [rechargeAmount, setRechargeAmount] = useState(500)
 
@@ -664,7 +739,7 @@ function RequestPoolDialog({
       setRechargeOpen(true)
       return
     }
-    onConfirm({ name, scope })
+    onConfirm({ name, scope, memberIds, memberRoles })
   }
 
   return (
@@ -720,8 +795,41 @@ function RequestPoolDialog({
               <Icon name="i-ws" size={14} />
               <span><strong>团队可用</strong><small>团队成员可见</small></span>
             </button>
+            <button
+              className={scope === 'members' ? 'computer-scope-option is-selected' : 'computer-scope-option'}
+              type="button"
+              aria-pressed={scope === 'members'}
+              onClick={() => setScope('members')}
+            >
+              <Icon name="i-nav-user" size={14} />
+              <span><strong>指定成员</strong><small>仅名单内可见</small></span>
+            </button>
           </div>
         </div>
+
+        {scope === 'members' ? (
+          <div className="computer-member-picker">
+            <span>指定成员</span>
+            <div>
+              {computerMemberCandidates.map((member) => (
+                <label key={member.id}>
+                  <input type="checkbox" checked={memberIds.includes(member.id)} onChange={() => toggleMember(member.id)} />
+                  <span>{member.name}<small>{member.email}</small></span>
+                  {memberIds.includes(member.id) ? (
+                    <select
+                      aria-label={`${member.name} 的角色`}
+                      value={memberRoles[member.id] ?? 'user'}
+                      onChange={(event) => setMemberRoles((current) => ({ ...current, [member.id]: event.target.value as ComputerMemberRole }))}
+                    >
+                      <option value="user">User</option>
+                      <option value="admin">Admin</option>
+                    </select>
+                  ) : null}
+                </label>
+              ))}
+            </div>
+          </div>
+        ) : null}
 
         <div className="computer-request-rows">
           <div><span>可用机器</span><strong>{pool.available} / {pool.total}</strong></div>

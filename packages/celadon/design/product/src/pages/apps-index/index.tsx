@@ -31,7 +31,7 @@ export function AppsIndexPage() {
         origin === 'all' || (origin === 'self' ? app.source === 'self' : app.source !== 'self')
       const matchesExternalSource =
         origin !== 'external' || externalSource === 'all' || app.source === externalSource
-      const haystack = `${app.name} ${app.english} ${app.description} ${app.category} ${app.workspace}`
+      const haystack = `${app.name} ${app.english} ${app.description} ${app.category}`
       const matchesQuery = !needle || haystack.toLowerCase().includes(needle)
       return matchesCategory && matchesOrigin && matchesExternalSource && matchesQuery
     })
@@ -83,7 +83,7 @@ export function AppsIndexPage() {
           <div className="apps-head-copy">
             <span className="apps-eyebrow">APPS · EXCLUSIVE SURFACES</span>
             <h1>应用</h1>
-            <p>每个应用有自己的界面、资源与分享入口。打开后进入独占空间，不在 Chatbox 里套壳。</p>
+            <p>每个应用有自己的界面、数据与分享入口。打开后进入独占空间，不在 Chatbox 里套壳。</p>
           </div>
           <button className="apps-create" type="button" onClick={() => setCreateOpen(true)}>
             <Icon name="i-plus" size={15} />
@@ -172,7 +172,7 @@ export function AppsIndexPage() {
             <input
               type="search"
               value={query}
-              placeholder="搜索应用、分类或工作区"
+              placeholder="搜索应用或分类"
               onChange={(event) => setQuery(event.target.value)}
             />
           </label>
@@ -215,7 +215,6 @@ export function AppsIndexPage() {
               <div className="apps-card-tags">
                 <span>{app.category}</span>
                 <span>{app.surface}</span>
-                <span>{app.workspace}</span>
               </div>
               <div className="apps-card-foot">
                 <span>更新于 {app.updated}</span>

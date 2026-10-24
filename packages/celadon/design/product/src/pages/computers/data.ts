@@ -3,7 +3,8 @@ import type { IconId } from '../../../../app/src/platform/icons/icon-ids'
 export type ComputerTone = 'brand' | 'success' | 'warning' | 'danger' | 'neutral'
 export type ComputerStatus = 'online' | 'serving' | 'busy' | 'offline' | 'pending'
 export type PoolPolicy = 'auto' | 'approval' | 'paid'
-export type ComputerScope = 'private' | 'shared'
+export type ComputerScope = 'private' | 'shared' | 'members'
+export type ComputerMemberRole = 'admin' | 'user'
 
 export type ComputerNode = {
   id: string
@@ -20,9 +21,24 @@ export type ComputerNode = {
   lastActive: string
   personal?: boolean
   scope?: ComputerScope
+  memberIds?: string[]
+  memberRoles?: Record<string, ComputerMemberRole>
   poolId?: string
   ownerId?: string
 }
+
+export const computerScopeMeta: Record<ComputerScope, { label: string; short: string }> = {
+  private: { label: 'Private', short: '仅自己' },
+  shared: { label: 'Team', short: '团队' },
+  members: { label: 'Specified', short: '指定成员' },
+}
+
+export const computerMemberCandidates = [
+  { id: 'emma', name: 'Emma Lin', email: 'emma@yaoagents.com' },
+  { id: 'lin', name: 'Lin Chen', email: 'lin@yaoagents.com' },
+  { id: 'kai', name: 'Kai Wu', email: 'kai@yaoagents.com' },
+  { id: 'noah', name: 'Noah Park', email: 'noah@yaoagents.com' },
+]
 
 export type ComputerPool = {
   id: string

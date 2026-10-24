@@ -9,6 +9,7 @@ import {
   readWorkspace,
   roleMeta,
   scopeMeta,
+  workspaceMemberCandidates,
   workspaceSeed,
   type Workspace,
   type WorkspaceFile,
@@ -19,7 +20,7 @@ import {
 } from './data'
 import './workspaces.css'
 
-type CreateInput = { name: string; computerId: string; scope: WorkspaceScope }
+type CreateInput = { name: string; computerId: string; scope: WorkspaceScope; members: WorkspaceMember[] }
 
 export function WorkspacesPage({ workspaceId }: { workspaceId?: string }) {
   const searchParams = new URLSearchParams(window.location.search)
@@ -94,7 +95,9 @@ export function WorkspacesPage({ workspaceId }: { workspaceId?: string }) {
       ],
       members: input.scope === 'team'
         ? [{ id: 'wren', name: 'Wren', email: 'wren@yaoagents.com', role: 'editor' }]
-        : [],
+        : input.scope === 'members'
+          ? [{ id: 'wren', name: 'Wren', email: 'wren@yaoagents.com', role: 'owner' }, ...input.members]
+          : [],
       apps: [],
     }
     setWorkspaces((current) => [workspace, ...current])
@@ -154,12 +157,21 @@ function WorkspaceOverview({
   onSelect: (id: string) => void
   onCreate: () => void
 }) {
-  const groups = (['private', 'team'] as const).map((scope) => ({
-    scope,
-    label: scope === 'private' ? '我的工作空间' : '团队工作空间',
-    items: workspaces.filter((workspace) => workspace.scope === scope),
-  })).filter((group) => group.items.length > 0)
+  const groups = [
+    {
+      scope: 'mine',
+      label: '我的工作空间',
+      items: workspaces.filter((workspace) => workspace.scope === 'private' || workspace.scope === 'members'),
+    },
+    {
+      scope: 'team',
+      label: '团队工作空间',
+      items: workspaces.filter((workspace) => workspace.scope === 'team'),
+    },
+  ].filter((group) => group.items.length > 0)
   const computers = new Set(workspaces.map((workspace) => workspace.computerId)).size
+  const scopeIcon = (scope: WorkspaceScope) =>
+    scope === 'private' ? 'i-lock' : scope === 'team' ? 'i-ws' : 'i-nav-user'
 
   return (
     <div className="workspace-overview">
@@ -179,6 +191,7 @@ function WorkspaceOverview({
           <div><strong>{workspaces.length}</strong><span>全部工作空间</span></div>
           <div><strong>{workspaces.filter((workspace) => workspace.scope === 'private').length}</strong><span>Private</span></div>
           <div><strong>{workspaces.filter((workspace) => workspace.scope === 'team').length}</strong><span>Team</span></div>
+          <div><strong>{workspaces.filter((workspace) => workspace.scope === 'members').length}</strong><span>Specified</span></div>
           <div><strong>{computers}</strong><span>绑定 Computer</span></div>
         </section>
         {groups.map((group) => (
@@ -189,7 +202,7 @@ function WorkspaceOverview({
             <div className="workspace-overview-grid">
               {group.items.map((workspace) => (
                 <button className="workspace-overview-card" type="button" key={workspace.id} onClick={() => onSelect(workspace.id)}>
-                  <span className={`workspace-overview-card-icon is-${workspace.scope}`}><Icon name={workspace.scope === 'private' ? 'i-lock' : 'i-ws'} size={17} /></span>
+                  <span className={`workspace-overview-card-icon is-${workspace.scope}`}><Icon name={scopeIcon(workspace.scope)} size={17} /></span>
                   <span className="workspace-overview-card-copy">
                     <span className="workspace-overview-card-title">
                       <strong>{workspace.name}</strong>
@@ -250,7 +263,7 @@ function WorkspaceDetail({
   const role = roleMeta[workspace.role]
   const tabs: Array<{ id: WorkspaceTab; label: string; icon: 'i-folder' | 'i-nav-team' | 'i-apps' | 'i-nav-settings' }> = [
     { id: 'files', label: '文件', icon: 'i-folder' },
-    ...(workspace.scope === 'team' ? [{ id: 'access' as const, label: '成员', icon: 'i-nav-team' as const }] : []),
+    ...(workspace.scope !== 'private' ? [{ id: 'access' as const, label: '成员', icon: 'i-nav-team' as const }] : []),
     { id: 'apps', label: '应用', icon: 'i-apps' },
     { id: 'settings', label: '设置', icon: 'i-nav-settings' },
   ]
@@ -278,7 +291,7 @@ function WorkspaceDetail({
           <span>{focus ? workspace.name : `${workspace.computerName} · ${workspace.computerOs} · 更新于 ${workspace.updatedAt}`}</span>
         </div>
         <div className="workspace-detail-actions">
-          {!focus && workspace.scope === 'team' ? (
+          {!focus && workspace.scope !== 'private' ? (
             <button className="workspace-secondary" type="button" onClick={() => setTab('access')}>
               <Icon name="i-nav-team" size={14} />
               成员
@@ -729,7 +742,7 @@ function AccessTab({
       <div className="workspace-section-head">
         <div>
           <h2>成员与权限</h2>
-          <p>Team Owner / Admin 可以调整成员角色。Owner 自动拥有管理权，成员默认是只读。</p>
+          <p>{workspace.scope === 'team' ? 'Team Owner / Admin 可以调整成员角色。Owner 自动拥有管理权，成员默认是只读。' : 'Owner 与被授权的 Admin 可以调整成员角色；不在名单内的成员不能读取内容。'}</p>
         </div>
         <button className="workspace-secondary" type="button" disabled={!canManage} onClick={() => setInviteOpen(true)}>
           <Icon name="i-plus" size={13} />
@@ -878,7 +891,7 @@ function SettingsTab({
         <div className="workspace-field">
           <span>作用域</span>
           <div className="workspace-scope-options">
-            {(['private', 'team'] as const).map((item) => (
+            {(['private', 'team', 'members'] as const).map((item) => (
               <button
                 className={scope === item ? 'workspace-scope-option is-selected' : 'workspace-scope-option'}
                 type="button"
@@ -929,6 +942,11 @@ function CreateWorkspaceDialog({ onClose, onCreate }: { onClose: () => void; onC
   const [name, setName] = useState('')
   const [computerId, setComputerId] = useState(computers[0].id)
   const [scope, setScope] = useState<WorkspaceScope>('private')
+  const [memberIds, setMemberIds] = useState<string[]>([])
+
+  function toggleMember(id: string) {
+    setMemberIds((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id])
+  }
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -961,7 +979,7 @@ function CreateWorkspaceDialog({ onClose, onCreate }: { onClose: () => void; onC
         <div className="workspace-form-label">
           <span>作用域</span>
           <div className="workspace-scope-options">
-            {(['private', 'team'] as const).map((item) => (
+            {(['private', 'team', 'members'] as const).map((item) => (
               <button
                 className={scope === item ? 'workspace-scope-option is-selected' : 'workspace-scope-option'}
                 type="button"
@@ -974,9 +992,26 @@ function CreateWorkspaceDialog({ onClose, onCreate }: { onClose: () => void; onC
             ))}
           </div>
         </div>
+        {scope === 'members' ? (
+          <div className="workspace-member-picker">
+            <span>指定成员</span>
+            <div>
+              {workspaceMemberCandidates.map((member) => (
+                <label key={member.id}>
+                  <input
+                    type="checkbox"
+                    checked={memberIds.includes(member.id)}
+                    onChange={() => toggleMember(member.id)}
+                  />
+                  <span>{member.name}<small>{member.email}</small></span>
+                </label>
+              ))}
+            </div>
+          </div>
+        ) : null}
         <footer className="workspace-dialog-actions">
           <button className="workspace-secondary" type="button" onClick={onClose}>取消</button>
-          <button className="workspace-primary" type="button" disabled={!name.trim()} onClick={() => onCreate({ name: name.trim(), computerId, scope })}>创建工作空间</button>
+          <button className="workspace-primary" type="button" disabled={!name.trim()} onClick={() => onCreate({ name: name.trim(), computerId, scope, members: workspaceMemberCandidates.filter((member) => memberIds.includes(member.id)) })}>创建工作空间</button>
         </footer>
       </section>
     </div>

@@ -39,12 +39,27 @@ App 与 Bot 的耦合只剩 Manifest、标准协议与身份。运行时与用�
 三条边界：
 
 1. **Yao Engine → App**：只提供 Tunnel，不挂载 Workspace，不管理 App 数据。
-2. **App → Bot**：通过 Yao Open API 调用，请求携带 Yao Secret，可选指定 App 自己的 Workspace。
+2. **App → Bot**：通过 Yao Open API 调用，请求携带 Yao Secret；App 不指定 Workspace，平台按 Bot 入口与接收者绑定运行空间。
 3. **Bot → App**：只通过 App 暴露的 MCP 工具，不读取 App 数据库或文件。
 
 ## 2. App
 
 App 是一个 Builder 开发并启动的 daemon。
+
+### 2.0 发布记录
+
+Yao 提供一组发布 Tools。发布时，工具在 Workspace 中写入一条部署记录，落到表或数据库，具体存储形式在实现时确定。
+
+记录至少包含：
+
+```text
+AppDeploymentRecord
+  workspace_id
+  pid
+  daemon
+```
+
+记录与真实运行实例分离：Workspace 保存的是部署索引与定位信息，不是 App 的数据目录；App 自己的数据、数据库、文件与用户隔离仍由 App 负责。App 不因为有一条发布记录而获得 Workspace 的文件访问权，平台也不把 Workspace 当成 App 的数据源或 App 域。
 
 ```text
 App
@@ -56,13 +71,14 @@ App
 
 规则：
 
-- App 运行在 Builder Workspace，使用 Builder 的依赖与构建产物；
+- App 的构建与发布在 Builder Workspace 内完成，使用 Builder 的依赖与构建产物；运行时由部署记录中的 daemon 定位；
 - 平台只建立隧道，把 App 的端口暴露给外部；
 - 平台不把外部用户 Workspace 挂载进 App；
 - 平台不管理 App 的用户数据与数据库；
 - App 端口代理不强制 Yao 账号登录，是否要求登录由 App 自己决定；
 - App 可以选择在 Bot 调用 App 时接受 Yao JWT，平台不向 App 注入终端用户身份；
 - App 自己决定如何识别用户、保存数据、做权限与隔离；
+- App 使用自己的 Yao Secret 调用 Yao Vault API；Vault 授权按 App ID 记录，平台不向 App 注入密钥；
 - App 可以暴露 MCP 工具，供 Bot 调用；
 - App 可以调用 Bot 的标准接口，完成需要 Agent 的工作。
 
@@ -126,7 +142,7 @@ Apps 列表展示的是入口与 Manifest，不要求 App 运行在 Yao 上。�
 Bot 由 Yao 运行，App 调用 Bot 会产生平台费用。
 
 - Yao 按 Yao Secret 计量，与 App 结算；
-- Secret 标识 Builder 用户，账单归属该用户；
+- Secret 标识 App 与 App 所有者，账单归属 App 所有者；
 - App 自己决定对终端用户的收费方式，可以免费、订阅、按次或打包；
 - Yao 不参与 App 与终端用户之间的计费；
 - App 对终端用户免费，不等于 Bot 调用免费，App 仍需与 Yao 结算；
@@ -158,9 +174,10 @@ Bot 对外提供三类标准接口：
 Bot 的 Workspace 由平台承载，但归属按入口区分：
 
 - Bot 标准界面：平台按 Yao 用户创建 Workspace，同一用户再次访问时复用，不同用户之间隔离；
-- App API：Workspace 属于 Builder 用户；App 可以通过 Workspace API 新建，也可以复用已有 Workspace；同一个 Workspace 可以服务一个或多个 App；
+- 分享 Bot：每个接收者使用自己的 Workspace 与 Session；发布者按普通用户权限不能读取或接管；
+- App API：平台按 App 调用入口与接收者创建或复用 Workspace；App 不拥有 Workspace，不指定 Workspace ID，也不能读取 Workspace 文件；
 - Bot 调用的文件、Skill 与会话状态都保存在对应 Workspace 中；
-- 管理员可以通过平台管理视图查看。
+- 平台管理员不读取 Bot Workspace 内容；只能查看 Workspace 名称、归属、作用域、状态与容量等元数据，且每次查看都写入审计记录。规则见 [`permissions.md`](permissions.md)。
 
 ## 4. App 与 Bot 的调用
 
@@ -170,13 +187,13 @@ App 使用 Yao Secret 调用平台开放接口。Secret 本身就是凭据，不
 
 ```text
 App → Yao Open API
-  ├─ Workspace API   读写 App 自己的 Workspace
   ├─ Bot API         调用 MCP / WebSocket / SSE
+  ├─ Vault API       读取 App 被授权的密钥
   └─ 其他开放接口
 ```
 
 - Yao Secret 绑定 App 身份；
-- App 只能访问自己身份下的数据；
+- App 只能访问自己身份下的数据和被明确授权的 Vault；
 - 请求直接携带 Secret；
 - 调用发生在内部网络，不经过公网；
 - Bot 只是开放接口中的一类，不是 App 的唯一依赖。
@@ -190,13 +207,11 @@ App → Yao Open API → Bot
 ```
 
 - App 请求携带 Yao Secret；
-- Yao Secret 代表 Builder 用户，Workspace 属于这个 Builder 用户；
-- App 可以通过 Workspace API 新建 Workspace，也可以复用已有 Workspace；
-- 没有 App 专属 Workspace，新建出来的仍然是 Builder 用户的 Workspace；
-- 同一个 Workspace 可以放一个 App，也可以放多个 App；
-- App 通过 Workspace API 读写这个 Workspace；
-- App 决定 Workspace 分配给哪个用户，或同时分配给哪些用户；
-- App 调用 Bot 时传入 Workspace ID，平台校验该 Workspace 属于当前 Yao Secret 对应的 Builder 用户；
+- Yao Secret 代表 App 身份，不代表 Builder 用户，也不赋予任何 Workspace 所有权；
+- App 不拥有、不创建、不复用 Workspace，平台不向 App 提供 Workspace API；
+- 平台按 Bot 的 runtime ensure 与调用入口创建或复用 Session 与 Workspace；
+- App 只收发会话消息与工具结果，不能传 Workspace ID，也不能读取 Bot Workspace 的文件；
+- 需要区分终端用户时，App 提供稳定的接收者标识，由平台映射为 Bot 接收者并隔离其 Workspace；
 - App 不需要传递终端用户的 OAuth Token；
 - Bot 必须在 App Manifest 中声明为可调用；
 - 同一信任域内优先走内部 gRPC，标准接口作为回退。
@@ -235,7 +250,7 @@ App 与 Bot 在同一部署或同一信任边界内时，可以走内部 gRPC �
 - gRPC 是传输方式，不改变数据归属与权限边界；
 - 不经过公网 Tunnel，减少一跳，降低延迟；
 - 仍需要服务间身份校验，使用 Yao Secret；不附带终端用户 OAuth Token；
-- 不能因为走内部通道就跳过 Workspace 与租户校验；
+- 不能因为走内部通道就跳过 Bot 运行绑定与租户校验；
 - 外部用户仍然通过平台的 Tunnel 或 Bot 标准界面进入；
 - 内部 gRPC 不可用时，可以回退到标准 MCP、WebSocket 或 SSE。
 
@@ -245,7 +260,7 @@ App 与 Bot 在同一部署或同一信任边界内时，可以走内部 gRPC �
 | --- | --- | --- | --- |
 | App URL | 用户或匿名 | App 自己决定，平台不强制 Yao 登录 | App 自己管理 |
 | Bot 标准界面 | Yao 用户 | Yao 账号登录 | 平台按用户创建 |
-| App → Yao Open API | Builder 用户 | Yao Secret | Builder Workspace |
+| App → Yao Open API | App | Yao Secret | 不适用；Bot 调用由平台按入口与接收者创建 |
 | Bot → App | App | App 自己的鉴权，可选接受 Yao JWT | App 自己管理 |
 
 ### Bot 标准界面
@@ -264,18 +279,17 @@ App 与 Bot 在同一部署或同一信任边界内时，可以走内部 gRPC �
 外部系统通过 API 访问 Bot 时：
 
 - App 调用使用 Yao Secret，请求直接携带；
-- Yao Secret 代表 Builder 用户；
-- Workspace 属于 Builder 用户，不是 App 专属 Workspace；
-- App 通过 Workspace API 读写这个 Workspace；
-- App 传入 Workspace ID，平台校验该 Workspace 属于当前 Builder 用户；
-- App 自己决定 Workspace 分配给哪个用户，或同时分配给哪些用户；
+- Yao Secret 代表 App 身份，不代表 Builder 用户；
+- App 不拥有 Workspace，平台按 Bot 入口与接收者创建或复用 Workspace；
+- App 不传 Workspace ID，不调用 Workspace API，也不读取 Bot Workspace 的文件；
+- App 只负责提供稳定的接收者标识，用于平台隔离不同终端用户的 Session 与 Workspace；
 - App 不需要传递终端用户的 OAuth Token。
 
-App 与终端用户之间的身份映射和工作区分配由 App 自己处理。
+App 与终端用户之间的身份映射由 App 自己处理；Bot 运行空间由平台按接收者创建与隔离。
 
 ### App
 
-App 的用户体系、Workspace 分配与终端用户身份由 App 自己处理，Yao 不参与。
+App 的用户体系、自有数据与终端用户身份由 App 自己处理，Yao 不参与；Bot 运行空间由平台分配，App 不参与。
 
 App 可以：
 
@@ -285,14 +299,14 @@ App 可以：
 - 用自己的文件系统或对象存储保存文件；
 - 在自己的数据上实现隔离。
 
-平台不把 Builder Workspace 当作 App 的用户数据区。
+平台不把 Bot Workspace 当作 App 的用户数据区，也不把 App 数据写入 Bot Workspace。
 
 ## 6. 数据归属
 
 | 数据 | 归属 | 隔离责任 |
 | --- | --- | --- |
 | App 数据库、App 文件、App 用户数据 | App | App 自己 |
-| Bot API 使用的 Builder Workspace | Builder 用户 | Builder 用户；App 只负责选择 |
+| Bot API 创建的 Workspace | 平台 | 平台按接收者隔离；App 不可读写 |
 | Bot 标准界面创建的 Workspace | 平台 | 平台按 Yao 用户隔离 |
 | Bot Session | 平台 | 平台 |
 | Bot 调用的 App MCP 结果 | App | App |
@@ -318,9 +332,10 @@ App 与 Bot 之间不共享数据目录。需要交换数据时，通过 MCP 工
 - App 是否把 Builder 凭据当作外部用户身份；
 - Bot 是否直接读取 App 数据库或文件；
 - App 是否直接读取 Bot Workspace；
-- API 指定的 Workspace 是否属于当前 Builder 用户；
-- App 是否自行决定了 Workspace 的用户分配与审计；
-- Bot 标准界面与 API 是否区分了 Yao 用户 Workspace 与 Builder Workspace；
+- API 是否试图让 App 传入 Workspace ID 或调用 Workspace API；
+- App 是否试图自行分配 Bot Workspace；
+- Bot API 是否按入口与接收者创建独立 Workspace，且 App 无法读取；
+- 平台管理员是否只能查看 Workspace 元数据，且每次查看都有审计记录；
 - Yao JWT 是否只用于 Bot 调用 App，而没有混入 App 调用 Bot。
 
 Yao Secret 的轮换与吊销使用 Yao OpenAPI 的标准接口。

@@ -31,6 +31,8 @@ Bot
   publish
 ```
 
+Workspace 与 Computer 不在 Bot 定义中，也不是 Bot 创建时写死的字段。它们是运行时绑定：打开 Bots 模块或分享服务时，由 ensure 按规则检查、创建并绑定。
+
 Bot 与 Agent 的关系：
 
 - Agent 是执行角色；
@@ -71,6 +73,17 @@ Runner 与 LLM Provider 都是 Bot 的可选策略，不是固定字段。大多
 
 Bot 是可复用定义，不是每种场景都拥有自己的 Session。按 Session 的归属分三种：
 
+### 3.0 运行时 ensure
+
+Workspace 与 Computer 不写进 Bot 定义。Bots 模块、分享服务或首次创建默认会话时，由 ensure 按规则检查并绑定：
+
+1. 按 `bot_id`、绑定模式与接收者查询已有绑定；存在且资源可用时直接复用。
+2. 没有绑定时，按 Workspace 规则创建或复用空间，按 Runner、电脑池、配额与可用性选择 Computer。
+3. 资源就绪后写入绑定，再创建 Session；电脑不可用时返回明确错误，不产生半个绑定。
+4. ensure 是幂等的；同一个 Bot 的 Bots 默认会话复用自己的 Workspace 与 Computer，分享服务按接收者分别 ensure。
+5. 绑定只用于运行时定位，不在 Chatbox 中显示或切换；Bot 定义更新不改变已有绑定。
+6. Bot 归档、删除或所有权转移不自动重建或删除默认 Workspace；按 Bot 与 Workspace 的生命周期策略处理。
+
 | 场景 | Session 归属 | Workspace | Bot 可切换 | 说明 |
 | --- | --- | --- | --- | --- |
 | New Session | 用户创建的 Session | 用户选择 | 可切换（Chatbox Settings） | Bot 作为执行者，Session 是主对象 |
@@ -107,7 +120,7 @@ Bots 模块中的 Bot 是产品化入口，一个 Bot 绑定一个持久会话�
 - 主 Agent 固定为该 Bot，不显示选择器；
 - Runner 在 Bot 默认会话创建时从清单与节点可用 Runner 的交集中确定，之后固定；交集为空时阻止创建；
 - LLM Provider 与模型由 Bot 提供默认值，可在会话内切换；
-- Workspace 与 Computer 由系统分配，不跟随 New Session 选择，也不在 Chatbox 中显示；
+- Workspace 与 Computer 由运行时 ensure 按规则检查并绑定，不跟随 New Session 选择，也不在 Chatbox 中显示；
 - 右上角只有一个固定的「工作空间」入口，点击后在右侧 Browser 面板打开这个 Bot 默认空间的文件，不显示其他 Workspace、切换器或管理页；
 - Bot 的 Vault access policy 范围内的引用可在默认会话中选择与切换，密钥值不展示；
 - Bot 可以调用 A2A 专家，也可以被其他 Agent 通过 A2A 调用。
@@ -121,8 +134,9 @@ Bots 首页与 Session 详情的 Workspace 入口都在右侧 Browser 面板打�
 分享出去的 Bot 是服务化的 Bot 定义，不是共享同一个会话。
 
 - 每个外部用户访问时，创建自己的 Session，并从 Runner 清单与可用节点的交集中确定 Runner；交集为空时服务不可用；
-- 平台为每个外部用户创建或复用其 Workspace，用户会话不在 Bot 的 Builder Workspace 中运行；
+- 平台为每个外部用户创建独立 Workspace，用户会话不在 Bot 的 Builder Workspace 中运行；同一接收者再次进入时复用其 Workspace；
 - Bot 定义共享，Session、Workspace 与上下文隔离；
+- 分享出去的是 Bot 能力与服务定义，不是发布者的默认 Workspace、会话或文件；发布者不能读取或接管接收者的 Session 与 Workspace；
 - 用户不能切换 Bot 或 Runner；LLM Provider 可以切换，与主智能体解耦；
 - Bot 的 Vault access policy 由运行侧执行，外部用户不能读取密钥值，也不能超出 policy 范围；
 - 外部用户的数据不写回 Bot 的 Builder Workspace。

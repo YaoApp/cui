@@ -83,13 +83,17 @@ Chatbox 的高级设置里提供 **Vault access** 选择器：
 
 ## 5. 与 App 的关系
 
-App 跟随绑定的 Workspace 使用一个 Vault，在发布时声明需要的密钥引用：
+App 自己管理数据与鉴权。App 通过 Yao 提供的 Vault API 使用获授权的密钥，平台不把密钥挂载进 App 的 Workspace，也不直接注入 App 的进程环境。
 
-- 运行时由平台注入，不写进 App 代码、镜像或环境变量明文；
-- App 声明的是分组或单条密钥引用，不声明整个 Vault；
+- Vault 授权只认 App ID：App 发布时只需要一个稳定的 App ID；授权、审计与撤销都按 App ID 记录，不按 Workspace ID 绑定；
+- App 使用自己的 Yao Secret 调用 Vault API，平台校验 App 身份、App ID 与授权范围；
+- 具体授权范围在 Vault 中按 App ID 配置，不写进发布记录；
+- 密钥值不写进 App 代码、镜像、环境变量、Workspace 文件或发布记录；
 - App 只能读取被授权的引用；
 - App 分享出去时，接收者不会拿到所有者的密钥；
 - 撤销 App 授权后，入口保留，但依赖该密钥的操作失败并提示。
+
+发布记录中的 `workspace_id` 只用于定位部署记录，不能作为 App 读取 Workspace 密钥或文件的凭据，也不能替代 Vault 的 App ID 授权。
 
 ## 6. 界面
 

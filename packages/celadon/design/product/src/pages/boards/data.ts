@@ -1,7 +1,8 @@
 import type { IconId } from '../../../../app/src/platform/icons/icon-ids'
 
 export type BoardTone = 'brand' | 'success' | 'warning' | 'danger' | 'neutral'
-export type BoardStatus = 'pending' | 'running' | 'waiting' | 'completed' | 'failed'
+export type BoardRunStatus = 'pending' | 'queued' | 'running' | 'completed' | 'failed' | 'stopped' | 'cancelled'
+export type BoardStatus = BoardRunStatus | 'waiting'
 export type BoardFilter = 'all' | BoardStatus
 
 export type BoardMessage = {
@@ -75,10 +76,13 @@ export type BoardSummary = {
 
 export const statusMeta: Record<BoardStatus, { label: string; icon: IconId; tone: BoardTone }> = {
   pending: { label: '待开始', icon: 'i-state-queued', tone: 'neutral' },
+  queued: { label: '已排队', icon: 'i-state-queued', tone: 'neutral' },
   running: { label: '运行中', icon: 'i-state-loading', tone: 'brand' },
   waiting: { label: '等待输入', icon: 'i-state-warning', tone: 'warning' },
   completed: { label: '已完成', icon: 'i-check', tone: 'success' },
   failed: { label: '失败', icon: 'i-state-error', tone: 'danger' },
+  stopped: { label: '已停止', icon: 'i-state-info', tone: 'neutral' },
+  cancelled: { label: '已取消', icon: 'i-state-error', tone: 'danger' },
 }
 
 export const boards: Record<string, BoardData> = {

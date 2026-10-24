@@ -17,7 +17,6 @@ Apps 列表是造与用的同一个入口。
 | 描述 | 这个应用解决什么问题 |
 | 分类 | Design、Commerce、Education 等 |
 | 界面形态 | Canvas、Gallery、Print 等，帮助用户预期打开后的界面 |
-| 资源 | 绑定的 Workspace |
 | 状态 | Ready、Draft；运行状态不进入列表卡片 |
 | 时间 | 最近更新时间 |
 | 入口 | Open，点击进入独占详情 |
@@ -41,11 +40,11 @@ App 从列表或导航打开时进入独占页。
 
 ## 3. 分享
 
-每个 App 顶栏提供分享入口。分享的是应用入口，不共享 Builder 的 Workspace、Vault 或运行数据。
+每个 App 顶栏提供分享入口。分享的是应用入口，不共享发布者的 App 数据、Vault 或运行记录。
 
 分享窗包含：
 
-- 可见范围：Team 或 Anyone with link；
+- 可见范围：Private、Team 或 Anyone with link；Private 仅发布者可见，Team 对当前团队成员可见，Link 对拿到链接的人可见；
 - 入口链接；
 - 复制链接；
 - 只读入口说明。

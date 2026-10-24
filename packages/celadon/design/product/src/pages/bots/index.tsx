@@ -36,7 +36,7 @@ export function BotsPage({ botId }: { botId?: string }) {
         id,
         title,
         prompt,
-        workspace: 'Research',
+        workspace: bot?.workspace ?? 'Research Notes',
         computer: 'Mac mini',
         model: 'DeepSeek Flash 4.1',
         effort: 'Balanced',

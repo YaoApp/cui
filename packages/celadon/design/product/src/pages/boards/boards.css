@@ -1221,28 +1221,104 @@
   border-color: var(--text-primary);
 }
 
-.board-column-preview {
+.board-create-dialog {
+  inline-size: min(620px, 100%);
+}
+
+.board-template-group {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  gap: var(--spacing-8);
+}
+
+.board-template-label {
+  display: flex;
+  align-items: baseline;
   justify-content: space-between;
   gap: var(--spacing-8);
-  padding: var(--spacing-8);
-  border-radius: var(--radius-small);
-  background: var(--background-field);
+  color: var(--text-secondary);
+  font-size: var(--font-size-11);
+}
+
+.board-template-label small {
   color: var(--text-tertiary);
   font-size: var(--font-size-11);
 }
 
-.board-column-preview > div {
-  display: flex;
-  gap: var(--spacing-4);
+.board-template-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--spacing-8);
 }
 
-.board-column-preview > div span {
-  padding: 1px var(--spacing-4);
+.board-template {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  min-inline-size: 0;
+  padding: var(--spacing-8);
+  border: var(--border-width) solid var(--border-subtle);
   border-radius: var(--radius-small);
   background: var(--background-surface);
   color: var(--text-secondary);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.board-template:hover {
+  border-color: var(--border-hover-strong);
+  background: var(--background-hover);
+}
+
+.board-template:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 1px;
+}
+
+.board-template.is-selected {
+  border-color: var(--brand);
+  background: var(--background-selected);
+  color: var(--text-primary);
+}
+
+.board-template-head {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+  min-inline-size: 0;
+}
+
+.board-template-head strong {
+  overflow: hidden;
+  font-size: var(--font-size-12);
+  font-weight: var(--font-weight-medium);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.board-template-english {
+  overflow: hidden;
+  color: var(--text-tertiary);
+  font-size: var(--font-size-11);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.board-template-columns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-4);
+  padding-block-start: var(--spacing-4);
+}
+
+.board-template-columns > span {
+  padding: 1px var(--spacing-4);
+  border-radius: var(--radius-small);
+  background: var(--background-field);
+  color: var(--text-secondary);
+  font-size: var(--font-size-11);
+  white-space: nowrap;
 }
 
 .board-dialog-actions {

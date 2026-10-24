@@ -19,10 +19,70 @@ import './boards.css'
 const FILTERS: Array<{ id: BoardFilter; label: string }> = [
   { id: 'all', label: '全部' },
   { id: 'pending', label: '待开始' },
+  { id: 'queued', label: '已排队' },
   { id: 'running', label: '运行中' },
-  { id: 'waiting', label: '等待中' },
+  { id: 'waiting', label: '等待输入' },
   { id: 'completed', label: '已完成' },
   { id: 'failed', label: '失败' },
+  { id: 'stopped', label: '已停止' },
+  { id: 'cancelled', label: '已取消' },
+]
+
+type BoardTemplateId = 'research' | 'content' | 'delivery'
+
+type BoardTemplate = {
+  id: BoardTemplateId
+  title: string
+  english: string
+  description: string
+  icon: IconId
+  tone: BoardTone
+  columns: Array<{ title: string; icon: IconId; tone: BoardTone }>
+}
+
+const BOARD_TEMPLATES: BoardTemplate[] = [
+  {
+    id: 'research',
+    title: '市场调研',
+    english: 'Market research',
+    description: '从行业研究、竞品分析到用户洞察',
+    icon: 'i-search',
+    tone: 'brand',
+    columns: [
+      { title: '行业研究', icon: 'i-search', tone: 'brand' },
+      { title: '竞品分析', icon: 'i-tasks', tone: 'warning' },
+      { title: '用户访谈', icon: 'i-bot', tone: 'success' },
+      { title: '数据洞察', icon: 'i-book', tone: 'danger' },
+    ],
+  },
+  {
+    id: 'content',
+    title: '内容运营',
+    english: 'Content operations',
+    description: '从内容策划、文案制作到渠道发布',
+    icon: 'i-book',
+    tone: 'warning',
+    columns: [
+      { title: '内容策划', icon: 'i-book', tone: 'warning' },
+      { title: '文案撰写', icon: 'i-tasks', tone: 'brand' },
+      { title: '设计制作', icon: 'i-file-code', tone: 'brand' },
+      { title: '渠道发布', icon: 'i-mail', tone: 'success' },
+    ],
+  },
+  {
+    id: 'delivery',
+    title: '客户交付',
+    english: 'Customer delivery',
+    description: '从需求澄清、方案设计到实施与回访',
+    icon: 'i-bot',
+    tone: 'success',
+    columns: [
+      { title: '需求澄清', icon: 'i-search', tone: 'warning' },
+      { title: '方案设计', icon: 'i-tasks', tone: 'brand' },
+      { title: '实施交付', icon: 'i-folder', tone: 'brand' },
+      { title: '客户成功', icon: 'i-bot', tone: 'success' },
+    ],
+  },
 ]
 
 type TaskTab = 'chat' | 'info' | 'files' | 'run'
@@ -69,20 +129,20 @@ export function BoardsPage() {
     count: item.tasks.length + (createdTasks[item.id]?.length ?? 0),
   }))
 
-  function addBoard(input: { title: string; english: string; icon: IconId; tone: BoardTone }) {
+  function addBoard(input: { title: string; english: string; icon: IconId; tone: BoardTone; templateId: BoardTemplateId }) {
     const id = `board-${Date.now()}`
-    const columns: BoardColumn[] = [
-      { id: `${id}-todo`, title: '待办', icon: 'i-state-queued', tone: 'neutral' },
-      { id: `${id}-doing`, title: '进行中', icon: 'i-state-loading', tone: 'brand' },
-      { id: `${id}-done`, title: '已完成', icon: 'i-check', tone: 'success' },
-    ]
+    const template = BOARD_TEMPLATES.find((item) => item.id === input.templateId) ?? BOARD_TEMPLATES[0]
+    const columns: BoardColumn[] = template.columns.map((column, index) => ({
+      ...column,
+      id: `${id}-column-${index}`,
+    }))
     const next: BoardData = {
       id,
       title: input.title,
       english: input.english,
       icon: input.icon,
       tone: input.tone,
-      description: '新建看板',
+      description: template.description,
       updatedAt: '刚刚',
       columns,
       tasks: [],
@@ -619,14 +679,23 @@ function CreateBoardDialog({
   onCreate,
 }: {
   onClose: () => void
-  onCreate: (input: { title: string; english: string; icon: IconId; tone: BoardTone }) => void
+  onCreate: (input: { title: string; english: string; icon: IconId; tone: BoardTone; templateId: BoardTemplateId }) => void
 }) {
-  const [title, setTitle] = useState('')
-  const [english, setEnglish] = useState('')
-  const [icon, setIcon] = useState<IconId>('i-board')
+  const [templateId, setTemplateId] = useState<BoardTemplateId>('research')
+  const [title, setTitle] = useState('市场调研')
+  const [english, setEnglish] = useState('Market research')
+  const [icon, setIcon] = useState<IconId>('i-search')
   const [tone, setTone] = useState<BoardTone>('brand')
 
   const canCreate = useMemo(() => title.trim().length > 0, [title])
+
+  function chooseTemplate(template: BoardTemplate) {
+    setTemplateId(template.id)
+    setTitle(template.title)
+    setEnglish(template.english)
+    setIcon(template.icon)
+    setTone(template.tone)
+  }
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -643,7 +712,7 @@ function CreateBoardDialog({
     <div className="board-dialog-backdrop" role="presentation" onMouseDown={(event) => {
       if (event.target === event.currentTarget) onClose()
     }}>
-      <section className="board-dialog" role="dialog" aria-modal="true" aria-labelledby="create-board-title">
+      <section className="board-dialog board-create-dialog" role="dialog" aria-modal="true" aria-labelledby="create-board-title">
         <header className="board-dialog-head">
           <div>
             <span className="boards-eyebrow">NEW BOARD</span>
@@ -653,9 +722,35 @@ function CreateBoardDialog({
             <Icon name="i-act-close" size={16} />
           </button>
         </header>
+        <div className="board-template-group">
+          <div className="board-template-label">
+            <span>场景模板</span>
+            <small>列是工作域，不是运行状态</small>
+          </div>
+          <div className="board-template-grid" role="group" aria-label="选择看板模板">
+            {BOARD_TEMPLATES.map((item) => (
+              <button
+                className={templateId === item.id ? 'board-template is-selected' : 'board-template'}
+                type="button"
+                aria-pressed={templateId === item.id}
+                key={item.id}
+                onClick={() => chooseTemplate(item)}
+              >
+                <span className="board-template-head">
+                  <Icon name={item.icon} size={14} />
+                  <strong>{item.title}</strong>
+                </span>
+                <span className="board-template-english">{item.english}</span>
+                <span className="board-template-columns">
+                  {item.columns.map((column) => <span key={column.title}>{column.title}</span>)}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
         <label className="board-field">
           <span>名称</span>
-          <input value={title} autoFocus placeholder="例如：内容运营" onChange={(event) => setTitle(event.target.value)} />
+          <input value={title} autoFocus placeholder="例如：市场调研" onChange={(event) => setTitle(event.target.value)} />
         </label>
         <label className="board-field">
           <span>英文名</span>
@@ -693,21 +788,13 @@ function CreateBoardDialog({
             ))}
           </div>
         </div>
-        <div className="board-column-preview">
-          <span>默认列</span>
-          <div>
-            <span>待办</span>
-            <span>进行中</span>
-            <span>已完成</span>
-          </div>
-        </div>
         <footer className="board-dialog-actions">
           <button className="board-dialog-cancel" type="button" onClick={onClose}>取消</button>
           <button
             className="board-dialog-create"
             type="button"
             disabled={!canCreate}
-            onClick={() => onCreate({ title: title.trim(), english: english.trim() || 'New board', icon, tone })}
+            onClick={() => onCreate({ title: title.trim(), english: english.trim() || 'New board', icon, tone, templateId })}
           >
             创建看板
           </button>

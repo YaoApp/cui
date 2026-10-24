@@ -1,6 +1,6 @@
 import type { IconId } from '../../../../app/src/platform/icons/icon-ids'
 
-export type WorkspaceScope = 'private' | 'team'
+export type WorkspaceScope = 'private' | 'team' | 'members'
 export type WorkspaceRole = 'owner' | 'admin' | 'editor' | 'viewer'
 export type WorkspaceTab = 'files' | 'access' | 'apps' | 'settings'
 export type WorkspaceTone = 'brand' | 'success' | 'warning' | 'neutral'
@@ -58,7 +58,15 @@ export const roleMeta: Record<WorkspaceRole, { label: string; tone: WorkspaceTon
 export const scopeMeta: Record<WorkspaceScope, { label: string; description: string; icon: IconId }> = {
   private: { label: 'Private', description: '只有自己可见', icon: 'i-lock' },
   team: { label: 'Team', description: '团队成员可见', icon: 'i-nav-team' },
+  members: { label: 'Specified members', description: '指定成员可见', icon: 'i-nav-user' },
 }
+
+export const workspaceMemberCandidates: WorkspaceMember[] = [
+  { id: 'emma', name: 'Emma Lin', email: 'emma@yaoagents.com', role: 'viewer' },
+  { id: 'lin', name: 'Lin Chen', email: 'lin@yaoagents.com', role: 'viewer' },
+  { id: 'kai', name: 'Kai Wu', email: 'kai@yaoagents.com', role: 'viewer' },
+  { id: 'noah', name: 'Noah Park', email: 'noah@yaoagents.com', role: 'viewer' },
+]
 
 export const computers = [
   { id: 'mac-studio', name: 'Mac Studio · 研究机', os: 'macOS 15.1' },
@@ -483,6 +491,25 @@ export const workspaceSeed: Workspace[] = [
         tone: 'success',
       },
     ],
+  },
+  {
+    id: 'client-brief',
+    name: 'Client Brief',
+    description: 'Client scope, milestones and approval notes for the current engagement.',
+    scope: 'members',
+    computerId: 'mac-studio',
+    computerName: 'Mac Studio · 研究机',
+    computerOs: 'macOS 15.1',
+    role: 'owner',
+    createdAt: '2026-10-08',
+    updatedAt: '36 分钟前',
+    files: researchFiles,
+    members: [
+      { id: 'wren', name: 'Wren', email: 'wren@yaoagents.com', role: 'owner' },
+      { id: 'emma', name: 'Emma Lin', email: 'emma@yaoagents.com', role: 'editor' },
+      { id: 'kai', name: 'Kai Wu', email: 'kai@yaoagents.com', role: 'viewer' },
+    ],
+    apps: [],
   },
 ]
 

@@ -13,7 +13,7 @@ export type BotProfile = (typeof bots)[number] & {
 const details: Record<string, Omit<BotProfile, keyof (typeof bots)[number]>> = {
   researcher: {
     welcome: '我是研究员。给我一个问题，我会找资料、追来源、核对说法，再给出带引用的结论。',
-    workspace: 'Research',
+    workspace: 'Research Notes',
     workspaceId: 'research-notes',
     model: 'DeepSeek Flash 4.1',
     effort: 'Balanced',
@@ -22,7 +22,7 @@ const details: Record<string, Omit<BotProfile, keyof (typeof bots)[number]>> = {
   },
   analyst: {
     welcome: '我是分析师。把数据或问题交给我，我会找异常、做图表，再给出能执行的判断。',
-    workspace: 'Data',
+    workspace: 'Automation Lab',
     workspaceId: 'automation-lab',
     model: 'DeepSeek Pro 4.1',
     effort: 'Deep',
@@ -31,7 +31,7 @@ const details: Record<string, Omit<BotProfile, keyof (typeof bots)[number]>> = {
   },
   editor: {
     welcome: '我是编辑。把草稿交给我，我会收紧结构、统一语气，并检查事实与表达。',
-    workspace: 'Editorial',
+    workspace: 'Brand Launch',
     workspaceId: 'brand-launch',
     model: 'Claude Sonnet 4.5',
     effort: 'Balanced',

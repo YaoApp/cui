@@ -41,7 +41,7 @@ Chatbox
 Workspace 决定 Computer，并在会话开始前确定。
 
 - 新会话的 Chatbox 底部左侧、模型与思考强度合并选择左边选择一个 Workspace，按 Computer 分组，组名显示电脑与在线状态。
-- 每个选项显示 Workspace 名称与 Private / Team 作用域。
+- 每个选项显示 Workspace 名称与 Private / Team / Specified members 作用域。
 - 只列出当前用户可访问的 Workspace。
 - 选中 Workspace 即确定绑定的 Computer，不需要再选一次。
 - 会话开始后主线 的 Workspace 固定，Chatbox 不提供切换入口。

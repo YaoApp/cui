@@ -1,6 +1,6 @@
 # 00 · 概要设计
 
-> 状态：草案 · 2026-10-19
+> 状态：草案 · 2026-10-24
 > 本阶段只定义一级模块；模块功能与页面后续逐项展开。
 
 ## 1. 产品
@@ -25,17 +25,17 @@
 
 术语约定：模块名用「智能体」，对外说明用「数字员工」；「机器人」只指聊天机器人，不作为本模块名。
 
-Bots 是上手即用的个人 Agent 入口。系统在创建时分配专属 Workspace 与 Computer，Chatbox 不显示 Workspace 选择，右上角只有一个固定的「工作空间」入口，点击后在右侧 Browser 面板打开该 Bot 默认空间的文件。复杂的 Build 构建放在 New Session 的高级路径，不进入 Bots 首页。
+Bots 是上手即用的个人 Agent 入口。打开 Bot 或首次创建默认会话时，运行时 ensure 会按规则检查并绑定专属 Workspace 与 Computer；Chatbox 不显示 Workspace 选择，右上角只有一个固定的「工作空间」入口，点击后在右侧 Browser 面板打开该 Bot 默认空间的文件。复杂的 Build 构建放在 New Session 的高级路径，不进入 Bots 首页。
 
-App 是一个无壳能力内核加两套寻址面：人面与 Agent 面。发布时绑定 Workspace 与 Computer，只暴露指定的 App 域，后端用文件系统隔离。Bot 是固定形态的 App，没有独立人面，共享出去是一个 chat 入口。分享入口通过 Tao 提供 HTTPS、hash 子域、`yao.run` 短链与自定义域名，可用 Ding 或 OTP 收口。Workspace 只有自己可见与团队可见两档，不提供分享；单文件可复制到临时分享池，到期清理。
+App 是独立 daemon，自己管理数据、数据库、文件与鉴权。发布时使用 Yao 发布的 Tools，在 Workspace 写入一条部署记录，至少包含 `workspace_id`、`pid` 与 `daemon`；记录与真实运行实例分离，Workspace 只承担部署索引，不承载 App 数据，也不向 App 挂载文件系统。Bot 是固定形态的 App，没有独立人面，共享出去是一个 chat 入口；每个接收者使用自己的 Session 与 Workspace，发布者不读取接收者数据。分享入口通过 Tao 提供 HTTPS、hash 子域、`yao.run` 短链与自定义域名，可用 Ding 或 OTP 收口。Workspace 提供 Private、Team、Specified members 三档作用域，不提供公开分享；单文件可复制到临时分享池，到期清理。
 
 全局能力：搜索、通知、账户、设置、主题与语言。共享与隔离是跨模块能力，规则见 [`notes/sharing.md`](notes/sharing.md)。
 
-Vault 与 Workspace、Computer 同级，是保护密钥、令牌与凭据的跨模块能力，入口放在 Settings 的二级。一个所有者一个 Vault，个人与团队各一个；会话按分组或单条密钥显式多选授权，不自动使用整个 Vault，规则见 [`notes/vault.md`](notes/vault.md)。
+Vault 与 Workspace、Computer 同级，是保护密钥、令牌与凭据的跨模块能力，入口放在 Settings 的二级。一个所有者一个 Vault，个人与团队各一个；会话按分组或单条密钥显式多选授权，不自动使用整个 Vault。App 使用自己的 Yao Secret 调用 Vault API，Vault 授权按 App ID 记录，发布时只需要 App ID，规则见 [`notes/vault.md`](notes/vault.md)。
 
-电脑的池、申请与个人节点绑定见 [`notes/computers.md`](notes/computers.md)。用户版原型入口为 `/computers`，默认展示电脑清单，提供「接入本机」与「接入云电脑」两个操作，支持仅自己使用或团队可用的共享方式；接入云电脑仅 Team Owner 可操作，付费云电脑使用积分支付，余额不足时引导充值，支付后直接开通。审批申请会先加入清单并显示审批中，详情可查看进度，管理后台通过后直接转为可用；审批中的申请可以撤销。系统管理员的池配置与审批后台独立于用户版。
+电脑的池、申请与个人节点绑定见 [`notes/computers.md`](notes/computers.md)。用户版原型入口为 `/computers`，默认展示电脑清单，提供「接入本机」与「接入云电脑」两个操作，支持仅自己使用、团队可用与指定成员三种共享方式；接入云电脑仅 Team Owner 可操作，云电脑开通由平台管理员审批，团队内共享由 Team Owner 配置；个人电脑共享给团队或指定成员由 Team Owner 审批。Team Owner 是用户侧角色，负责团队成员配额、共享、支付与撤销。付费云电脑使用积分支付，余额不足时引导充值，支付后直接开通。审批申请会先加入清单并显示审批中，详情可查看进度，平台管理员在独立管理后台审批通过后直接转为可用；审批中的申请可以撤销。系统管理员的池配置与审批后台独立于用户版，Team Owner 与 Team Admin 不能进入审批后台。
 
-Workspace 与 Computer 的归属、Private / Team 作用域与读写角色见 [`notes/workspace.md`](notes/workspace.md)。用户版原型入口为 `/workspaces`，默认显示全部工作空间概览，左栏按我的工作空间与团队工作空间分组，详情包含文件、成员、应用与设置；文件预览在内容区独占打开，也可在 Browser 打开并单独切换目录；Git 只跟随目录显示状态；单文件通过分享链接交付。
+Workspace 与 Computer 的归属、Private / Team / Specified members 三档作用域、角色与每次请求的实时校验见 [`notes/permissions.md`](notes/permissions.md) 与 [`notes/workspace.md`](notes/workspace.md)。用户版原型入口为 `/workspaces`，默认显示全部工作空间概览，左栏按我的工作空间与团队工作空间分组，详情包含文件、成员、应用与设置；文件预览在内容区独占打开，也可在 Browser 打开并单独切换目录；Git 只跟随目录显示状态；单文件通过分享链接交付。
 
 ## 3. 新会话
 
@@ -49,7 +49,7 @@ Workspace 与 Computer 的归属、Private / Team 作用域与读写角色见 [`
 - **Chatbox**：意图输入、语音输入、Workspace、附件、模型与思考强度合并选择、高级设置。新会话的 Workspace 选择在底部左侧，其后是合并选择与设置；Workspace 决定 Computer，两者合并在一个按电脑分组的选择器里。合并选择的每个选项同时带模型与档位，选中即同时改变两者。右侧空输入时是附件、语音输入与 Voice Chat，输入文字后换成发送。高级设置包含主智能体、Models、Computer 生命周期、看板与列、Vault 授权与工具审批。规则见 [`notes/chatbox.md`](notes/chatbox.md)。运行中的引导、排队、打断、语音/视频通话与主动联络规则见 [`notes/realtime-outreach.md`](notes/realtime-outreach.md)。
 - **推荐**：Apps 与 Bots 列表立即出现在首屏。点击 App 打开独立 App 界面；点击 Bot 选中 chat 入口。
 
-Apps 模块有列表 `/apps` 与详情 `/apps/:id`。详情以独占页打开，应用自己决定页面、导航与状态；外层只保留最小化与关闭胶囊。列表展示应用身份、分类、界面形态、Workspace、状态与更新时间，并提供新建入口。规则见 [`notes/apps.md`](notes/apps.md)。
+Apps 模块有列表 `/apps` 与详情 `/apps/:id`。详情以独占页打开，应用自己决定页面、导航与状态；外层只保留最小化与关闭胶囊。列表展示应用身份、分类、界面形态、状态与更新时间，并提供新建入口。规则见 [`notes/apps.md`](notes/apps.md)。
 
 Apps 列表可以挂载官方外部 App、第三方外部 App 与 Builder 内部 App。App 用 Manifest 声明端口、域名、可调用 Bots、对外 Skills 与可见范围；平台不要求 App 运行在 Yao 上。规则见 [`notes/service.md`](notes/service.md)。
 
@@ -71,9 +71,9 @@ Board 是逻辑容器，收纳一组相关会话。Kanban 是 Board 的默认视
 - 列：`POST/PUT/DELETE /v1/agent/boards/:board_id/columns...`，支持排序与折叠。
 - 任务：`GET/POST /v1/agent/tasks`，`PUT /v1/agent/tasks/:chat_id/move`。
 
-Board 的列是工作域，例如运营、产品、调研、售前，不是运行状态。每张卡片是 `task`，带 `chat_id`，对应一次会话；运行状态由 `run_status` 单独表示，取值为 `pending`、`queued`、`running`、`completed`、`failed`、`stopped`、`cancelled`。这套“列是领域、状态由会话推导”的结构就是 Board 的特色。
+Board 的列是工作域，例如运营、产品、调研、售前，不是运行状态。每张卡片是 `task`，带 `chat_id`，对应一次会话；运行状态由 `run_status` 单独表示，取值为 `pending`、`queued`、`running`、`completed`、`failed`、`stopped`、`cancelled`。「等待输入」是 `running` 下的展示状态，不写入 `run_status`。这套“列是领域、状态由会话推导”的结构就是 Board 的特色。
 
-原型入口为 `/boards`。左侧二级导航切换看板，内容区按列展示任务卡片；点击卡片从右侧打开任务详情，包含会话、信息、文件与运行四个分区。看板创建、任务创建、状态筛选、搜索与看板切换均可操作。规则见 [`notes/boards.md`](notes/boards.md)。
+原型入口为 `/boards`。左侧二级导航切换看板，内容区按列展示任务卡片；点击卡片在右侧 Browser 打开任务详情，任务本身是 Browser 的 tab item，包含会话、信息、文件与运行四个分区。看板创建、任务创建、状态筛选、搜索与看板切换均可操作。规则见 [`notes/boards.md`](notes/boards.md)。
 
 ## 5. Session Branches（后续）
 
