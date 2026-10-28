@@ -1,0 +1,14 @@
+{
+  "chatbox.send": "送信",
+  "chatbox.stop": "中止",
+  "chatbox.attach": "添付ファイルを追加",
+  "chatbox.removeAttachment": "{{name}} を削除",
+  "chatbox.mic": "音声入力",
+  "chatbox.voice": "音声チャット",
+  "chatbox.settings": "セッション設定",
+  "chatbox.placeholder": "タスクを説明してください…",
+  "chatbox.listening": "聞き取り中…",
+  "chatbox.busy": "アシスタントが応答中です",
+  "chatbox.attachments": "添付ファイル",
+  "chatbox.label": "チャット入力欄"
+}

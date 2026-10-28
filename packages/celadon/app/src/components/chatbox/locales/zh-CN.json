@@ -1,0 +1,14 @@
+{
+  "chatbox.send": "发送",
+  "chatbox.stop": "停止",
+  "chatbox.attach": "添加附件",
+  "chatbox.removeAttachment": "移除 {{name}}",
+  "chatbox.mic": "语音输入",
+  "chatbox.voice": "语音对话",
+  "chatbox.settings": "会话设置",
+  "chatbox.placeholder": "描述任务…",
+  "chatbox.listening": "正在聆听…",
+  "chatbox.busy": "助手正在回复",
+  "chatbox.attachments": "附件",
+  "chatbox.label": "对话输入区"
+}

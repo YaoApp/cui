@@ -56,8 +56,19 @@ describe('the route table', () => {
     const index = surface?.children?.[0]
     expect(index?.index).toBe(true)
     expect(index?.element).toBeTruthy()
-    /* 产品面：收件箱组装页与四个占位页 */
-    expect(pathsOf(productChildren)).toEqual(['new', 'inbox', 'apps', 'board', 'workspace', 'computer'])
+    /* 产品面：新会话、会话详情、收件箱组装页、应用与其余占位页 */
+    expect(pathsOf(productChildren)).toEqual([
+      'new',
+      'sessions/:id',
+      'sessions/:sessionId/branches/:branchId',
+      'inbox',
+      'apps',
+      'apps/:appId',
+      'bots',
+      'board',
+      'workspace',
+      'computer',
+    ])
   })
 
   it('sends everything else through the session guard, then back to the namespace root', () => {

@@ -1,0 +1,9 @@
+{
+  "bots.title": "Bots",
+  "bots.catalogTitle": "Available Bots",
+  "bots.lede": "Reusable agents for the work you do often.",
+  "bots.create": "Create Bot",
+  "bots.error": "The Bot catalog could not be loaded.",
+  "bots.retry": "Try again",
+  "bots.empty": "No Bots yet."
+}

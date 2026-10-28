@@ -1,0 +1,9 @@
+{
+  "bots.title": "智能体",
+  "bots.catalogTitle": "可用智能体",
+  "bots.lede": "为经常做的工作准备可复用的智能体。",
+  "bots.create": "创建智能体",
+  "bots.error": "无法加载智能体目录。",
+  "bots.retry": "重试",
+  "bots.empty": "还没有智能体。"
+}

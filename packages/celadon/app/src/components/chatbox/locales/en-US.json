@@ -1,0 +1,14 @@
+{
+  "chatbox.send": "Send",
+  "chatbox.stop": "Stop",
+  "chatbox.attach": "Add attachment",
+  "chatbox.removeAttachment": "Remove {{name}}",
+  "chatbox.mic": "Voice input",
+  "chatbox.voice": "Voice chat",
+  "chatbox.settings": "Session settings",
+  "chatbox.placeholder": "Describe the task…",
+  "chatbox.listening": "Listening…",
+  "chatbox.busy": "The assistant is responding",
+  "chatbox.attachments": "Attachments",
+  "chatbox.label": "Chatbox"
+}

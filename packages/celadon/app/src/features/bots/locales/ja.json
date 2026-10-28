@@ -1,0 +1,9 @@
+{
+  "bots.title": "エージェント",
+  "bots.catalogTitle": "利用可能なエージェント",
+  "bots.lede": "よく行う作業に使える再利用可能なエージェントです。",
+  "bots.create": "エージェントを作成",
+  "bots.error": "エージェント一覧を読み込めませんでした。",
+  "bots.retry": "再試行",
+  "bots.empty": "エージェントはまだありません。"
+}

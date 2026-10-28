@@ -1,0 +1,10 @@
+{
+  "messageList.loading": "Loading messages",
+  "messageList.assistant": "Assistant",
+  "messageList.loadingMore": "Loading earlier messages",
+  "messageList.loadMore": "Load earlier messages",
+  "messageList.retry": "Retry",
+  "messageList.stopped": "Generation stopped.",
+  "messageList.failed": "Generation failed.",
+  "messageList.jumpLatest": "Jump to latest"
+}

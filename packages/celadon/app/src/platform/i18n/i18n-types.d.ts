@@ -13,6 +13,40 @@ export type I18nKey =
   | 'account.settings.section.usage'
   | 'account.settings.title'
   | 'app.name'
+  | 'apps.back'
+  | 'apps.backNew'
+  | 'apps.catalogTitle'
+  | 'apps.category'
+  | 'apps.category.commerce'
+  | 'apps.category.design'
+  | 'apps.category.education'
+  | 'apps.create'
+  | 'apps.detail.about'
+  | 'apps.detail.availability'
+  | 'apps.detail.empty'
+  | 'apps.detail.projects'
+  | 'apps.detail.start'
+  | 'apps.detail.startFailed'
+  | 'apps.empty'
+  | 'apps.error'
+  | 'apps.lede'
+  | 'apps.notFound'
+  | 'apps.open'
+  | 'apps.retry'
+  | 'apps.source'
+  | 'apps.source.official'
+  | 'apps.source.self'
+  | 'apps.source.thirdParty'
+  | 'apps.status'
+  | 'apps.status.draft'
+  | 'apps.status.ready'
+  | 'apps.surface'
+  | 'apps.surface.canvas'
+  | 'apps.surface.gallery'
+  | 'apps.surface.print'
+  | 'apps.title'
+  | 'apps.updated'
+  | 'apps.updatedLabel'
   | 'auth.action.backToServers'
   | 'auth.action.cancel'
   | 'auth.action.change'
@@ -108,6 +142,13 @@ export type I18nKey =
   | 'auth.welcome.name'
   | 'auth.welcome.title'
   | 'auth.welcome.userId'
+  | 'bots.catalogTitle'
+  | 'bots.create'
+  | 'bots.empty'
+  | 'bots.error'
+  | 'bots.lede'
+  | 'bots.retry'
+  | 'bots.title'
   | 'bridge.error.bridge.notRunning'
   | 'bridge.error.bridge.rejected'
   | 'bridge.error.bridge.unavailable'
@@ -146,6 +187,18 @@ export type I18nKey =
   | 'bridge.error.transport.status'
   | 'bridge.error.transport.timeout'
   | 'bridge.error.unauthorized'
+  | 'chatbox.attach'
+  | 'chatbox.attachments'
+  | 'chatbox.busy'
+  | 'chatbox.label'
+  | 'chatbox.listening'
+  | 'chatbox.mic'
+  | 'chatbox.placeholder'
+  | 'chatbox.removeAttachment'
+  | 'chatbox.send'
+  | 'chatbox.settings'
+  | 'chatbox.stop'
+  | 'chatbox.voice'
   | 'client.bootFailed'
   | 'client.bootRetry'
   | 'client.loading'
@@ -200,7 +253,139 @@ export type I18nKey =
   | 'localeSwitch.system'
   | 'localeSwitch.zhCN'
   | 'localeSwitch.zhTW'
+  | 'messageList.assistant'
+  | 'messageList.failed'
+  | 'messageList.jumpLatest'
+  | 'messageList.loadMore'
+  | 'messageList.loading'
+  | 'messageList.loadingMore'
+  | 'messageList.retry'
+  | 'messageList.stopped'
   | 'modal.close'
+  | 'session.app.poster'
+  | 'session.app.posterDesc'
+  | 'session.app.posterEnglish'
+  | 'session.app.posterMeta'
+  | 'session.app.product'
+  | 'session.app.productDesc'
+  | 'session.app.productEnglish'
+  | 'session.app.productMeta'
+  | 'session.app.teaching'
+  | 'session.app.teachingDesc'
+  | 'session.app.teachingEnglish'
+  | 'session.app.teachingMeta'
+  | 'session.approval.auto'
+  | 'session.approval.every'
+  | 'session.approval.writes'
+  | 'session.assistant'
+  | 'session.back'
+  | 'session.bot.analyst'
+  | 'session.bot.analystDesc'
+  | 'session.bot.analystEnglish'
+  | 'session.bot.analystMeta'
+  | 'session.bot.editor'
+  | 'session.bot.editorDesc'
+  | 'session.bot.editorEnglish'
+  | 'session.bot.editorMeta'
+  | 'session.bot.researcher'
+  | 'session.bot.researcherDesc'
+  | 'session.bot.researcherEnglish'
+  | 'session.bot.researcherMeta'
+  | 'session.branch.action'
+  | 'session.branch.creating'
+  | 'session.branch.empty'
+  | 'session.branch.failed'
+  | 'session.branch.label'
+  | 'session.branch.open'
+  | 'session.branches'
+  | 'session.connectionLost'
+  | 'session.copied'
+  | 'session.copy'
+  | 'session.effort.high'
+  | 'session.effort.low'
+  | 'session.effort.max'
+  | 'session.effort.medium'
+  | 'session.effort.off'
+  | 'session.empty.body'
+  | 'session.empty.title'
+  | 'session.error.create'
+  | 'session.error.noModel'
+  | 'session.error.noWorkspace'
+  | 'session.error.send'
+  | 'session.failed'
+  | 'session.lifecycle.keep'
+  | 'session.lifecycle.serve'
+  | 'session.lifecycle.stop'
+  | 'session.loadMore'
+  | 'session.loading'
+  | 'session.loadingMore'
+  | 'session.model.reasoning'
+  | 'session.new.connecting'
+  | 'session.new.effort'
+  | 'session.new.model'
+  | 'session.new.noResources'
+  | 'session.new.settings'
+  | 'session.new.start'
+  | 'session.new.subtitle'
+  | 'session.new.title'
+  | 'session.new.vault'
+  | 'session.new.workspace'
+  | 'session.offline'
+  | 'session.placeholder'
+  | 'session.plan.body'
+  | 'session.plan.title'
+  | 'session.ready'
+  | 'session.rec.apps'
+  | 'session.rec.bots'
+  | 'session.rec.cancel'
+  | 'session.rec.chat'
+  | 'session.rec.chatting'
+  | 'session.rec.createApp'
+  | 'session.rec.createAppContext'
+  | 'session.rec.createBot'
+  | 'session.rec.createBotContext'
+  | 'session.rec.lede'
+  | 'session.rec.open'
+  | 'session.rec.recommendTitle'
+  | 'session.rec.removeContext'
+  | 'session.rec.selected'
+  | 'session.rec.title'
+  | 'session.retry'
+  | 'session.review.body'
+  | 'session.review.title'
+  | 'session.role.editor'
+  | 'session.role.owner'
+  | 'session.role.viewer'
+  | 'session.settings.agent'
+  | 'session.settings.approval'
+  | 'session.settings.done'
+  | 'session.settings.general'
+  | 'session.settings.lifetime'
+  | 'session.settings.note'
+  | 'session.settings.save'
+  | 'session.settings.saveFailed'
+  | 'session.stop'
+  | 'session.stopped'
+  | 'session.streaming'
+  | 'session.thinking'
+  | 'session.title'
+  | 'session.turnFailed'
+  | 'session.vault.clear'
+  | 'session.vault.done'
+  | 'session.vault.empty'
+  | 'session.vault.groupCount'
+  | 'session.vault.hint'
+  | 'session.vault.loadFailed'
+  | 'session.vault.noAccess'
+  | 'session.vault.saveFailed'
+  | 'session.vault.search'
+  | 'session.vault.secretCount'
+  | 'session.vault.selected'
+  | 'session.vault.title'
+  | 'session.workspace.offline'
+  | 'session.workspace.private'
+  | 'session.workspace.team'
+  | 'session.you'
   | 'shell.browser.action.blocked'
   | 'shell.browser.action.collapse'
   | 'shell.browser.action.exclusive'
@@ -242,6 +427,7 @@ export type I18nKey =
   | 'shell.navigation.current'
   | 'shell.navigation.item.apps'
   | 'shell.navigation.item.board'
+  | 'shell.navigation.item.bots'
   | 'shell.navigation.item.computer'
   | 'shell.navigation.item.inbox'
   | 'shell.navigation.item.new'
@@ -296,6 +482,40 @@ declare module 'i18next' {
         'account.settings.section.usage': string
         'account.settings.title': string
         'app.name': string
+        'apps.back': string
+        'apps.backNew': string
+        'apps.catalogTitle': string
+        'apps.category': string
+        'apps.category.commerce': string
+        'apps.category.design': string
+        'apps.category.education': string
+        'apps.create': string
+        'apps.detail.about': string
+        'apps.detail.availability': string
+        'apps.detail.empty': string
+        'apps.detail.projects': string
+        'apps.detail.start': string
+        'apps.detail.startFailed': string
+        'apps.empty': string
+        'apps.error': string
+        'apps.lede': string
+        'apps.notFound': string
+        'apps.open': string
+        'apps.retry': string
+        'apps.source': string
+        'apps.source.official': string
+        'apps.source.self': string
+        'apps.source.thirdParty': string
+        'apps.status': string
+        'apps.status.draft': string
+        'apps.status.ready': string
+        'apps.surface': string
+        'apps.surface.canvas': string
+        'apps.surface.gallery': string
+        'apps.surface.print': string
+        'apps.title': string
+        'apps.updated': string
+        'apps.updatedLabel': string
         'auth.action.backToServers': string
         'auth.action.cancel': string
         'auth.action.change': string
@@ -391,6 +611,13 @@ declare module 'i18next' {
         'auth.welcome.name': string
         'auth.welcome.title': string
         'auth.welcome.userId': string
+        'bots.catalogTitle': string
+        'bots.create': string
+        'bots.empty': string
+        'bots.error': string
+        'bots.lede': string
+        'bots.retry': string
+        'bots.title': string
         'bridge.error.bridge.notRunning': string
         'bridge.error.bridge.rejected': string
         'bridge.error.bridge.unavailable': string
@@ -429,6 +656,18 @@ declare module 'i18next' {
         'bridge.error.transport.status': string
         'bridge.error.transport.timeout': string
         'bridge.error.unauthorized': string
+        'chatbox.attach': string
+        'chatbox.attachments': string
+        'chatbox.busy': string
+        'chatbox.label': string
+        'chatbox.listening': string
+        'chatbox.mic': string
+        'chatbox.placeholder': string
+        'chatbox.removeAttachment': string
+        'chatbox.send': string
+        'chatbox.settings': string
+        'chatbox.stop': string
+        'chatbox.voice': string
         'client.bootFailed': string
         'client.bootRetry': string
         'client.loading': string
@@ -483,7 +722,139 @@ declare module 'i18next' {
         'localeSwitch.system': string
         'localeSwitch.zhCN': string
         'localeSwitch.zhTW': string
+        'messageList.assistant': string
+        'messageList.failed': string
+        'messageList.jumpLatest': string
+        'messageList.loadMore': string
+        'messageList.loading': string
+        'messageList.loadingMore': string
+        'messageList.retry': string
+        'messageList.stopped': string
         'modal.close': string
+        'session.app.poster': string
+        'session.app.posterDesc': string
+        'session.app.posterEnglish': string
+        'session.app.posterMeta': string
+        'session.app.product': string
+        'session.app.productDesc': string
+        'session.app.productEnglish': string
+        'session.app.productMeta': string
+        'session.app.teaching': string
+        'session.app.teachingDesc': string
+        'session.app.teachingEnglish': string
+        'session.app.teachingMeta': string
+        'session.approval.auto': string
+        'session.approval.every': string
+        'session.approval.writes': string
+        'session.assistant': string
+        'session.back': string
+        'session.bot.analyst': string
+        'session.bot.analystDesc': string
+        'session.bot.analystEnglish': string
+        'session.bot.analystMeta': string
+        'session.bot.editor': string
+        'session.bot.editorDesc': string
+        'session.bot.editorEnglish': string
+        'session.bot.editorMeta': string
+        'session.bot.researcher': string
+        'session.bot.researcherDesc': string
+        'session.bot.researcherEnglish': string
+        'session.bot.researcherMeta': string
+        'session.branch.action': string
+        'session.branch.creating': string
+        'session.branch.empty': string
+        'session.branch.failed': string
+        'session.branch.label': string
+        'session.branch.open': string
+        'session.branches': string
+        'session.connectionLost': string
+        'session.copied': string
+        'session.copy': string
+        'session.effort.high': string
+        'session.effort.low': string
+        'session.effort.max': string
+        'session.effort.medium': string
+        'session.effort.off': string
+        'session.empty.body': string
+        'session.empty.title': string
+        'session.error.create': string
+        'session.error.noModel': string
+        'session.error.noWorkspace': string
+        'session.error.send': string
+        'session.failed': string
+        'session.lifecycle.keep': string
+        'session.lifecycle.serve': string
+        'session.lifecycle.stop': string
+        'session.loadMore': string
+        'session.loading': string
+        'session.loadingMore': string
+        'session.model.reasoning': string
+        'session.new.connecting': string
+        'session.new.effort': string
+        'session.new.model': string
+        'session.new.noResources': string
+        'session.new.settings': string
+        'session.new.start': string
+        'session.new.subtitle': string
+        'session.new.title': string
+        'session.new.vault': string
+        'session.new.workspace': string
+        'session.offline': string
+        'session.placeholder': string
+        'session.plan.body': string
+        'session.plan.title': string
+        'session.ready': string
+        'session.rec.apps': string
+        'session.rec.bots': string
+        'session.rec.cancel': string
+        'session.rec.chat': string
+        'session.rec.chatting': string
+        'session.rec.createApp': string
+        'session.rec.createAppContext': string
+        'session.rec.createBot': string
+        'session.rec.createBotContext': string
+        'session.rec.lede': string
+        'session.rec.open': string
+        'session.rec.recommendTitle': string
+        'session.rec.removeContext': string
+        'session.rec.selected': string
+        'session.rec.title': string
+        'session.retry': string
+        'session.review.body': string
+        'session.review.title': string
+        'session.role.editor': string
+        'session.role.owner': string
+        'session.role.viewer': string
+        'session.settings.agent': string
+        'session.settings.approval': string
+        'session.settings.done': string
+        'session.settings.general': string
+        'session.settings.lifetime': string
+        'session.settings.note': string
+        'session.settings.save': string
+        'session.settings.saveFailed': string
+        'session.stop': string
+        'session.stopped': string
+        'session.streaming': string
+        'session.thinking': string
+        'session.title': string
+        'session.turnFailed': string
+        'session.vault.clear': string
+        'session.vault.done': string
+        'session.vault.empty': string
+        'session.vault.groupCount': string
+        'session.vault.hint': string
+        'session.vault.loadFailed': string
+        'session.vault.noAccess': string
+        'session.vault.saveFailed': string
+        'session.vault.search': string
+        'session.vault.secretCount': string
+        'session.vault.selected': string
+        'session.vault.title': string
+        'session.workspace.offline': string
+        'session.workspace.private': string
+        'session.workspace.team': string
+        'session.you': string
         'shell.browser.action.blocked': string
         'shell.browser.action.collapse': string
         'shell.browser.action.exclusive': string
@@ -525,6 +896,7 @@ declare module 'i18next' {
         'shell.navigation.current': string
         'shell.navigation.item.apps': string
         'shell.navigation.item.board': string
+        'shell.navigation.item.bots': string
         'shell.navigation.item.computer': string
         'shell.navigation.item.inbox': string
         'shell.navigation.item.new': string

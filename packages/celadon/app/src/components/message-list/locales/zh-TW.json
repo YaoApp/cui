@@ -1,0 +1,10 @@
+{
+  "messageList.loading": "正在載入訊息",
+  "messageList.assistant": "助理",
+  "messageList.loadingMore": "正在載入較早的訊息",
+  "messageList.loadMore": "載入較早的訊息",
+  "messageList.retry": "重試",
+  "messageList.stopped": "已停止產生。",
+  "messageList.failed": "產生失敗。",
+  "messageList.jumpLatest": "跳到最新"
+}

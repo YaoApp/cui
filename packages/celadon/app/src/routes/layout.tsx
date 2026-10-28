@@ -14,6 +14,7 @@ import { withNext } from '@/features/auth/next'
 import { signedIn } from '@/features/auth/session-marker'
 import { useLandingRecord } from '@/features/auth/hooks/use-landing-record'
 import { InboxNav } from '@/features/inbox'
+import { BranchView } from '@/features/session'
 import { client, openUrl, useWindowChrome } from '@/platform/client'
 import { useMediaQuery } from '@/platform/client/use-media-query'
 import type { I18nKey } from '@/platform/i18n/i18n-types'
@@ -24,11 +25,12 @@ import { useSecondaryTabsStore } from '@/stores/browser/secondary'
 import { isAddressLike, parseTarget, targetLabel } from '@/stores/browser/targets'
 import { useColumnsStore } from '@/stores/layout/columns'
 
-/* 一级导航的六项：**路由信息的投影**，写在装配层（`architecture/07-routing.md`）。
-   每一项一个图标加文字；「新任务」是动作但占一级位置（超高频，一步可达）。 */
+/* 一级导航的七项：**路由信息的投影**，写在装配层（`architecture/07-routing.md`）。
+   每一项一个图标加文字；「新会话」是动作但占一级位置（超高频，一步可达）。 */
 const MAIN_ITEMS: NavItem[] = [
-	{ key: 'new', icon: 'i-new-task', labelKey: 'shell.navigation.item.new', to: '/new' },
+	{ key: 'new', icon: 'i-plus-square', labelKey: 'shell.navigation.item.new', to: '/new' },
 	{ key: 'apps', icon: 'i-apps', labelKey: 'shell.navigation.item.apps', to: '/apps' },
+	{ key: 'bots', icon: 'i-bot', labelKey: 'shell.navigation.item.bots', to: '/bots' },
 	{ key: 'inbox', icon: 'i-inbox', labelKey: 'shell.navigation.item.inbox', to: '/inbox' },
 	{ key: 'board', icon: 'i-board', labelKey: 'shell.navigation.item.board', to: '/board' },
 	{ key: 'workspace', icon: 'i-ws', labelKey: 'shell.navigation.item.workspace', to: '/workspace' },
@@ -296,6 +298,7 @@ export function AppLayout() {
 				if (entry) openSecondary(entry.target)
 			}}
 			validateAddress={validateAddress}
+			renderInternal={renderInternal}
 		/>
 	)
 	/* 主动关分栏时把新栏一页并进主栏：走主栏的打开入口，同目标复用、key 由主栏分配器给 */
@@ -346,6 +349,18 @@ export function AppLayout() {
 	}
 
 	/* 一页的内容：两个面板共用同一个派发组件，分屏时各自渲染自己那一页 */
+	function renderInternal(path: string) {
+		const branch = path.match(/^\/sessions\/([^/]+)\/branches\/([^/]+)$/)
+		if (!branch) return null
+		return (
+			<BranchView
+				sessionId={decodeURIComponent(branch[1])}
+				branchId={decodeURIComponent(branch[2])}
+				surface='browser'
+			/>
+		)
+	}
+
 	const renderTab = (tab: TabEntry) => (
 		<TabPage
 			key={tab.key}
@@ -354,6 +369,7 @@ export function AppLayout() {
 			onOpen={(input) => openIn(tab, input)}
 			onOpenRecent={openRecent}
 			validateAddress={validateAddress}
+			renderInternal={renderInternal}
 		/>
 	)
 
@@ -390,6 +406,12 @@ export function AppLayout() {
 				onClick: toggleBrowser
 			}
 
+	const contentTitle = location.pathname.startsWith('/sessions/')
+		? t('session.title')
+		: current
+			? t(current.labelKey)
+			: t('shell.content.demoTitle')
+
 	return (
 		<div
 			className='layout'
@@ -421,7 +443,7 @@ export function AppLayout() {
 				{location.pathname.startsWith('/inbox') ? <InboxNav /> : null}
 			</Nav>
 			<Content
-				title={t('shell.content.demoTitle')}
+				title={contentTitle}
 				navCollapsed={navCollapsed}
 				lead={contentLead}
 				trail={contentTrail}

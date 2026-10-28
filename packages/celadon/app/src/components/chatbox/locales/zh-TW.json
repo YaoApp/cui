@@ -1,0 +1,14 @@
+{
+  "chatbox.send": "傳送",
+  "chatbox.stop": "停止",
+  "chatbox.attach": "加入附件",
+  "chatbox.removeAttachment": "移除 {{name}}",
+  "chatbox.mic": "語音輸入",
+  "chatbox.voice": "語音對話",
+  "chatbox.settings": "工作階段設定",
+  "chatbox.placeholder": "描述任務…",
+  "chatbox.listening": "正在聆聽…",
+  "chatbox.busy": "助理正在回覆",
+  "chatbox.attachments": "附件",
+  "chatbox.label": "對話輸入區"
+}
