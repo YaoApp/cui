@@ -82,12 +82,21 @@ export default defineConfig(({ mode }) => {
      Vite 只把 `VITE_` 前缀的注进 `import.meta.env`，**不写 `process.env`**，直接读 `process.env` 会静默拿不到）。 */
   const env = loadEnv(mode, import.meta.dirname, '')
   const proxyTarget = process.env.YAO_SERVER_HOST || env.YAO_SERVER_HOST
-  const enginePaths = ['.well-known', 'v1']
+  const mockTarget = process.env.YAO_MOCK_HOST || env.YAO_MOCK_HOST
+  const enginePaths = mockTarget ? ['v1'] : ['.well-known', 'v1']
+  /* 开发期按接口域拆分：服务发现 / Auth / Session / Apps / Bots / Workspace / Computer / Vault / LLM
+     可单独走本地 Mock，其余接口仍由 Yao 承担。具体路径放在 `/v1` 前面，代理匹配按声明顺序生效。 */
+  const mockPaths = ['.well-known', 'v1/user', 'v1/sessions', 'v1/apps', 'v1/bots', 'v1/computers', 'v1/workspaces', 'v1/vaults', 'v1/llm']
   /* **代理挂在根路径**：dev 的请求路径必须与生产一致 —— 生产里引擎就在站点根下，
      带应用命名空间（`/app/v1/…`）的请求在生产并不存在。实测：根路径下代理先于 base 中间件生效。 */
-  const devProxy: Record<string, ProxyOptions> = proxyTarget
-    ? Object.fromEntries(enginePaths.map((path) => [`/${path}`, { target: proxyTarget, changeOrigin: true }]))
-    : {}
+  const devProxy: Record<string, ProxyOptions> = {
+    ...(mockTarget
+      ? Object.fromEntries(mockPaths.map((path) => [`/${path}`, { target: mockTarget, changeOrigin: true, ws: true }]))
+      : {}),
+    ...(proxyTarget
+      ? Object.fromEntries(enginePaths.map((path) => [`/${path}`, { target: proxyTarget, changeOrigin: true, ws: true }]))
+      : {}),
+  }
 
   /* 开发服务经隧道公开时（例如把本机 5199 挂到某个开发子域），要显式列出这个主机名：
      Vite 默认只认 localhost 与已绑定的地址，不列会被拒成 `Blocked request`。
