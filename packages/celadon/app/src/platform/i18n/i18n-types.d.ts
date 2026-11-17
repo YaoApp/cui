@@ -298,6 +298,13 @@ export type I18nKey =
   | 'session.branch.label'
   | 'session.branch.open'
   | 'session.branches'
+  | 'session.build.appDesc'
+  | 'session.build.appTitle'
+  | 'session.build.botDesc'
+  | 'session.build.botTitle'
+  | 'session.build.placeholder'
+  | 'session.build.templates'
+  | 'session.build.title'
   | 'session.connectionLost'
   | 'session.copied'
   | 'session.copy'
@@ -322,11 +329,15 @@ export type I18nKey =
   | 'session.model.reasoning'
   | 'session.new.connecting'
   | 'session.new.effort'
+  | 'session.new.mode'
   | 'session.new.model'
   | 'session.new.noResources'
+  | 'session.new.placeholder'
   | 'session.new.settings'
   | 'session.new.start'
   | 'session.new.subtitle'
+  | 'session.new.tab.build'
+  | 'session.new.tab.use'
   | 'session.new.title'
   | 'session.new.vault'
   | 'session.new.workspace'
@@ -344,7 +355,6 @@ export type I18nKey =
   | 'session.rec.createAppContext'
   | 'session.rec.createBot'
   | 'session.rec.createBotContext'
-  | 'session.rec.lede'
   | 'session.rec.open'
   | 'session.rec.recommendTitle'
   | 'session.rec.removeContext'
@@ -767,6 +777,13 @@ declare module 'i18next' {
         'session.branch.label': string
         'session.branch.open': string
         'session.branches': string
+        'session.build.appDesc': string
+        'session.build.appTitle': string
+        'session.build.botDesc': string
+        'session.build.botTitle': string
+        'session.build.placeholder': string
+        'session.build.templates': string
+        'session.build.title': string
         'session.connectionLost': string
         'session.copied': string
         'session.copy': string
@@ -791,11 +808,15 @@ declare module 'i18next' {
         'session.model.reasoning': string
         'session.new.connecting': string
         'session.new.effort': string
+        'session.new.mode': string
         'session.new.model': string
         'session.new.noResources': string
+        'session.new.placeholder': string
         'session.new.settings': string
         'session.new.start': string
         'session.new.subtitle': string
+        'session.new.tab.build': string
+        'session.new.tab.use': string
         'session.new.title': string
         'session.new.vault': string
         'session.new.workspace': string
@@ -813,7 +834,6 @@ declare module 'i18next' {
         'session.rec.createAppContext': string
         'session.rec.createBot': string
         'session.rec.createBotContext': string
-        'session.rec.lede': string
         'session.rec.open': string
         'session.rec.recommendTitle': string
         'session.rec.removeContext': string

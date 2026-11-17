@@ -9,7 +9,7 @@
 
 把「新会话」从占位页做成可独立验收的一条链路：
 
-1. 打开 `/new`，看到推荐入口和 Chatbox。
+1. 打开 `/new-session`，看到推荐入口和 Chatbox。
 2. 选择 Workspace、Computer、模型与设置。
 3. 输入任务并创建 Session。
 4. 进入最小可用的 Session 页，看到首条消息与 Chatbox。
@@ -25,7 +25,7 @@ New Session 已包含 Apps/Bots 推荐卡片、App/Bot 使用上下文、Create 
 
 | # | 名称 | 英文 | 图标 | 路径 | 本期 |
 | --- | --- | --- | --- | --- | --- |
-| 1 | 新会话 | New Session | `i-plus-square` | `/new` | 实现 |
+| 1 | 新会话 | New Session | `i-plus-square` | `/new-session` | 实现 |
 | 2 | 应用 | Apps | `i-apps` | `/apps` | 实现 |
 | 3 | 智能体 | Bots | `i-bot` | `/bots` | 实现 |
 | 4 | 收件箱 | Inbox | `i-inbox` | `/inbox` | 保持现状 |
@@ -70,7 +70,7 @@ Content
 
 ### 3.3 路由
 
-- `/new`：New Session。
+- `/new-session`：New Session。
 - `/sessions/:id`：最小 Session 页面。
 - `/sessions/:sessionId/branches/:branchId`：Branch 视图，作为内部路由打开在 Browser 标签。
 - `/bots`：占位，供导航与后续模块接入。
@@ -227,10 +227,10 @@ type MessageListProps = {
 ## 7. 验收
 
 - 七项导航顺序正确，四语完整，Bots 占位可达。
-- `/new` 默认、输入、选择、提交、失败、空资源六种状态可见。
+- `/new-session` 默认、输入、选择、提交、失败、空资源六种状态可见。
 - Chatbox 键盘、焦点、禁用、处理中、附件 chip、录音状态可用。
 - 创建成功后进入 `/sessions/:id`，首条用户消息与 Assistant 回复可见。
-- Session 页 Chatbox 可继续发送；返回 `/new` 不丢当前草稿策略明确。
+- Session 页 Chatbox 可继续发送；返回 `/new-session` 不丢当前草稿策略明确。
 - 同一 Chatbox 与 MessageList 可分别挂内容区和 Browser 标签；Browser 不导入 feature。
 - Branch 标签打开 `/sessions/:sessionId/branches/:branchId`，有独立历史与滚动；关闭标签关闭支线 Ctrl，主会话不受影响。
 - CUI 开发代理经最小网关访问 Mock；未登录请求返回 401；现有 Yao 登录不被替换。
@@ -239,6 +239,6 @@ type MessageListProps = {
 ## 8. 未定项
 
 1. MessageList 先只做文本、加载、空态与错误，工具卡片是否同时进入本期？本文建议先做文本与状态类消息。
-2. `/new` 是否保留现有路径，还是同步原型改为 `/new-session`？本文建议保留 `/new`。
+2. 新会话使用 `/new-session` 作为唯一路径。
 3. Session 页本期做最小收发与 Branch 视图壳，自动支线与运行条延后；Branch 创建/管理不在本期。
 4. 新会话资源选择是否允许“未选 Workspace”直接发送？本文建议必须选择可用资源。

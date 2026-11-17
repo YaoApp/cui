@@ -1,9 +1,9 @@
 {
-  "bots.title": "智能體",
-  "bots.catalogTitle": "可用智能體",
-  "bots.lede": "為經常做的工作準備可重複使用的智能體。",
-  "bots.create": "建立智能體",
-  "bots.error": "無法載入智能體目錄。",
+  "bots.title": "Agent",
+  "bots.catalogTitle": "可用的 Agent",
+  "bots.lede": "把經常做的工作交給可重複使用的 Agent。",
+  "bots.create": "建立 Agent",
+  "bots.error": "無法載入 Agent 目錄。",
   "bots.retry": "重試",
-  "bots.empty": "還沒有智能體。"
+  "bots.empty": "還沒有 Agent。"
 }

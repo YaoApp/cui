@@ -21,7 +21,7 @@ import { useColumnsStore } from '@/stores/layout/columns'
 
 /* 产品面：收件箱是组装页，其余入口当前用占位页。 */
 const productRoutes: RouteObject[] = [
-	{ path: 'new', element: <NewSessionPage /> },
+	{ path: 'new-session', element: <NewSessionPage /> },
 	{ path: 'sessions/:id', element: <SessionPage /> },
 	{ path: 'sessions/:sessionId/branches/:branchId', element: <BranchPage /> },
 	{ path: 'inbox', element: <InboxPage /> },

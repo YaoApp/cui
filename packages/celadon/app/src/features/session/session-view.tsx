@@ -222,7 +222,7 @@ export function SessionPage() {
             aria-label={t('session.back')}
             title={t('session.back')}
             icon={<Icon name='i-left' size={14} />}
-            onClick={() => navigate('/new')}
+            onClick={() => navigate('/new-session')}
           />
           <span
             className={['session-page__status', session.error ? 'is-error' : null].filter(Boolean).join(' ')}

@@ -324,34 +324,40 @@
 }
 
 .session-new {
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-32);
-  max-inline-size: 920px;
+  gap: var(--spacing-48);
+  inline-size: 100%;
+  max-inline-size: 840px;
   margin: 0 auto;
+  padding-inline: var(--spacing-8);
   padding-block-end: var(--spacing-48);
 }
 
 .session-new__intro {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: var(--spacing-8);
-  padding-block-start: var(--spacing-16);
+  inline-size: 100%;
+  max-inline-size: 680px;
+  margin: 0 auto;
+  padding-block-start: var(--spacing-32);
+  text-align: center;
+}
+
+.session-new__panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-48);
 }
 
 .session-new__intro h1 {
   margin: 0;
   color: var(--text-primary);
-  font-size: var(--font-size-title);
-  line-height: var(--line-height-tight);
-}
-
-.session-new__intro p {
-  max-inline-size: 620px;
-  margin: 0;
-  color: var(--text-secondary);
-  font-size: var(--font-size-body);
-  line-height: var(--line-height-cjk);
+  font-size: var(--font-size-28);
+  line-height: var(--line-height-title);
 }
 
 .session-new__composer,
@@ -359,6 +365,12 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-12);
+}
+
+.session-new__composer {
+  inline-size: 100%;
+  max-inline-size: 680px;
+  margin: 0 auto;
 }
 
 .session-new__section-head {
@@ -387,7 +399,8 @@
 }
 
 .session-new__composer .chatbox__composer {
-  max-inline-size: none;
+  gap: var(--spacing-12);
+  padding-block: var(--spacing-24);
 }
 
 .session-new__composer .chatbox__composer-wrap {
@@ -502,7 +515,7 @@
 
 .session-new__cards {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: var(--spacing-8);
   margin: 0;
   padding: 0;
@@ -604,9 +617,20 @@
   color: var(--brand-ink);
 }
 
+@media (width <= 960px) {
+  .session-new {
+    padding-inline: var(--spacing-16);
+  }
+}
+
 @media (width <= 720px) {
   .session-new {
-    gap: var(--spacing-24);
+    gap: var(--spacing-32);
+    padding-inline: var(--spacing-8);
+  }
+
+  .session-new__panel {
+    gap: var(--spacing-32);
   }
 
   .session-new__cards {

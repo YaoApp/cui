@@ -64,7 +64,7 @@ export function BotsPage() {
           variant='soft'
           size='small'
           icon={<Icon name='i-plus' size={16} />}
-          onClick={() => navigate('/new?create=bot')}
+          onClick={() => navigate('/new-session?create=bot')}
         >
           {t('bots.create')}
         </Button>
@@ -93,7 +93,7 @@ export function BotsPage() {
                 variant='plain'
                 size='large'
                 className='bots-card'
-                onClick={() => navigate(`/new?bot=${encodeURIComponent(record.id)}`)}
+                onClick={() => navigate(`/new-session?bot=${encodeURIComponent(record.id)}`)}
               >
                 <span className='bots-card__icon'>
                   <Icon name={copy.icon} size={20} />

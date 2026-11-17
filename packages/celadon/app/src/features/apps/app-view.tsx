@@ -86,7 +86,7 @@ export function AppViewPage() {
     return (
       <div className='app-view app-view--state'>
         <p role='alert'>{t('apps.notFound')}</p>
-        <Button variant='ghost' size='small' onClick={() => navigate(fromNewSession ? '/new' : '/apps')}>
+        <Button variant='ghost' size='small' onClick={() => navigate(fromNewSession ? '/new-session' : '/apps')}>
           {backLabel}
         </Button>
       </div>
@@ -105,7 +105,7 @@ export function AppViewPage() {
           aria-label={backLabel}
           title={backLabel}
           icon={<Icon name='i-left' size={14} />}
-          onClick={() => navigate(fromNewSession ? '/new' : '/apps')}
+          onClick={() => navigate(fromNewSession ? '/new-session' : '/apps')}
         />
         <span className='app-view__icon'>
           <Icon name={copy.icon} size={20} />

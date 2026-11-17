@@ -70,7 +70,7 @@ export function AppsPage() {
           variant='soft'
           size='small'
           icon={<Icon name='i-plus' size={16} />}
-          onClick={() => navigate('/new?create=app')}
+          onClick={() => navigate('/new-session?create=app')}
         >
           {t('apps.create')}
         </Button>

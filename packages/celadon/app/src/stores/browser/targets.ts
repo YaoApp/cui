@@ -9,7 +9,7 @@ export type TabTarget =
 /** 快捷方式：名字映射到内部路由，允许带一个参数（`workspace:yao` 落到 `/workspace/yao`）。 */
 export const SHORTCUTS: Record<string, string> = {
 	home: '/',
-	new: '/new',
+	new: '/new-session',
 	apps: '/apps',
 	inbox: '/inbox',
 	board: '/board',

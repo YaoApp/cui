@@ -28,7 +28,7 @@ import { useColumnsStore } from '@/stores/layout/columns'
 /* 一级导航的七项：**路由信息的投影**，写在装配层（`architecture/07-routing.md`）。
    每一项一个图标加文字；「新会话」是动作但占一级位置（超高频，一步可达）。 */
 const MAIN_ITEMS: NavItem[] = [
-	{ key: 'new', icon: 'i-plus-square', labelKey: 'shell.navigation.item.new', to: '/new' },
+	{ key: 'new', icon: 'i-plus-square', labelKey: 'shell.navigation.item.new', to: '/new-session' },
 	{ key: 'apps', icon: 'i-apps', labelKey: 'shell.navigation.item.apps', to: '/apps' },
 	{ key: 'bots', icon: 'i-bot', labelKey: 'shell.navigation.item.bots', to: '/bots' },
 	{ key: 'inbox', icon: 'i-inbox', labelKey: 'shell.navigation.item.inbox', to: '/inbox' },
@@ -406,11 +406,13 @@ export function AppLayout() {
 				onClick: toggleBrowser
 			}
 
-	const contentTitle = location.pathname.startsWith('/sessions/')
-		? t('session.title')
-		: current
-			? t(current.labelKey)
-			: t('shell.content.demoTitle')
+	const contentTitle = location.pathname === '/new-session'
+		? undefined
+		: location.pathname.startsWith('/sessions/')
+			? t('session.title')
+			: current
+				? t(current.labelKey)
+				: t('shell.content.demoTitle')
 
 	return (
 		<div

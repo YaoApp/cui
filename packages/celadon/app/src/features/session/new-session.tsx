@@ -19,6 +19,7 @@ import {
   type Workspace,
 } from '@/data/session'
 import { VaultPicker } from './components/vault-picker'
+import { NewSessionTabs, type NewSessionMode } from './components/new-session-tabs'
 import { listApps, listBots } from '@/data/apps'
 import {
   APP_RECOMMENDATIONS,
@@ -33,7 +34,12 @@ const EFFORTS = ['off', 'low', 'medium', 'high', 'max'] as const
 export function NewSessionPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const requestedCreate = searchParams.get('create')
+  const mode: NewSessionMode =
+    searchParams.get('mode') === 'build' || requestedCreate === 'app' || requestedCreate === 'bot'
+      ? 'build'
+      : 'use'
   const [computers, setComputers] = useState<Computer[]>([])
   const [workspaces, setWorkspaces] = useState<Workspace[]>([])
   const [models, setModels] = useState<LlmModel[]>([])
@@ -51,7 +57,13 @@ export function NewSessionPage() {
   const [selectedAssistant, setSelectedAssistant] = useState<Recommendation | null>(null)
   const [apps, setApps] = useState<Recommendation[]>(APP_RECOMMENDATIONS)
   const [bots, setBots] = useState<Recommendation[]>(BOT_RECOMMENDATIONS)
-  const [createMode, setCreateMode] = useState<'app' | 'bot' | null>(null)
+  const [createMode, setCreateMode] = useState<'app' | 'bot' | null>(() =>
+    requestedCreate === 'app' || requestedCreate === 'bot'
+      ? requestedCreate
+      : mode === 'build'
+        ? 'bot'
+        : null,
+  )
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [lifetime, setLifetime] = useState('stop')
   const [approval, setApproval] = useState('writes')
@@ -112,9 +124,10 @@ export function NewSessionPage() {
   }, [settingsOpen])
 
   useEffect(() => {
-    const mode = searchParams.get('create')
-    if (mode === 'app' || mode === 'bot') setCreateMode(mode)
-  }, [searchParams])
+    if (requestedCreate !== 'app' && requestedCreate !== 'bot') return
+    setCreateMode(requestedCreate)
+    setSelectedAssistant(null)
+  }, [requestedCreate])
 
   useEffect(() => {
     const botId = searchParams.get('bot')
@@ -156,39 +169,23 @@ export function NewSessionPage() {
   const selectedWorkspace = workspaces.find((workspace) => workspace.id === workspaceId)
   const selectedVaultCount = grants.secret_ids.length
   const canSend = Boolean(workspaceId && modelId && !loading && !creating)
-  const context = selectedAssistant ? (
-    <div className='session-new__context'>
-      <span className='session-new__context-icon'>
-        <Icon name={selectedAssistant.icon} size={16} />
-      </span>
-      <span>{t('session.rec.chatting', { name: t(selectedAssistant.nameKey) })}</span>
-      <Button
-        variant='ghost'
-        size='small'
-        iconOnly
-        aria-label={t('session.rec.removeContext', { name: t(selectedAssistant.nameKey) })}
-        icon={<Icon name='i-act-close' size={14} />}
-        onClick={() => setSelectedAssistant(null)}
-      />
-    </div>
-  ) : createMode ? (
-    <div className='session-new__context is-create'>
-      <span className='session-new__context-icon'>
-        <Icon name={createMode === 'app' ? 'i-apps' : 'i-bot'} size={16} />
-      </span>
-      <span>
-        {createMode === 'app' ? t('session.rec.createAppContext') : t('session.rec.createBotContext')}
-      </span>
-      <Button
-        variant='ghost'
-        size='small'
-        iconOnly
-        aria-label={t('session.rec.cancel')}
-        icon={<Icon name='i-act-close' size={14} />}
-        onClick={() => setCreateMode(null)}
-      />
-    </div>
-  ) : null
+  const context =
+    mode === 'use' && selectedAssistant ? (
+      <div className='session-new__context'>
+        <span className='session-new__context-icon'>
+          <Icon name={selectedAssistant.icon} size={16} />
+        </span>
+        <span>{t('session.rec.chatting', { name: t(selectedAssistant.nameKey) })}</span>
+        <Button
+          variant='ghost'
+          size='small'
+          iconOnly
+          aria-label={t('session.rec.removeContext', { name: t(selectedAssistant.nameKey) })}
+          icon={<Icon name='i-act-close' size={14} />}
+          onClick={() => setSelectedAssistant(null)}
+        />
+      </div>
+    ) : null
 
   async function start() {
     if (!selectedWorkspace || !modelId || !draft.trim()) return
@@ -203,7 +200,10 @@ export function NewSessionPage() {
         effort,
         lifetime,
         approval,
-        agent: selectedAssistant?.id ?? (createMode ? `create-${createMode}` : undefined),
+        agent:
+          mode === 'build'
+            ? `create-${createMode ?? 'bot'}`
+            : selectedAssistant?.id,
         vault_grants: grants,
       })
       navigate(`/sessions/${session.id}`, {
@@ -220,8 +220,30 @@ export function NewSessionPage() {
     setCreateMode(null)
   }
 
-  function chooseCreate(mode: 'app' | 'bot') {
-    setCreateMode(mode)
+  function updateMode(nextMode: NewSessionMode) {
+    const next = new URLSearchParams(searchParams)
+    if (nextMode === 'build') {
+      next.set('mode', 'build')
+    } else {
+      next.delete('mode')
+      next.delete('create')
+    }
+    setSearchParams(next, { replace: true })
+  }
+
+  function switchMode(nextMode: NewSessionMode) {
+    if (nextMode === mode) return
+    updateMode(nextMode)
+    if (nextMode === 'build') {
+      setCreateMode((current) => current ?? 'bot')
+    } else {
+      setCreateMode(null)
+    }
+  }
+
+  function chooseCreate(nextCreate: 'app' | 'bot') {
+    updateMode('build')
+    setCreateMode(nextCreate)
     setSelectedAssistant(null)
   }
 
@@ -232,195 +254,204 @@ export function NewSessionPage() {
   return (
     <div className='session-new'>
       <section className='session-new__intro'>
-        <h1>{t('session.rec.title')}</h1>
-        <p>{t('session.rec.lede')}</p>
+        <NewSessionTabs value={mode} onChange={switchMode} />
+        <h1>{mode === 'build' ? t('session.build.title') : t('session.rec.title')}</h1>
       </section>
 
-      <section className='session-new__composer' aria-label={t('chatbox.label')}>
-        <Chatbox
-          messages={[]}
-          loading={false}
-          showHistory={false}
-          submitKey='mod-enter'
-          surface='content'
-          value={draft}
-          onValueChange={setDraft}
-          onSubmit={start}
-          placeholder={
-            createMode === 'app'
-              ? t('session.rec.createAppContext')
-              : createMode === 'bot'
-                ? t('session.rec.createBotContext')
-                : t('session.placeholder')
-          }
-          canSend={canSend}
-          disabled={loading || creating}
-          context={context}
-          onFiles={(files) =>
-            setAttachments((current) => [
-              ...current,
-              ...files.map((file) => ({ id: `${file.name}-${file.size}-${Date.now()}`, name: file.name })),
-            ])
-          }
-          attachments={attachments}
-          onRemoveAttachment={(id) => setAttachments((current) => current.filter((item) => item.id !== id))}
-          onSettings={() => setSettingsOpen(true)}
-          resources={
-            <>
-              <Select
-                aria-label={t('session.new.workspace')}
-                size='small'
-                variant='plain'
-                icon={<Icon name='i-ws' size={16} />}
-                value={workspaceId}
-                onValueChange={setWorkspaceId}
-                groups={workspaceGroups}
-                placeholder={t('session.new.workspace')}
-                emptyText={t('session.new.noResources')}
-                disabled={loading}
-              />
-              <Select
-                aria-label={t('session.new.model')}
-                size='small'
-                variant='plain'
-                icon={<Icon name='i-obj-model' size={16} />}
-                value={`${modelId}::${effort}`}
-                onValueChange={(value) => {
-                  const [nextModel, nextEffort] = value.split('::')
-                  if (nextModel) setModelId(nextModel)
-                  if (nextEffort) setEffort(nextEffort)
-                }}
-                options={modelEffortOptions}
-                placeholder={t('session.new.model')}
-                disabled={loading}
-              />
-            </>
-          }
-          footer={
-            error ? (
-              <span className='session-page__error' role='alert'>
-                <Icon name='i-state-error' size={14} /> {error}
-              </span>
-            ) : null
-          }
-        />
-        {settingsOpen ? (
-          <div className='session-new__settings' role='dialog' aria-label={t('session.new.settings')}>
-            <div className='session-new__settings-head'>
-              <strong>{t('session.new.settings')}</strong>
-              <Button
-                variant='ghost'
-                size='small'
-                iconOnly
-                aria-label={t('session.settings.done')}
-                icon={<Icon name='i-act-close' size={14} />}
-                onClick={() => setSettingsOpen(false)}
-              />
+      <div
+        className='session-new__panel'
+        id={`new-session-panel-${mode}`}
+        role='tabpanel'
+        aria-labelledby={`new-session-tab-${mode}`}
+      >
+        <section className='session-new__composer' aria-label={t('chatbox.label')}>
+          <Chatbox
+            messages={[]}
+            loading={false}
+            showHistory={false}
+            submitKey='mod-enter'
+            surface='content'
+            value={draft}
+            onValueChange={setDraft}
+            onSubmit={start}
+            placeholder={
+              mode === 'build' ? t('session.build.placeholder') : t('session.new.placeholder')
+            }
+            canSend={canSend}
+            disabled={loading || creating}
+            context={context}
+            onFiles={(files) =>
+              setAttachments((current) => [
+                ...current,
+                ...files.map((file) => ({ id: `${file.name}-${file.size}-${Date.now()}`, name: file.name })),
+              ])
+            }
+            attachments={attachments}
+            onRemoveAttachment={(id) => setAttachments((current) => current.filter((item) => item.id !== id))}
+            onSettings={() => setSettingsOpen(true)}
+            resources={
+              <>
+                <Select
+                  aria-label={t('session.new.workspace')}
+                  size='small'
+                  variant='plain'
+                  icon={<Icon name='i-ws' size={16} />}
+                  value={workspaceId}
+                  onValueChange={setWorkspaceId}
+                  groups={workspaceGroups}
+                  placeholder={t('session.new.workspace')}
+                  emptyText={t('session.new.noResources')}
+                  disabled={loading}
+                />
+                <Select
+                  aria-label={t('session.new.model')}
+                  size='small'
+                  variant='plain'
+                  icon={<Icon name='i-obj-model' size={16} />}
+                  value={`${modelId}::${effort}`}
+                  onValueChange={(value) => {
+                    const [nextModel, nextEffort] = value.split('::')
+                    if (nextModel) setModelId(nextModel)
+                    if (nextEffort) setEffort(nextEffort)
+                  }}
+                  options={modelEffortOptions}
+                  placeholder={t('session.new.model')}
+                  disabled={loading}
+                />
+              </>
+            }
+            footer={
+              error ? (
+                <span className='session-page__error' role='alert'>
+                  <Icon name='i-state-error' size={14} /> {error}
+                </span>
+              ) : null
+            }
+          />
+          {settingsOpen ? (
+            <div className='session-new__settings' role='dialog' aria-label={t('session.new.settings')}>
+              <div className='session-new__settings-head'>
+                <strong>{t('session.new.settings')}</strong>
+                <Button
+                  variant='ghost'
+                  size='small'
+                  iconOnly
+                  aria-label={t('session.settings.done')}
+                  icon={<Icon name='i-act-close' size={14} />}
+                  onClick={() => setSettingsOpen(false)}
+                />
+              </div>
+              <div className='session-new__setting-row'>
+                <span>{t('session.settings.agent')}</span>
+                <span>
+                  {mode === 'use' && selectedAssistant
+                    ? t(selectedAssistant.nameKey)
+                    : mode === 'build' && createMode === 'app'
+                      ? t('session.rec.createAppContext')
+                      : mode === 'build' && createMode === 'bot'
+                        ? t('session.rec.createBotContext')
+                        : t('session.settings.general')}
+                </span>
+              </div>
+              <div className='session-new__setting-row'>
+                <span>{t('session.settings.lifetime')}</span>
+                <Select
+                  aria-label={t('session.settings.lifetime')}
+                  size='small'
+                  variant='plain'
+                  value={lifetime}
+                  onValueChange={setLifetime}
+                  options={[
+                    { value: 'stop', label: t('session.lifecycle.stop') },
+                    { value: 'keep', label: t('session.lifecycle.keep') },
+                    { value: 'serve', label: t('session.lifecycle.serve') },
+                  ]}
+                />
+              </div>
+              <div className='session-new__setting-row'>
+                <span>{t('session.vault.title')}</span>
+                <Button
+                  variant='ghost'
+                  size='small'
+                  icon={<Icon name='i-obj-key' size={14} />}
+                  onClick={() => setVaultOpen(true)}
+                >
+                  {selectedVaultCount > 0
+                    ? t('session.vault.selected', { count: selectedVaultCount })
+                    : t('session.vault.noAccess')}
+                </Button>
+              </div>
+              <div className='session-new__setting-row'>
+                <span>{t('session.settings.approval')}</span>
+                <Select
+                  aria-label={t('session.settings.approval')}
+                  size='small'
+                  variant='plain'
+                  value={approval}
+                  onValueChange={setApproval}
+                  options={[
+                    { value: 'writes', label: t('session.approval.writes') },
+                    { value: 'every', label: t('session.approval.every') },
+                    { value: 'auto', label: t('session.approval.auto') },
+                  ]}
+                />
+              </div>
+              <p className='session-new__settings-note'>{t('session.settings.note')}</p>
+              <div className='session-new__settings-foot'>
+                <Button variant='ghost' size='small' onClick={() => setSettingsOpen(false)}>
+                  {t('session.settings.done')}
+                </Button>
+              </div>
             </div>
-            <div className='session-new__setting-row'>
-              <span>{t('session.settings.agent')}</span>
-              <span>
-                {selectedAssistant
-                  ? t(selectedAssistant.nameKey)
-                  : createMode === 'app'
-                    ? t('session.rec.createAppContext')
-                    : createMode === 'bot'
-                      ? t('session.rec.createBotContext')
-                      : t('session.settings.general')}
-              </span>
-            </div>
-            <div className='session-new__setting-row'>
-              <span>{t('session.settings.lifetime')}</span>
-              <Select
-                aria-label={t('session.settings.lifetime')}
-                size='small'
-                variant='plain'
-                value={lifetime}
-                onValueChange={setLifetime}
-                options={[
-                  { value: 'stop', label: t('session.lifecycle.stop') },
-                  { value: 'keep', label: t('session.lifecycle.keep') },
-                  { value: 'serve', label: t('session.lifecycle.serve') },
-                ]}
-              />
-            </div>
-            <div className='session-new__setting-row'>
-              <span>{t('session.vault.title')}</span>
-              <Button
-                variant='ghost'
-                size='small'
-                icon={<Icon name='i-obj-key' size={14} />}
-                onClick={() => setVaultOpen(true)}
-              >
-                {selectedVaultCount > 0
-                  ? t('session.vault.selected', { count: selectedVaultCount })
-                  : t('session.vault.noAccess')}
-              </Button>
-            </div>
-            <div className='session-new__setting-row'>
-              <span>{t('session.settings.approval')}</span>
-              <Select
-                aria-label={t('session.settings.approval')}
-                size='small'
-                variant='plain'
-                value={approval}
-                onValueChange={setApproval}
-                options={[
-                  { value: 'writes', label: t('session.approval.writes') },
-                  { value: 'every', label: t('session.approval.every') },
-                  { value: 'auto', label: t('session.approval.auto') },
-                ]}
-              />
-            </div>
-            <p className='session-new__settings-note'>{t('session.settings.note')}</p>
-            <div className='session-new__settings-foot'>
-              <Button variant='ghost' size='small' onClick={() => setSettingsOpen(false)}>
-                {t('session.settings.done')}
-              </Button>
-            </div>
-          </div>
-        ) : null}
-      </section>
+          ) : null}
+        </section>
 
-      <section className='session-new__recommend' aria-label={t('session.rec.recommendTitle')}>
-        <div className='session-new__section-head'>
-          <h2>{t('session.rec.recommendTitle')}</h2>
-          <div className='session-new__create-actions'>
-            <Button
-              variant='ghost'
-              size='small'
-              icon={<Icon name='i-plus' size={16} />}
-              onClick={() => chooseCreate('app')}
-            >
-              {t('session.rec.createApp')}
-            </Button>
-            <Button
-              variant='ghost'
-              size='small'
-              icon={<Icon name='i-plus' size={16} />}
-              onClick={() => chooseCreate('bot')}
-            >
-              {t('session.rec.createBot')}
-            </Button>
-          </div>
-        </div>
+        {mode === 'use' ? (
+          <section className='session-new__recommend' aria-label={t('session.rec.recommendTitle')}>
+            <div className='session-new__section-head'>
+              <h2>{t('session.rec.recommendTitle')}</h2>
+            </div>
 
-        <RecommendationRow
-          title={t('session.rec.apps')}
-          items={apps}
-          selectedId={null}
-          onChoose={openApp}
-          action={t('session.rec.open')}
-        />
+            <RecommendationRow
+              title={t('session.rec.apps')}
+              items={apps}
+              selectedId={null}
+              onChoose={openApp}
+              action={t('session.rec.open')}
+            />
 
-        <RecommendationRow
-          title={t('session.rec.bots')}
-          items={bots}
-          selectedId={selectedAssistant?.id ?? null}
-          onChoose={chooseAssistant}
-          action={t('session.rec.chat')}
-        />
-      </section>
+            <RecommendationRow
+              title={t('session.rec.bots')}
+              items={bots}
+              selectedId={selectedAssistant?.id ?? null}
+              onChoose={chooseAssistant}
+              action={t('session.rec.chat')}
+            />
+          </section>
+        ) : (
+          <section className='session-new__recommend' aria-label={t('session.build.templates')}>
+            <div className='session-new__section-head'>
+              <h2>{t('session.build.templates')}</h2>
+            </div>
+            <ul className='session-new__cards session-new__template-cards'>
+              <TemplateCard
+                icon='i-apps'
+                title={t('session.build.appTitle')}
+                description={t('session.build.appDesc')}
+                action={t('session.rec.createApp')}
+                onClick={() => chooseCreate('app')}
+              />
+              <TemplateCard
+                icon='i-bot'
+                title={t('session.build.botTitle')}
+                description={t('session.build.botDesc')}
+                action={t('session.rec.createBot')}
+                onClick={() => chooseCreate('bot')}
+              />
+            </ul>
+          </section>
+        )}
+      </div>
 
       <VaultPicker
         open={vaultOpen}
@@ -430,6 +461,45 @@ export function NewSessionPage() {
         onSave={setGrants}
       />
     </div>
+  )
+}
+
+function TemplateCard({
+  icon,
+  title,
+  description,
+  action,
+  onClick,
+}: {
+  icon: 'i-apps' | 'i-bot'
+  title: string
+  description: string
+  action: string
+  onClick: () => void
+}) {
+  return (
+    <li>
+      <Button
+        variant='plain'
+        size='large'
+        className='session-new__card session-new__template-card'
+        onClick={onClick}
+      >
+        <span className='session-new__card-icon'>
+          <Icon name={icon} size={20} />
+        </span>
+        <span className='session-new__card-copy'>
+          <span className='session-new__card-title'>
+            <strong>{title}</strong>
+          </span>
+          <span className='session-new__card-desc'>{description}</span>
+          <span className='session-new__card-foot'>
+            <span />
+            <span>{action}</span>
+          </span>
+        </span>
+      </Button>
+    </li>
   )
 }
 

@@ -58,7 +58,7 @@ describe('the route table', () => {
     expect(index?.element).toBeTruthy()
     /* 产品面：新会话、会话详情、收件箱组装页、应用与其余占位页 */
     expect(pathsOf(productChildren)).toEqual([
-      'new',
+      'new-session',
       'sessions/:id',
       'sessions/:sessionId/branches/:branchId',
       'inbox',

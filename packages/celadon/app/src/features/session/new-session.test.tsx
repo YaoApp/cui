@@ -50,9 +50,9 @@ vi.mock('@/data/apps', () => ({
 
 function renderPage() {
   return render(
-    <MemoryRouter initialEntries={['/new']}>
+    <MemoryRouter initialEntries={['/new-session']}>
       <Routes>
-        <Route path='/new' element={<NewSessionPage />} />
+        <Route path='/new-session' element={<NewSessionPage />} />
         <Route path='/apps/:appId' element={<div>App detail</div>} />
         <Route path='/sessions/:id' element={<div>Session detail</div>} />
       </Routes>
@@ -73,6 +73,33 @@ describe('NewSessionPage', () => {
     await userEvent.click(app)
     expect(await screen.findByText('App detail')).toBeInTheDocument()
     expect(createSession).not.toHaveBeenCalled()
+  })
+
+  it('moves the selected tab with the arrow keys', async () => {
+    renderPage()
+    const useTab = screen.getByRole('tab', { name: i18n.t('session.new.tab.use') })
+    const buildTab = screen.getByRole('tab', { name: i18n.t('session.new.tab.build') })
+
+    useTab.focus()
+    await userEvent.keyboard('{ArrowRight}')
+
+    expect(buildTab).toHaveAttribute('aria-selected', 'true')
+    expect(useTab).toHaveAttribute('aria-selected', 'false')
+  })
+
+  it('switches to Build and shows the template section', async () => {
+    renderPage()
+    expect(screen.getByRole('heading', { name: i18n.t('session.rec.title') })).toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole('tab', { name: i18n.t('session.new.tab.build') }))
+
+    expect(screen.getByRole('heading', { name: i18n.t('session.build.title') })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: i18n.t('session.build.templates') })).toBeInTheDocument()
+    expect(screen.queryByText(i18n.t('session.rec.recommendTitle'))).not.toBeInTheDocument()
+    expect(
+      screen.queryByText(i18n.t('session.rec.createBotContext'), { selector: '.session-new__context' }),
+    ).not.toBeInTheDocument()
+    expect(screen.getByRole('textbox')).toHaveAttribute('placeholder', i18n.t('session.build.placeholder'))
   })
 
   it('starts a session from a Bot with the platform submit shortcut', async () => {
