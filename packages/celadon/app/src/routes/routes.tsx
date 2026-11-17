@@ -7,6 +7,9 @@ import { ServersPage } from '@/features/auth/servers'
 import { WelcomePage } from '@/features/auth/welcome'
 import { PlaceholderPage } from '@/components/content'
 import { InboxPage } from '@/features/inbox'
+import { AppsPage, AppViewPage } from '@/features/apps'
+import { BotsPage } from '@/features/bots'
+import { BranchPage, NewSessionPage, SessionPage } from '@/features/session'
 import { EntryGate, ServerGuard } from './entry-gate'
 import { RequireSession, SessionExpiryGuard } from './session-guard'
 import { AppLayout } from './layout'
@@ -16,11 +19,15 @@ import { useColumnsStore } from '@/stores/layout/columns'
 /* 路由表：**只做装配**，业务实现不住这里。应用挂在构建决定的段下（base，见 04-host-integration.md）；
    路径**在 base 之下**：根是入口判定，产品页在导航六项的地址下。 */
 
-/* 产品面：收件箱是组装页，其余四个入口当前用占位页。 */
+/* 产品面：收件箱是组装页，其余入口当前用占位页。 */
 const productRoutes: RouteObject[] = [
-	{ path: 'new', element: <PlaceholderPage titleKey='shell.navigation.item.new' /> },
+	{ path: 'new-session', element: <NewSessionPage /> },
+	{ path: 'sessions/:id', element: <SessionPage /> },
+	{ path: 'sessions/:sessionId/branches/:branchId', element: <BranchPage /> },
 	{ path: 'inbox', element: <InboxPage /> },
-	{ path: 'apps', element: <PlaceholderPage titleKey='shell.navigation.item.apps' /> },
+	{ path: 'apps', element: <AppsPage /> },
+	{ path: 'apps/:appId', element: <AppViewPage /> },
+	{ path: 'bots', element: <BotsPage /> },
 	{ path: 'board', element: <PlaceholderPage titleKey='shell.navigation.item.board' /> },
 	{ path: 'workspace', element: <PlaceholderPage titleKey='shell.navigation.item.workspace' /> },
 	{ path: 'computer', element: <PlaceholderPage titleKey='shell.navigation.item.computer' /> }

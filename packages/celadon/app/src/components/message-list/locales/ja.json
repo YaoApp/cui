@@ -1,0 +1,10 @@
+{
+  "messageList.loading": "メッセージを読み込み中",
+  "messageList.assistant": "アシスタント",
+  "messageList.loadingMore": "以前のメッセージを読み込み中",
+  "messageList.loadMore": "以前のメッセージを読み込む",
+  "messageList.retry": "再試行",
+  "messageList.stopped": "生成を停止しました。",
+  "messageList.failed": "生成に失敗しました。",
+  "messageList.jumpLatest": "最新へ移動"
+}

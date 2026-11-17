@@ -1,0 +1,9 @@
+{
+  "bots.title": "Agent",
+  "bots.catalogTitle": "可用的 Agent",
+  "bots.lede": "把經常做的工作交給可重複使用的 Agent。",
+  "bots.create": "建立 Agent",
+  "bots.error": "無法載入 Agent 目錄。",
+  "bots.retry": "重試",
+  "bots.empty": "還沒有 Agent。"
+}

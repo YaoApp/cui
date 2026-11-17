@@ -32,9 +32,10 @@ export function Content({
 	trailing,
 	hidden = false
 }: ContentProps) {
+	const showHead = title !== undefined || lead !== undefined || trail !== undefined || trailing !== undefined
 	return (
 		<main className='content' aria-hidden={hidden || undefined} inert={hidden || undefined}>
-			{title ? (
+			{showHead ? (
 				<ContentHead title={title} navCollapsed={navCollapsed} lead={lead} trail={trail} trailing={trailing} />
 			) : null}
 			<ScrollArea className='content__scroll' size='medium' persistent>

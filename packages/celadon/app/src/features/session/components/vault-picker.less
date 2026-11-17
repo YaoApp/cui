@@ -1,0 +1,76 @@
+.vault-picker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-12);
+  min-block-size: 0;
+}
+
+.vault-picker__summary {
+  color: var(--text-tertiary);
+  font-size: var(--font-size-caption);
+}
+
+.vault-picker__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-16);
+  overflow: auto;
+  max-block-size: min(52vh, 520px);
+  padding-inline-end: var(--spacing-4);
+}
+
+.vault-picker__vault {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-8);
+  padding: var(--spacing-12);
+  border: var(--border-width) solid var(--border-subtle);
+  border-radius: var(--radius-medium);
+  background: var(--background-surface);
+}
+
+.vault-picker__vault-name {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+}
+
+.vault-picker__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.vault-picker__group-label,
+.vault-picker__secret-label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  min-inline-size: 0;
+}
+
+.vault-picker__group-label small,
+.vault-picker__secret-label small {
+  color: var(--text-tertiary);
+  font-size: var(--font-size-caption);
+}
+
+.vault-picker__secrets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-8);
+  padding-inline-start: var(--spacing-24);
+}
+
+.vault-picker__ungrouped {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-8);
+}
+
+.vault-picker__empty {
+  margin: 0;
+  color: var(--text-tertiary);
+  font-size: var(--font-size-body);
+}

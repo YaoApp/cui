@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import type { TabEntry } from '@/stores/browser/tabs'
 import { Internal } from '../internal'
 import { NewTab, type NewTabRecent } from '../new-tab'
@@ -14,12 +15,14 @@ export type TabPageProps = {
 	onOpenRecent?: (key: string) => void
 	/** 地址入口的校验：判据由装配层给 */
 	validateAddress?: (input: string) => 'empty' | 'invalid' | null
+	/** 内部路由的业务渲染：装配层按路径映射；不传则画占位 */
+	renderInternal?: (path: string) => ReactNode
 }
 
 /* 一页内容的派发：按页的目标选内容组件。首页与新标签页共用同一个组件，
    外部网址与内部路由（含快捷方式）各有自己的内容组件。
    内容组件只认自己的入参，标签模型与打开动作由装配层接（见 routes/layout.tsx）。 */
-export function TabPage({ tab, recent, onOpen, onOpenRecent, validateAddress }: TabPageProps) {
+export function TabPage({ tab, recent, onOpen, onOpenRecent, validateAddress, renderInternal }: TabPageProps) {
 	const target = tab.target
 	if (target.kind === 'home' || target.kind === 'blank') {
 		return (
@@ -32,5 +35,5 @@ export function TabPage({ tab, recent, onOpen, onOpenRecent, validateAddress }: 
 		)
 	}
 	if (target.kind === 'external') return <Web address={target.url} />
-	return <Internal path={target.path} />
+	return <>{renderInternal?.(target.path) ?? <Internal path={target.path} />}</>
 }
